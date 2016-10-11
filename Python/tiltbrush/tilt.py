@@ -372,6 +372,9 @@ class Stroke(object):
                     get_stroke_extension('scale') to get a true size.
     .controlpoints  List of tilt.ControlPoint instances.
 
+    .flags          Wrapper around get/set_stroke_extension('flags')
+    .scale          Wrapper around get/set_stroke_extension('scale')
+
   Also see has_stroke_extension(), get_stroke_extension()."""
   @classmethod
   def from_file(cls, b):
@@ -384,6 +387,28 @@ class Stroke(object):
     inst = self.shallow_clone()
     inst.controlpoints = map(ControlPoint.clone, inst.controlpoints)
     return inst
+
+  def __getattr__(self, name):
+    if name in STROKE_EXTENSION_BY_NAME:
+      try:
+        return self.get_stroke_extension(name)
+      except LookupError:
+        raise AttributeError("%s (extension attribute)" % name)
+    return super(Stroke, self).__getattr__(name)
+
+  def __setattr__(self, name, value):
+    if name in STROKE_EXTENSION_BY_NAME:
+      return self.set_stroke_extension(name, value)
+    return super(Stroke, self).__setattr__(name, value)
+
+  def __delattr__(self, name):
+    if name in STROKE_EXTENSION_BY_NAME:
+      try:
+        self.delete_stroke_extension(name)
+        return
+      except LookupError:
+        raise AttributeError("%s (extension attribute)" % name)
+    return super(Stroke, self).__delattr__(name)
 
   def shallow_clone(self):
     """Clone everything but the control points themselves."""
@@ -429,13 +454,14 @@ class Stroke(object):
     return name in self.stroke_ext_lookup
 
   def get_stroke_extension(self, name):
-    """Returns the requested extension stroke data, or raises LookupError if it doesn't exist."""
+    """Returns the requested extension stroke data.
+    Raises LookupError if it doesn't exist."""
     idx = self.stroke_ext_lookup[name]
     return self.extension[idx]
 
   def set_stroke_extension(self, name, value):
     """Sets stroke extension data.
-    This method cannot (yet?) be used to remove extension data."""
+    This method can be used to add extension data."""
     idx = self.stroke_ext_lookup.get(name, None)
     if idx is not None:
       self.extension[idx] = value
@@ -455,6 +481,26 @@ class Stroke(object):
       for (name, idx) in self.stroke_ext_lookup.iteritems():
         self.extension[idx] = name_to_value[name]
                                                           
+  def delete_stroke_extension(self, name):
+    """Remove stroke extension data.
+    Raises LookupError if it doesn't exist."""
+    idx = self.stroke_ext_lookup[name]
+
+    # Convert from idx->value to name->value
+    name_to_value = dict( (name, self.extension[idx])
+                          for (name, idx) in self.stroke_ext_lookup.iteritems() )
+    del name_to_value[name]
+
+    bit, exttype = STROKE_EXTENSION_BY_NAME[name]
+    self.stroke_mask &= ~bit
+    _, self.stroke_ext_writer, self.stroke_ext_lookup = \
+        _make_stroke_ext_reader(self.stroke_mask)
+
+    # Convert back to idx->value
+    self.extension = [None] * len(self.stroke_ext_lookup)
+    for (name, idx) in self.stroke_ext_lookup.iteritems():
+      self.extension[idx] = name_to_value[name]
+
   def has_cp_extension(self, name):
     """Returns true if control points in this stroke have the requested extension data.
     All control points in a stroke are guaranteed to use the same set of extensions.

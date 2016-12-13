@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1000011919851416}
+  m_IsPrefabParent: 1
+--- !u!1 &1000011919851416
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 4000014055701426}
+  - 114: {fileID: 114000010368978826}
+  m_Layer: 0
+  m_Name: Sequence_ Star
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4000014055701426
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011919851416}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.0956, y: 0.79, z: -1.9996}
+  m_LocalScale: {x: 0.5070389, y: 0.50703895, z: 0.50703895}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+--- !u!114 &114000010368978826
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011919851416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ef59a444b37aa842bd5b691c7d8737d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_FrameSources:
+  - m_Source: {fileID: 100000, guid: b5703f0d6e039ae4a8d458db6b8050fb, type: 3}
+    m_Repetitions: 0
+    m_SourceType: 2
+  - m_Source: {fileID: 100000, guid: 3649ace44f1dd26418693a6e9229258f, type: 3}
+    m_Repetitions: 0
+    m_SourceType: 2
+  - m_Source: {fileID: 100000, guid: 70d423be7e581694ab0632a21bd51a04, type: 3}
+    m_Repetitions: 0
+    m_SourceType: 2
+  - m_Source: {fileID: 100000, guid: 3592dce770831a042b7507f775de074a, type: 3}
+    m_Repetitions: 0
+    m_SourceType: 2
+  m_ConstantFramesPerSecond: 5
+  m_PlaybackMode: 1
+  m_DirectorFrameDuration: 0.5
+  m_RandomizeStart: 1
+  m_PreviewFirstFrame: 1

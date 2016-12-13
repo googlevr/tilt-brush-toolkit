@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: beaafc79a47dd4b97a8ca836452b82aa
+timeCreated: 1474657649
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - m_TeleportArrowPrefab: {fileID: 122708, guid: 0b629384e7db86f4bba6de731dd33648,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,35 @@
+The wiki for this repository contains more information.
+
+Simplex noise functions are (C) Ashima Arts and Stefan Gustavson
+Classic noise functions are (C) Stefan Gustavson
+Cellular noise functions are (C) Stefan Gustavson
+The "psrdnoise" functions are (C) Stefan Gustavson
+
+Source code for the noise functions is released under the
+conditions of the MIT license. See the file LICENSE for details.
+
+The simplex noise functions follow Ken Perlin's original idea,
+more clearly explained in Stefan Gustavson's paper
+"Simplex noise demystified"
+http://www.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
+but without using any uniform arrays or texture engines.
+
+Many other noise implementations make heavy use of a
+texture lookup table and are texture bandwidth limited.
+The noise functions in this library, however, are completely
+self contained with no dependency on external data.
+While not quite as fast as texture-based implementations
+on typical current desktop GPUs, they are more scalable to
+massive parallelism and much more convenient to use, and
+they can make good use of unused ALU resources when run
+concurrently with a typical texture-intensive rendering.
+
+2016-05-13: Ashima Arts now seems to be defunct as a company
+(their website and email addresses have ceased to function)
+so I cloned this repository to:
+
+https://github.com/stegu/webgl-noise/
+
+This site is heavily linked from all over the place on the
+Internet, so I (Stefan Gustavson) will keep updating both sites
+for the foreseeable future as the (apparently) sole maintainer.

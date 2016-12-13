@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 50a3c1cee21a2b243b72ebe88b204415
+timeCreated: 1475624417
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - m_IconTexture: {fileID: 2800000, guid: 4624ea9a2180fda49a0d0b58768979a8, type: 3}
+  - m_IconMaterial: {fileID: 2100000, guid: c56986090d01ddc44a7c6c5de7549cda, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -38,14 +38,23 @@ except ImportError:
   print >>sys.stderr, "Please put the 'Python' directory in your PYTHONPATH"
   sys.exit(1)
 
-try:
-  arch = 'x64' if '64' in platform.architecture()[0] else 'x86'
-  sys.path.append(r'c:\Program Files\Autodesk\FBX\FBX Python SDK\2015.1\lib\Python27_'+arch)
-  from fbx import *
-except ImportError:
-  print >>sys.stderr, "Please install the Python fbx sdk:\nhttp://images.autodesk.com/adsk/files/fbx20151_fbxpythonsdk_win.exe"
-  sys.exit(1)
-
+arch = 'x64' if '64' in platform.architecture()[0] else 'x86'
+dir = 'c:/Program Files/Autodesk/FBX/FBX Python SDK'
+versions = sorted(os.listdir(dir), reverse=True)
+found = False
+for version in versions:
+  path = '{0}/{1}/lib/Python27_{2}'.format(dir, version, arch)
+  if os.path.exists(path):
+    sys.path.append(path)
+    try:
+      from fbx import *
+      found = True
+    except ImportError:
+      print >>sys.stderr, "Failed trying to import fbx from {0}".format(path)
+      sys.exit(1)
+    break
+if not found:
+  print >>sys.stderr, "Please install the Python FBX SDK: http://www.autodesk.com/products/fbx/"
 
 # ----------------------------------------------------------------------
 # Utils
@@ -81,6 +90,13 @@ def write_fbx_meshes(meshes, outf_name):
   import FbxCommon
   (sdk, scene) = FbxCommon.InitializeSdkObjects()
 
+  docInfo = FbxDocumentInfo.Create(sdk, 'DocInfo')
+  docInfo.Original_ApplicationVendor.Set('Google')
+  docInfo.Original_ApplicationName.Set('Tilt Brush')
+  docInfo.LastSaved_ApplicationVendor.Set('Google')
+  docInfo.LastSaved_ApplicationName.Set('Tilt Brush')
+  scene.SetDocumentInfo(docInfo)
+
   for mesh in meshes:
     add_mesh_to_scene(sdk, scene, mesh)
   
@@ -100,9 +116,10 @@ def create_fbx_layer(fbx_mesh, data, converter_fn, layer_class,
                 has many repeated values. Unity3D doesn't seem to like it
                 when this is used for vertex colors, though.
   allow_allsame Allow the use of eAllSame mode. Useful if the data might
-                be entirely identical."""
+                be entirely identical.  This allows passing an empty data list,
+                in which case FBX will use a default value."""
   # No elements, or all missing data.
-  if len(data) == 0 or data[0] == None:
+  if not allow_allsame and (len(data) == 0 or data[0] == None):
     return None
 
   layer_elt = layer_class.Create(fbx_mesh, "")
@@ -115,10 +132,11 @@ def create_fbx_layer(fbx_mesh, data, converter_fn, layer_class,
   # Something about this eIndexToDirect code isn't working for vertex colors and UVs.
   # Do it the long-winded way for now, I guess.
   allow_index = False
-  if allow_allsame and len(unique_data) == 1:
+  if allow_allsame and len(unique_data) <= 1:
     layer_elt.SetMappingMode(FbxLayerElement.eAllSame)
     layer_elt.SetReferenceMode(FbxLayerElement.eDirect)
-    direct.Add(converter_fn(unique_data[0]))
+    if len(unique_data) == 1:
+      direct.Add(converter_fn(unique_data[0]))
   elif allow_index and len(unique_data) <= len(data) * .7:
     layer_elt.SetMappingMode(FbxLayerElement.eByControlPoint)
     layer_elt.SetReferenceMode(FbxLayerElement.eIndexToDirect)
@@ -175,6 +193,25 @@ def add_mesh_to_scene(sdk, scene, mesh):
     layer0.SetUVs(layer_elt, FbxLayerElement.eTextureDiffuse)
     pass
 
+  layer_elt = create_fbx_layer(
+    fbx_mesh, mesh.t, as_fvec4, FbxLayerElementTangent,
+    allow_index = True)
+  if layer_elt is not None:
+    layer0.SetTangents(layer_elt)
+
+  # Unity's FBX import requires Binormals to be present in order to import the
+  # tangents but doesn't actually use them, so we just output some dummy data.
+  layer_elt = create_fbx_layer(
+    fbx_mesh, ((0, 0, 0, 0),), as_fvec4, FbxLayerElementBinormal,
+    allow_allsame = True)
+  if layer_elt is not None:
+    layer0.SetBinormals(layer_elt)
+
+  layer_elt = create_fbx_layer(
+    fbx_mesh, (), lambda x: x, FbxLayerElementMaterial, allow_allsame = True)
+  if layer_elt is not None:
+    layer0.SetMaterials(layer_elt)
+
   # Polygons
 
   for triplet in mesh.tri:
@@ -184,11 +221,13 @@ def add_mesh_to_scene(sdk, scene, mesh):
     fbx_mesh.AddPolygon(triplet[2])
     fbx_mesh.EndPolygon()
 
+  material = FbxSurfaceLambert.Create(sdk, mesh.brush_name)
   # Node tree
 
   root = scene.GetRootNode()
   node = FbxNode.Create(sdk, name)
   node.SetNodeAttribute(fbx_mesh)
+  node.AddMaterial(material)
   node.SetShadingMode(FbxNode.eTextureShading)  # Hmm
   root.AddChild(node)
 

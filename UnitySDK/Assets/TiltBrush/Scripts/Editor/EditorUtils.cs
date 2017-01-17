@@ -31,33 +31,47 @@ public class EditorUtils {
     Undo.SetCurrentGroupName("Separate sketch by color");
     List<GameObject> newSelection = new List<GameObject>();
     bool cancel = false;
+
+    var tri = new int[3] { 0, 0, 0 };
+
     foreach (var o in Selection.gameObjects) {
       if (cancel) break;
       var obj = GameObject.Instantiate(o, o.transform.position, o.transform.rotation) as GameObject;
       obj.name = o.name + " (Separated)";
       Undo.RegisterCreatedObjectUndo(obj, "Separate sketch by color");
       newSelection.Add(obj);
+      int count = 0;
 
       foreach (var m in obj.GetComponentsInChildren<MeshFilter>()) {
         if (cancel) break;
         var mesh = m.sharedMesh;
+        var meshColors = mesh.colors;
 
         // Keep a list of triangles for each color (as a vector) we find
         Dictionary<Vector3, List<int>> colors = new Dictionary<Vector3, List<int>>();
 
-        for (int i = 0; i < mesh.triangles.Length; i += 3) {
-          cancel = EditorUtility.DisplayCancelableProgressBar("Separating sketch", "Processing " + mesh.name, (float)i / (float)mesh.triangles.Length);
-          if (cancel) break;
+        var triangles = mesh.triangles;
+        const int PROGRESS_FREQUENCY = 600;
 
-          var tri = new int[3] { mesh.triangles[i], mesh.triangles[i + 1], mesh.triangles[i + 2] };
+        for (int i = 0; i < triangles.Length; i += 3) {
+          if (++count > PROGRESS_FREQUENCY) {
+            count = 0;
+            cancel = EditorUtility.DisplayCancelableProgressBar("Separating sketch", "Processing " + mesh.name, (float)i / (float)triangles.Length);
+            if (cancel) break;
+          }
+
+          tri[0] = triangles[i];
+          tri[1] = triangles[i + 1];
+          tri[2] = triangles[i + 2];
+
           // Get the triangle's average color
-          var color = GetTriangleColorVec(mesh, tri);
+          var color = GetTriangleColorVec(meshColors, tri);
+
           // Add the triangle to the triangle-by-color list
-          if (!colors.ContainsKey(color))
-            colors.Add(color, new List<int>());
-          colors[color].Add(tri[0]);
-          colors[color].Add(tri[1]);
-          colors[color].Add(tri[2]);
+          List<int> trianglesForColor;
+          if (!colors.TryGetValue(color, out trianglesForColor))
+            trianglesForColor = colors[color] = new List<int>();
+          trianglesForColor.AddRange(tri);
         }
 
         if (cancel)
@@ -65,9 +79,13 @@ public class EditorUtils {
 
         // make a new mesh for each color
         int colorIndex = 0;
+        count = 0;
         foreach (var color in colors.Keys) {
-          cancel = EditorUtility.DisplayCancelableProgressBar("Separating sketch", "Processing " + mesh.name, (float)colorIndex / (float)colors.Keys.Count);
-          if (cancel) break;
+          if (++count > PROGRESS_FREQUENCY) {
+            count = 0;
+            cancel = EditorUtility.DisplayCancelableProgressBar("Separating sketch", "Processing " + mesh.name, (float)colorIndex / (float)colors.Keys.Count);
+            if (cancel) break;
+          }
           // Clone the gameobject with the mesh
           var newObj = GameObject.Instantiate(m.gameObject, m.transform.position, m.transform.rotation) as GameObject;
           newObj.name = string.Format("{0} {1}", m.name, colorIndex);
@@ -95,7 +113,7 @@ public class EditorUtils {
 
   [MenuItem("Tilt Brush/Labs/Separate strokes by brush color", true)]
   public static bool ExplodeSketchByColorValidate() {
-    // TODO: validate that selection is a model 
+    // TODO: validate that selection is a model
     foreach (var o in Selection.gameObjects) {
       if (o.GetComponent<MeshFilter>() != null)
         return true;
@@ -108,17 +126,15 @@ public class EditorUtils {
   /// <summary>
   /// Gets the average color of a triangle and returns it as a vector for easier comparison
   /// </summary>
-  public static Vector3 GetTriangleColorVec(Mesh Mesh, int[] Triangle) {
+  public static Vector3 GetTriangleColorVec(Color[] meshColors, int[] Triangle) {
     Vector3 v = new Vector3();
     for (int i = 0; i < Triangle.Length; i++) {
-      var c = Mesh.colors[Triangle[i]];
+      var c = meshColors[Triangle[i]];
       v.x += c.r;
       v.y += c.g;
       v.z += c.b;
     }
-    v.x /= Triangle.Length;
-    v.y /= Triangle.Length;
-    v.z /= Triangle.Length;
+    v /= Triangle.Length;
     return v;
   }
 
@@ -154,7 +170,7 @@ public class EditorUtils {
       if (string.IsNullOrEmpty (m_TiltBrushDirectory))
         Debug.LogErrorFormat ("Could not find the TiltBrush directory. Reimport the Tilt Brush Unity SDK to ensure it's unmodified.");
       return m_TiltBrushDirectory;
-    } 
+    }
   }
 
   /// <summary>
@@ -237,23 +253,23 @@ public class EditorUtils {
 
     GrabObjectsAtDirectory (sFolderPath, ref frames); // get files in top directory
     RecursiveSearch (sFolderPath, ref frames); // go through subdirectories
-    GameObject[] array = frames.ToArray (); 
+    GameObject[] array = frames.ToArray ();
     System.Array.Sort (array, new AlphanumericComparer ());
     return array;
 
   }
 
   public static void GrabObjectsAtDirectory(string sDir, ref List<GameObject> List) {
-    foreach (string f in Directory.GetFiles(sDir)) 
+    foreach (string f in Directory.GetFiles(sDir))
     {
       var frame =  AssetDatabase.LoadAssetAtPath<GameObject>(f.Substring(Application.dataPath.Length-6));
       if (frame != null)
         List.Add (frame);
     }
   }
-  public static void RecursiveSearch(string sDir, ref List<GameObject> List) 
+  public static void RecursiveSearch(string sDir, ref List<GameObject> List)
   {
-    try 
+    try
     {
       foreach (string d in Directory.GetDirectories(sDir))
       {
@@ -261,7 +277,7 @@ public class EditorUtils {
         RecursiveSearch(d, ref List);
       }
     }
-    catch (System.Exception excpt) 
+    catch (System.Exception excpt)
     {
       Debug.LogError(excpt.Message);
     }

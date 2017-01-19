@@ -6,8 +6,6 @@ The Tilt Brush Toolkit is a collection of scripts and assets that
 allow you to use [Tilt Brush](http://g.co/tiltbrush) data in your
 creative projects.
 
-This is not an official Google product.
-
 ## Contents
 
  * `bin` - command-line tools

@@ -15,7 +15,7 @@ Scripts, shaders and tools for importing and manipulating Tilt Brush  sketches i
 * Audio reactive features
 * Examples and reusable scripts to create animations and add interactivity
 
-**Click [here](releases) to download the latest version of the Tilt Brush Unity SDK**
+**Click [here](../../releases) to download the latest version of the Tilt Brush Unity SDK**
 
 Check out the [Documentation](https://docs.google.com/document/d/1YID89te9oDjinCkJ9R65bLZ3PpJk1W4S1SM2Ccc6-9w) to get started !
 

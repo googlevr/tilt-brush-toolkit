@@ -8,7 +8,7 @@ The Tilt Brush Toolkit is a collection of scripts and assets that allow you to u
 
 ![Unity SDK](http://i.imgur.com/UdJg4Tz.gif)
 
-Scripts, shaders and tools for importing and manipulating Tilt Brush  sketches in [Unity](http://unity3d.com/)
+Scripts, shaders and tools for importing and manipulating Tilt Brush sketches in [Unity](http://unity3d.com/)
 
 * Easily import sketches into Unity
 * Brush shaders and materials
@@ -24,13 +24,20 @@ Check out the [Documentation](https://docs.google.com/document/d/1YID89te9oDjinC
 ### Command Line Tools
 Python scripts for advanced Tilt Brush data manipulation.
 
- * `bin` - command-line tools
-   * `dump_tilt.py` - Sample code that uses the tiltbrush.tilt module to view raw Tilt Brush data.
-   * `geometry_json_to_fbx.py` - Historical sample code that converts Tilt Brush .json exports to .fbx. This script is superseded by Tilt Brush native .fbx exports.
-   * `geometry_json_to_obj.py` - Historical sample code that converts Tilt Brush .json exports to .obj. This script is superseded by Tilt Brush native .fbx exports.
-   * `tilt_to_strokes_dae.py` - Converts .tilt files to a Collada .dae containing spline data.
-   * `unpack_tilt.py` - Converts .tilt files from packed format (zip) to unpacked format (directory) and vice versa, optionally applying compression.
- * `Python` - Put this in your `PYTHONPATH`
+The PyPi package is not published yet. To install package locally via symlink:
+
+```sh
+pip install -e Python/
+
+```
+
+ * `Python` - All python scripts are collected here
+   * `bin` - command-line tools (not published within the package yet)
+     * `dump_tilt.py` - Sample code that uses the tiltbrush.tilt module to view raw Tilt Brush data.
+     * `geometry_json_to_fbx.py` - Historical sample code that converts Tilt Brush .json exports to .fbx. This script is superseded by Tilt Brush native .fbx exports.
+     * `geometry_json_to_obj.py` - Historical sample code that converts Tilt Brush .json exports to .obj. This script is superseded by Tilt Brush native .fbx exports.
+     * `tilt_to_strokes_dae.py` - Converts .tilt files to a Collada .dae containing spline data.
+     * `unpack_tilt.py` - Converts .tilt files from packed format (zip) to unpacked format (directory) and vice versa, optionally applying compression.
    * `tiltbrush` - Python package for manipulating Tilt Brush data
      * `export.py` - Parse the legacy .json export format
      * `tilt.py` - Read and write .tilt files

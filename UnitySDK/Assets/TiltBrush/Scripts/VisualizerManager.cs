@@ -151,10 +151,10 @@ public class VisualizerManager : MonoBehaviour {
     m_BandLevels = new float[m_Bands.Length];
     m_BandPeakLevels = new float[m_Bands.Length];
     m_BandNormalizedLevels = new float[m_Bands.Length];
-    m_WaveFormTexture = new Texture2D(FFT_SIZE, 1, TextureFormat.ARGB32, true);
+    m_WaveFormTexture = new Texture2D(FFT_SIZE, 1, TextureFormat.ARGB32, true, true);
     m_WaveFormTexture.SetPixels32(new Color32[FFT_SIZE]);
     m_WaveFormRow = new Color[FFT_SIZE];
-    m_FFTTexture = new Texture2D(m_FFTTextureSize, 1, TextureFormat.ARGB32, true);
+    m_FFTTexture = new Texture2D(m_FFTTextureSize, 1, TextureFormat.ARGB32, true, true);
     m_FFTTexture.SetPixels32(new Color32[m_FFTTextureSize]);
     m_FFTRow = new Color[m_FFTTextureSize];
 

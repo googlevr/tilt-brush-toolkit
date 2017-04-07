@@ -31,6 +31,33 @@ public class ModelImportSettings : AssetPostprocessor {
     if (!IsTiltBrushFbx(assetPath))
       return null;
 
+    // UVs come as four float2s so go through them and pack them back into two float4s
+    if (renderer.GetComponent<MeshFilter>() != null) {
+      var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
+      var sourceUVs = new List<Vector2>();
+      var targetUVs = new List<Vector4>();
+      for (int c = 0; c < 2; c++) {
+        mesh.GetUVs(c, targetUVs);
+        mesh.GetUVs(c + 2, sourceUVs);
+        if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
+          mesh.GetUVs(c, targetUVs);
+          for (int i = 0; i < sourceUVs.Count; i++) {
+            if (i < targetUVs.Count) {
+              // Repack uv[n+2].xy into uv[n].zw
+              var v4 = targetUVs[i];
+              v4.z = sourceUVs[i].x;
+              v4.w = sourceUVs[i].y;
+              targetUVs[i] = v4;
+            } else {
+              targetUVs.Add(new Vector4(0, 0, sourceUVs[i].x, sourceUVs[i].y));
+            }
+          }
+          mesh.SetUVs(c, targetUVs);
+          mesh.SetUVs(c + 2, new List<Vector2>());
+        }
+      }
+    }
+
     if (!string.IsNullOrEmpty (EditorUtils.TiltBrushDirectory) ) {
       // Find the material through a filtered search, check if it's inside the Tilt Brush SDK folder
       var materials = AssetDatabase.FindAssets ("t:material", new string[]{ EditorUtils.TiltBrushDirectory });

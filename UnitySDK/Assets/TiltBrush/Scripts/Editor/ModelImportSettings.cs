@@ -34,16 +34,17 @@ public class ModelImportSettings : AssetPostprocessor {
     // UVs come as four float2s so go through them and pack them back into two float4s
     if (renderer.GetComponent<MeshFilter>() != null) {
       var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
-      var sourceUVs = new List<Vector2>();
-      var targetUVs = new List<Vector4>();
-      for (int c = 0; c < 2; c++) {
-        mesh.GetUVs(c, targetUVs);
-        mesh.GetUVs(c + 2, sourceUVs);
+      var finalUVs = new List<List<Vector4>>();
+      for (int iUnityChannel = 0; iUnityChannel < 2; iUnityChannel++) {
+        var sourceUVs = new List<Vector2>();
+        var targetUVs = new List<Vector4>();
+        int iFbxChannel = 2 * iUnityChannel;
+        mesh.GetUVs(iFbxChannel, targetUVs);
+        mesh.GetUVs(iFbxChannel + 1, sourceUVs);
         if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
-          mesh.GetUVs(c, targetUVs);
           for (int i = 0; i < sourceUVs.Count; i++) {
             if (i < targetUVs.Count) {
-              // Repack uv[n+2].xy into uv[n].zw
+              // Repack xy into zw
               var v4 = targetUVs[i];
               v4.z = sourceUVs[i].x;
               v4.w = sourceUVs[i].y;
@@ -52,9 +53,12 @@ public class ModelImportSettings : AssetPostprocessor {
               targetUVs.Add(new Vector4(0, 0, sourceUVs[i].x, sourceUVs[i].y));
             }
           }
-          mesh.SetUVs(c, targetUVs);
-          mesh.SetUVs(c + 2, new List<Vector2>());
         }
+        finalUVs.Add(targetUVs);
+      }
+      for (int i = 0; i < finalUVs.Count; i++) {
+        mesh.SetUVs(i, finalUVs[i]);
+        mesh.SetUVs(2 * i + 1, new List<Vector2>()); // Clear unused uv sets
       }
     }
 

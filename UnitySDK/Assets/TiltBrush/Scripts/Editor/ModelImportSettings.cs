@@ -58,8 +58,10 @@ public class ModelImportSettings : AssetPostprocessor {
       }
       for (int i = 0; i < finalUVs.Count; i++) {
         mesh.SetUVs(i, finalUVs[i]);
-        mesh.SetUVs(2 * i + 1, new List<Vector2>()); // Clear unused uv sets
       }
+      // Clear unused uv sets
+      mesh.SetUVs(2, new List<Vector2>());
+      mesh.SetUVs(3, new List<Vector2>());
     }
 
     if (!string.IsNullOrEmpty (EditorUtils.TiltBrushDirectory) ) {

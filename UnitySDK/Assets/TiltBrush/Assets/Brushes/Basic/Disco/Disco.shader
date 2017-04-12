@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ Shader "Brush/Disco" {
 		_BumpMap ("Normalmap", 2D) = "bump" {}
 	} 
 	SubShader {
+		Cull Back
 		CGPROGRAM
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert noshadow
@@ -41,9 +42,8 @@ Shader "Brush/Disco" {
 
 		void vert (inout appdata_full v) {
 			float t, uTileRate, waveIntensity;
-			// Radius is stored in the tangent homogeneous component, which is always 1.0.
-			float radius = v.tangent.w * 0.02;  // TODO: Use raw secondary coordinates once supported
-			v.tangent.w = 1.0;
+         
+			float radius = v.texcoord.z;
 
 #ifdef AUDIO_REACTIVE
 			t = _BeatOutputAccum.z * 5;

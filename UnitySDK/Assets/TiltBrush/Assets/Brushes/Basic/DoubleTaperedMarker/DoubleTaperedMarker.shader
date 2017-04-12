@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ Category {
 			#pragma fragment frag
 			#pragma target 3.0
 			#pragma multi_compile_particles
+			#pragma multi_compile_fog
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -45,6 +46,7 @@ Category {
 				float4 vertex : POSITION;
 				fixed4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
+				UNITY_FOG_COORDS(1)
 			};
 			
 			v2f vert (appdata_t v)
@@ -57,17 +59,20 @@ Category {
 				v2f o; 
 				float envelope = sin(v.texcoord0.x * 3.14159);
 				float widthMultiplier = 1 - envelope;
-				v.vertex.xyz += -v.texcoord1 * widthMultiplier * 0.1; // TODO: Use raw secondary coordinates once supported
+				v.vertex.xyz += -v.texcoord1 * widthMultiplier;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.color = v.color;
 				o.texcoord = v.texcoord0;
+				UNITY_TRANSFER_FOG(o, o.vertex);
 				return o; 
 			}
 		
 			fixed4 frag (v2f i) : COLOR
 			{
 				
+				UNITY_APPLY_FOG(i.fogCoord, i.color.rgb);
 				return float4(i.color.rgb, 1);
+				
 			}
 
 			ENDCG 

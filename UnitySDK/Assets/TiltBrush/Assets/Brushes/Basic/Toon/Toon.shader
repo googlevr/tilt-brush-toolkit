@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ CGINCLUDE
 	#include "../../../Shaders/Brush.cginc"
 	#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc"
 	#pragma multi_compile __ AUDIO_REACTIVE
+	#pragma multi_compile_fog
 	#pragma target 3.0
 	sampler2D _MainTex;
 	float4 _MainTex_ST;
@@ -32,14 +33,14 @@ CGINCLUDE
 		float4 vertex : POSITION;
 		fixed4 color : COLOR;
 		float3 normal : NORMAL;
-		float4 tangent : TANGENT;
-		float2 texcoord : TEXCOORD0;
+		float3 texcoord : TEXCOORD0;
 	};
 
 	struct v2f {
 		float4 vertex : SV_POSITION;
 		fixed4 color : COLOR;
 		float2 texcoord : TEXCOORD0;
+		UNITY_FOG_COORDS(1)
 	};
 	 
 	v2f vertInflate (appdata_t v, float inflate)
@@ -47,8 +48,7 @@ CGINCLUDE
 
 		v2f o;
 		float outlineEnabled = inflate;
-		float radius = v.tangent.w * 0.1;  // TODO: Use raw secondary coordinates once supported
-		v.tangent.w = 1.0;
+		float radius = v.texcoord.z;
 		inflate *= radius * .4;
 		float bulge = 0.0;
 
@@ -86,11 +86,13 @@ CGINCLUDE
 		// mathematically speaking and likely causes crazy surface derivitives.
 		o.vertex.z -= disp.z * o.vertex.w * outlineEnabled;
 
-		o.color = v.color;
-	    o.color.a = 1;
-	    o.color.xyz += v.normal.y *.2;
-	    o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
-		return o;
+        o.color = v.color;
+        o.color.a = 1;
+        o.color.xyz += v.normal.y *.2;
+        o.color.xyz = max(0, o.color.xyz);
+        o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
+		UNITY_TRANSFER_FOG(o, o.vertex);
+        return o;
 	}
 
 	v2f vert (appdata_t v)
@@ -105,11 +107,14 @@ CGINCLUDE
 
 	fixed4 fragBlack (v2f i) : SV_Target
 	{			
-		return float4(0,0,0,1);
+		float4 color = float4(0,0,0,1);
+		UNITY_APPLY_FOG(i.fogCoord, color);
+		return color;
 	}
 
 	fixed4 fragColor (v2f i) : SV_Target
 	{
+		UNITY_APPLY_FOG(i.fogCoord, i.color);
 		return i.color;
 	}
 
@@ -118,6 +123,8 @@ ENDCG
 
 
 SubShader {
+  // For exportManifest.json:
+  //   GltfCull Back
 	Cull Back
 	Pass{
 		CGPROGRAM

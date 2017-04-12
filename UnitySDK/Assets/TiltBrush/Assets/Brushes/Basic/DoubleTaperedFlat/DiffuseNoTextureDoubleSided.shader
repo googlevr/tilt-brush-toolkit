@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ SubShader {
 	CGPROGRAM
 	#pragma surface surf Lambert vertex:vert addshadow
 	#pragma target 3.0
+	#include "../../../Shaders/Brush.cginc"
 
 	fixed4 _Color;
 
@@ -54,7 +55,7 @@ SubShader {
 		UNITY_INITIALIZE_OUTPUT(Input, o);
 		float envelope = sin(v.texcoord0.x * 3.14159);
 		float widthMultiplier = 1 - envelope;
-		v.vertex.xyz += -v.texcoord1 * widthMultiplier * 0.1; // TODO: Use secondary coordinates once supported
+		v.vertex.xyz += -v.texcoord1 * widthMultiplier;
 		o.color = v.color;
 		o.uv_MainTex = v.texcoord0;
 	}

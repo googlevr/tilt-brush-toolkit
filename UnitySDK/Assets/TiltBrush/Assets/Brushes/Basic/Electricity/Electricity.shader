@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ CGINCLUDE
 		float envelope = sin(v.texcoord0.x * (3.14159));
 		float envelopePow =  (1-pow(1  - envelope, 10));
 
-		float3 offsetFromMiddleToEdge_CS = v.texcoord1 * 0.1;  // TODO: Use raw secondary coordinates once supported
+		float3 offsetFromMiddleToEdge_CS = v.texcoord1;
 		float widthiness_CS = length(offsetFromMiddleToEdge_CS) / .02;
 		float3 midpointPos_CS = v.vertex.xyz - offsetFromMiddleToEdge_CS;
 		float3 disp = displacement(midpointPos_CS / widthiness_CS, mod);

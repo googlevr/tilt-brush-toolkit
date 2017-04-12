@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ Shader "Brush/Special/LightWire" {
 		_BumpMap ("Normalmap", 2D) = "bump" {}
 	} 
 	SubShader {
+		Cull Back
 		CGPROGRAM
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert noshadow
@@ -42,9 +43,8 @@ Shader "Brush/Special/LightWire" {
 
 		void vert (inout appdata_full v) {
 
-			// Radius is stored in the tangent homogeneous component, which is always 1.0.
-			float radius = v.tangent.w * 0.01;  // TODO: Use raw secondary coordinates once supported
-			v.tangent.w = 1.0;
+			// Radius is stored in texcoord (used to be tangent.w)
+			float radius = v.texcoord.z;
 
 			float t;
 			float envelope = sin ( fmod ( v.texcoord.x * 2, 1.0f) * 3.14159); 

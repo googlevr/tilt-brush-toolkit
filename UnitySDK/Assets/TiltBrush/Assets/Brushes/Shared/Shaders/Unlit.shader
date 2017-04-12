@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,9 @@ SubShader {
 
         #pragma vertex vert
         #pragma fragment frag
-		#include "../../../Shaders/Brush.cginc"
+        #pragma multi_compile_fog
+        #include "../../../Shaders/Brush.cginc"
+        #include "UnityCG.cginc"
 
         sampler2D _MainTex;
         float _Cutoff;
@@ -45,22 +47,25 @@ SubShader {
             float4 vertex : POSITION;
             float2 texcoord : TEXCOORD0;
             float4 color : COLOR;
+            UNITY_FOG_COORDS(1)
         };
 
         v2f vert (appdata_t v)
         {
 
             v2f o;
-			
+            
             o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
             o.texcoord = v.texcoord;
             o.color = v.color;
+            UNITY_TRANSFER_FOG(o, o.vertex);
             return o;
         }
 
         fixed4 frag (v2f i) : COLOR
         {
             fixed4 c;
+            UNITY_APPLY_FOG(i.fogCoord, i.color);
             c = tex2D(_MainTex, i.texcoord) * i.color;
             if (c.a < _Cutoff) {
                 discard;

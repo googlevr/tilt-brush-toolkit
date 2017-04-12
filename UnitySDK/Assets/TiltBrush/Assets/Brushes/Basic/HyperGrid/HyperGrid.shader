@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,8 +68,6 @@ Category {
 				worldPos = mul(xf_I_CS, worldPos);
 					
 				float waveform = 0;
-
-        v.texcoord1 = v.texcoord1 * 0.1;  // TODO: Use raw secondary coordinates once supported
 
 				float lifetime = _Time.y - v.texcoord1.w;
 				float size = length(v.texcoord1.xyz);

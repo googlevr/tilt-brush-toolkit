@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ Category {
 			#pragma vertex vert
 			#pragma fragment frag
 			#include "UnityCG.cginc"
+			#include "../../../Shaders/Brush.cginc"
 
 			sampler2D _MainTex;
 			uniform float _Cutoff;
@@ -53,6 +54,7 @@ Category {
 
 			v2f vert (appdata_t v)
 			{
+
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);

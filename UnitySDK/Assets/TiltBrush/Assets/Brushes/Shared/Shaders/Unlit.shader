@@ -33,6 +33,7 @@ SubShader {
         #pragma multi_compile_fog
         #include "../../../Shaders/Brush.cginc"
         #include "UnityCG.cginc"
+        #pragma shader_feature FORCE_SRGB
 
         sampler2D _MainTex;
         float _Cutoff;
@@ -64,6 +65,7 @@ SubShader {
 
         fixed4 frag (v2f i) : COLOR
         {
+            i.color = ensureColorSpace(i.color);
             fixed4 c;
             UNITY_APPLY_FOG(i.fogCoord, i.color);
             c = tex2D(_MainTex, i.texcoord) * i.color;

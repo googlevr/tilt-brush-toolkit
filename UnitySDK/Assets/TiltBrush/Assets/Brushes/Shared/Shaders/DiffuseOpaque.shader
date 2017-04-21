@@ -24,6 +24,7 @@ Cull Back
 CGPROGRAM
 #pragma surface surf Lambert addshadow
 #include "../../../Shaders/Brush.cginc"
+#pragma shader_feature FORCE_SRGB
 
 fixed4 _Color;
 
@@ -35,6 +36,7 @@ void vert(inout appdata_full v) {
 }
 
 void surf (Input IN, inout SurfaceOutput o) {
+	IN.color = ensureColorSpace(IN.color);
 	o.Albedo = _Color * IN.color.rgb;   
 }
 ENDCG

@@ -45,6 +45,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
+			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -93,6 +94,7 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR
 			{
+				i.color = ensureColorSpace(i.color);
 				// Workaround for b/30500118, caused by b/30504121
 				i.color.a = saturate(i.color.a);
 

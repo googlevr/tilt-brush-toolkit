@@ -85,6 +85,25 @@ float4 musicReactiveAnimation(float4 vertex, float4 color, float beat, float t) 
   return mul(unity_WorldToObject, worldPos);
 }
 
+float3 toLinear(float3 sRGB) {
+  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
+  return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
+}
+float3 toSRGB(float3 linearColor) {
+  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
+  float3 S1 = sqrt(linearColor);
+  float3 S2 = sqrt(S1);
+  float3 S3 = sqrt(S2);
+  return 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * linearColor;
+}
+float4 ensureColorSpace(float4 vertexColor) {
+  #ifdef FORCE_SRGB
+  // In the Unity SDK vertex colors are in linear space so we convert them when project is set to Gamma
+  vertexColor.rgb = toSRGB(vertexColor.rgb);
+  #endif
+  return vertexColor;
+}
+
 // Unity 5.1 and below use camera-space particle vertices
 // Unity 5.2 and above use world-space particle vertices
 #if UNITY_VERSION < 520

@@ -33,7 +33,8 @@ Category {
 			#pragma vertex vert 
 			#pragma fragment frag 
 			#pragma multi_compile_particles
-			#pragma multi_compile __ AUDIO_REACTIVE 
+			#pragma multi_compile __ AUDIO_REACTIVE
+			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -70,6 +71,7 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR
 			{
+				i.color = ensureColorSpace(i.color);
 				float4 color = i.color * tex2D(_MainTex, i.texcoord);
 				return float4(color.rgb * color.a, 1.0);
 			}

@@ -34,6 +34,7 @@ Category {
 			#pragma fragment frag
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
+			#pragma shader_feature FORCE_SRGB
 
 			sampler2D _MainTex;
 			uniform float _Cutoff;
@@ -66,6 +67,7 @@ Category {
 		
 			fixed4 frag (v2f i) : COLOR 
 			{
+			 	i.color = ensureColorSpace(i.color);
 			 	half4 c = tex2D(_MainTex, i.texcoord );
 
 				// Cutoff the alpha value based on the incoming vertex alpha

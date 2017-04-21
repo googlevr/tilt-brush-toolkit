@@ -32,6 +32,7 @@ Category {
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile __ AUDIO_REACTIVE 
+			#pragma shader_feature FORCE_SRGB
 
 			#pragma target 3.0
 			#include "UnityCG.cginc"
@@ -152,6 +153,7 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR 
 			{
+				i.color = ensureColorSpace(i.color);
 				i.color.a = 1; //ignore incoming vert alpha
 #ifdef AUDIO_REACTIVE
 				float4 tex =  GetAudioReactiveRainbowColor(i.texcoord.xy);

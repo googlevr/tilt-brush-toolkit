@@ -27,6 +27,7 @@ SubShader {
 CGPROGRAM
 #pragma surface surf Lambert vertex:vert alphatest:_Cutoff addshadow
 #include "../../../Shaders/Brush.cginc"
+#pragma shader_feature FORCE_SRGB
 
 sampler2D _MainTex;
 fixed4 _Color;
@@ -41,7 +42,8 @@ void vert (inout appdata_full v) {
 	
 void surf (Input IN, inout SurfaceOutput o) {
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-	o.Albedo = c.rgb * IN.color.rgb;   
+	IN.color = ensureColorSpace(IN.color);
+	o.Albedo = c.rgb * IN.color.rgb;
 	o.Alpha = c.a * IN.color.a;
 }
 ENDCG
@@ -56,6 +58,7 @@ SubShader {
 CGPROGRAM
 #pragma surface surf Lambert vertex:vert alphatest:_Cutoff
 #include "../../../Shaders/Brush.cginc"
+#pragma shader_feature FORCE_SRGB
 
 sampler2D _MainTex;
 fixed4 _Color;
@@ -70,6 +73,7 @@ void vert (inout appdata_full v) {
 	
 void surf (Input IN, inout SurfaceOutput o) {
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+	IN.color = ensureColorSpace(IN.color);
 	o.Albedo = c.rgb * IN.color.rgb;   
 	o.Alpha = c.a * IN.color.a;
 }

@@ -111,7 +111,8 @@ CGINCLUDE
 	}
 
 	fixed4 frag (v2f i) : COLOR
-	{			
+	{
+		i.color = ensureColorSpace(i.color);
 		// interior procedural line
 		float procedural = ( abs(i.texcoord.y - 0.5) < .1 ) ? 2 : 0;
 		i.color.a = 1; // kill any other alpha values that may come into this brush
@@ -137,6 +138,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
+			#pragma shader_feature FORCE_SRGB
 			ENDCG 
 		}
 
@@ -147,6 +149,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
+            #pragma shader_feature FORCE_SRGB
 			ENDCG 
 		}
 
@@ -157,6 +160,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
+            #pragma shader_feature FORCE_SRGB
 			ENDCG 
 		}
 	}	

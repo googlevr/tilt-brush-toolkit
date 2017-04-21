@@ -35,6 +35,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
+			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -69,6 +70,7 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR
 			{
+				i.color = ensureColorSpace(i.color);
 				// Envelope
 				float envelope = sin(i.texcoord.x * 3.14159);
 

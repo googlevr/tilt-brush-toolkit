@@ -30,6 +30,7 @@ Properties {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert alphatest:_Cutoff addshadow
 		#pragma multi_compile __ AUDIO_REACTIVE
+		#pragma shader_feature FORCE_SRGB
 
 		#include "../../../Shaders/Brush.cginc"
 
@@ -51,6 +52,7 @@ Properties {
 	
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
 			fixed4 tex = tex2D(_MainTex, IN.uv_MainTex);
+			IN.color = ensureColorSpace(IN.color);
 			o.Albedo = tex.rgb * _Color.rgb * IN.color.rgb;   
 			o.Smoothness = _Shininess;
 			o.Specular = _SpecColor;

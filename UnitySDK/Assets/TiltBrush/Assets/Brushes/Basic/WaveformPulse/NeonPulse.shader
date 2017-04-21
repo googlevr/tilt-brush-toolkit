@@ -27,6 +27,7 @@ Properties {
 		#pragma surface surf StandardSpecular vertex:vert
 		#pragma multi_compile __ AUDIO_REACTIVE
 		#include "../../../Shaders/Brush.cginc"
+		#pragma shader_feature FORCE_SRGB
 		
 
 		struct Input {
@@ -46,6 +47,7 @@ Properties {
 		}
 	
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
+			IN.color = ensureColorSpace(IN.color);
 			o.Smoothness = .8;
 			o.Specular = .05;
 			float audioMultiplier = 1;

@@ -26,6 +26,7 @@ Shader "Brush/Disco" {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert noshadow
 		#pragma multi_compile __ AUDIO_REACTIVE
+		#pragma shader_feature FORCE_SRGB
 		#include "../../../Shaders/Brush.cginc"
 
 		struct Input {
@@ -64,6 +65,7 @@ Shader "Brush/Disco" {
 		}
 
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
+			IN.color = ensureColorSpace(IN.color);
 			fixed4 tex = tex2D(_MainTex, IN.uv_MainTex);
 			o.Albedo = tex.rgb * _Color.rgb * IN.color.rgb;	  
 			o.Smoothness = _Shininess;

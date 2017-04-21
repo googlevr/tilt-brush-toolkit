@@ -29,6 +29,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile_fog
+			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -69,7 +70,7 @@ Category {
 		
 			fixed4 frag (v2f i) : COLOR
 			{
-				
+				i.color = ensureColorSpace(i.color);
 				UNITY_APPLY_FOG(i.fogCoord, i.color.rgb);
 				return float4(i.color.rgb, 1);
 				

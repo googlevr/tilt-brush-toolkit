@@ -37,6 +37,7 @@ Category {
 			#pragma target 3.0
 			#pragma glsl
 			#pragma multi_compile __ AUDIO_REACTIVE
+			#pragma shader_feature FORCE_SRGB
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
 			#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc" 
@@ -92,7 +93,7 @@ Category {
 
 			fixed4 frag (v2f i) : SV_Target
 			{			
-
+				i.color = ensureColorSpace(i.color);
 				float4 c = i.color * _TintColor * tex2D(_MainTex, i.texcoord);
 				return float4(c.rgb * c.a, 1.0);
 			}

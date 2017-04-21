@@ -33,6 +33,7 @@ Category {
 			#pragma multi_compile __ AUDIO_REACTIVE
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
+			#pragma shader_feature FORCE_SRGB
 
 			sampler2D _MainTex;
 			
@@ -71,6 +72,7 @@ Category {
 		
 			fixed4 frag (v2f i) : COLOR 
 			{
+			 	i.color = ensureColorSpace(i.color);
 			 	half4 c = tex2D(_MainTex, i.texcoord );
 				return i.color * c;
 			}

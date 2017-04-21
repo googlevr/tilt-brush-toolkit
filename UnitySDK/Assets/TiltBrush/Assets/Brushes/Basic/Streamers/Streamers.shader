@@ -40,6 +40,7 @@ Category {
 			#pragma multi_compile __ AUDIO_REACTIVE 
 			#pragma multi_compile_particles
 			#pragma target 3.0 // Required -> compiler error: too many instructions for SM 2.0
+			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
 			#include "../../../Shaders/Brush.cginc"
@@ -86,7 +87,7 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR 
 			{
-
+				i.color.rgb = ensureColorSpace(i.color);
 				// Create parametric flowing UV's
 				half2 uvs = i.texcoord;
 				float row_id = floor(uvs.y * 5);

@@ -23,6 +23,7 @@ CGINCLUDE
 	#include "../../../Shaders/Brush.cginc"
 	#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc"
 	#pragma multi_compile __ AUDIO_REACTIVE
+	#pragma shader_feature FORCE_SRGB
 	#pragma multi_compile_fog
 	#pragma target 3.0
 	sampler2D _MainTex;
@@ -114,6 +115,7 @@ CGINCLUDE
 
 	fixed4 fragColor (v2f i) : SV_Target
 	{
+		ensureColorSpace(i.color);
 		UNITY_APPLY_FOG(i.fogCoord, i.color);
 		return i.color;
 	}

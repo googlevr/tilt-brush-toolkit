@@ -25,6 +25,7 @@ SubShader {
 	#pragma surface surf Lambert vertex:vert addshadow
 	#pragma target 3.0
 	#include "../../../Shaders/Brush.cginc"
+	#pragma shader_feature FORCE_SRGB
 
 	fixed4 _Color;
 
@@ -61,6 +62,7 @@ SubShader {
 	}
 
 	void surf (Input IN, inout SurfaceOutput o) {
+		IN.color = ensureColorSpace(IN.color);
 		fixed4 c = _Color;
 		o.Normal = float3(0,0,IN.vface);
 		o.Albedo = c.rgb * IN.color.rgb;   

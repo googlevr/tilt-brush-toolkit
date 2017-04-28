@@ -394,7 +394,7 @@ class Stroke(object):
         return self.get_stroke_extension(name)
       except LookupError:
         raise AttributeError("%s (extension attribute)" % name)
-    return super(Stroke, self).__getattr__(name)
+    raise AttributeError(name)
 
   def __setattr__(self, name, value):
     if name in STROKE_EXTENSION_BY_NAME:
@@ -408,7 +408,7 @@ class Stroke(object):
         return
       except LookupError:
         raise AttributeError("%s (extension attribute)" % name)
-    return super(Stroke, self).__delattr__(name)
+    raise AttributeError(name)
 
   def shallow_clone(self):
     """Clone everything but the control points themselves."""

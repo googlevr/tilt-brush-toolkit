@@ -24,12 +24,19 @@ public class ModelImportSettings : AssetPostprocessor {
 
   const int kNodeHeaderSize = 13;
   const string kFbxTiltBrushPath = "FBXHeaderExtension/CreationTimeStamp/SceneInfo/MetaData/Properties70";
+  const string kApplicationNode           = "Original|ApplicationName";
+  const string kRequiredApplicationName   = "Tilt Brush";
+  const string kVersionNode               = "Original|ApplicationVersion";
+  const string kRequiredToolkitVersionNode= "Original|RequiredToolkitVersion";
+  readonly Version kToolkitVersion            = new Version { major=10 };
+  readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 
   // Try to find a Tilt Brush material using the imported models's material name
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
     // Ignore models that aren't Tilt Brush - generated FBXs
-    if (!IsTiltBrushFbx(assetPath))
+    if (! IsSupportedTiltBrushFbx(assetPath)) {
       return null;
+    }
 
     // UVs come as four float2s so go through them and pack them back into two float4s
     if (renderer.GetComponent<MeshFilter>() != null) {
@@ -89,117 +96,31 @@ public class ModelImportSettings : AssetPostprocessor {
     return null;
   }
 
-  // Simple and limited fbx reading code - we only need enough to read the 'Tilt Brush' property.
-  // FBX format ref found here: https://code.blender.org/2013/08/fbx-binary-file-format-specification/
-  bool IsTiltBrushFbx(string path) {
-    if (!path.ToLowerInvariant().EndsWith(".fbx")) {
+  /// Returns true if the path refers to an fbx that can be processed
+  /// by this version of the toolkit
+  bool IsSupportedTiltBrushFbx(string path) {
+    var info = FbxUtils.GetTiltBrushFbxInfo(path);
+    if (info.tiltBrushVersion == null) {
       return false;
     }
 
-    if (!IsTiltBrushAsciiFbx(path)) {
-      return IsTiltBrushBinaryFbx(path);
+    if (info.tiltBrushVersion < kRequiredFbxExportVersion) {
+      Debug.LogWarningFormat(
+          "{0} was exported with an older version of Tilt Brush ({1}) that is not supported by this version of the Toolkit. For best results, re-export it with a newer Tilt Brush version ({2}).",
+          assetPath, info.tiltBrushVersion, kRequiredFbxExportVersion);
+      return false;
     }
+
+    if (info.requiredToolkitVersion != null &&
+        kToolkitVersion < info.requiredToolkitVersion) {
+      Debug.LogWarningFormat(
+          "{0} was exported with an newer version of Tilt Brush that is not supported by this version of the Toolkit ({1}). For best results, upgrade your Toolkit to a newer version ({2}) or downgrade your Tilt Brush.",
+          assetPath, kToolkitVersion, info.requiredToolkitVersion);
+      return false;
+    }
+
     return true;
   }
-
-  bool IsTiltBrushAsciiFbx(string path) {
-    using (var file = new FileStream(path, FileMode.Open, FileAccess.Read)) {
-      using (var reader = new StreamReader(file)) {
-        if (!reader.ReadLine().StartsWith(";")) {
-          return false;  // Ascii FBX files (certainly the ones from TB) always start with a comment.
-        }
-
-        // Path in the FBX file we expect to find the Tilt Brush property:
-        Stack<string> expectedNames = new Stack<string>(kFbxTiltBrushPath.Split('/').Reverse());
-
-        while (!reader.EndOfStream) {
-          string line = reader.ReadLine().Trim();
-          if (line.StartsWith(";") || string.IsNullOrEmpty(line)) {
-            continue;
-          }
-          if (line.EndsWith("{")) {
-            string sectionName = line.Split(':')[0];
-            if (expectedNames.Count > 0 && sectionName == expectedNames.Peek()) {
-              expectedNames.Pop();
-            }
-          } else if (line.StartsWith("}") && expectedNames.Count == 0) {
-            return false;
-          } else if (expectedNames.Count == 0) {
-            var parts = line.Split(',').Select(x => x.Trim(' ', '"'));
-            if (parts.Contains("Tilt Brush")) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  bool IsTiltBrushBinaryFbx(string path) {
-    using (var file = new FileStream(path, FileMode.Open, FileAccess.Read)) {
-      using (var reader = new BinaryReader(file)) {
-        // Check header
-        string firstTwenty = System.Text.Encoding.ASCII.GetString(reader.ReadBytes(20));
-        if ((firstTwenty != "Kaydara FBX Binary  ")
-            || (reader.ReadByte() != 0x00)
-            || (reader.ReadByte() != 0x1a)
-            || (reader.ReadByte() != 0x00)) {
-          return false;
-        }
-        reader.ReadUInt32(); // Version - unneeded
-
-        Stack<uint> endOffsets = new Stack<uint>();
-        // Path in the FBX file we expect to find the Tilt Brush property:
-        Stack<string> expectedNames = new Stack<string>(kFbxTiltBrushPath.Split('/').Reverse());
-
-        while (file.Position < (file.Length - kNodeHeaderSize)) {
-          // Read Node header
-          endOffsets.Push(reader.ReadUInt32());
-          uint numProperties = reader.ReadUInt32();
-          uint propertyListLen = reader.ReadUInt32();
-          int nameLen = reader.ReadByte(); // read the name length
-          string name = System.Text.Encoding.ASCII.GetString(reader.ReadBytes(nameLen));
-
-          // Blank headers are used at the ends of nodes that have had sub-nodes; skip.
-          if (endOffsets.Peek() == 0) {
-            endOffsets.Pop();
-            continue;
-          }
-
-          long propertyStart = file.Position;
-          if (expectedNames.Count == 0) {
-            // We're looking for a node that contains a string property containing 'Tilt Brush'.
-            for (int i = 0; i < numProperties; ++i) {
-              char type = reader.ReadChar();
-              if (type == 'S') {
-                uint length = reader.ReadUInt32();
-                byte[] bytes = reader.ReadBytes((int)length);
-                string value = System.Text.Encoding.ASCII.GetString(bytes);
-                if (value == "Tilt Brush") {
-                  return true;
-                }
-              } else {
-                break; // the node we want only has string properties.
-              }
-            }
-          } else if (name == expectedNames.Peek()) {
-              expectedNames.Pop();
-            }
-
-          file.Seek(propertyListLen + propertyStart, SeekOrigin.Begin);
-
-          long pos = file.Position;
-          uint endPos = endOffsets.Peek();
-          if (pos == endPos) {
-            endOffsets.Pop();
-          }
-        }
-      }
-    }
-    return false;
-  }
-
 }
 
 }  // namespace TiltBrushToolkit

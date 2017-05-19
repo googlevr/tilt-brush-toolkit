@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: Plasma
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: c33714d1-b2f9-412e-bd50-1884c9d46336
+  m_DurableName: Plasma
+  m_Material: {fileID: 2100000, guid: c33714d1b2f9412ebd501884c9d46336, type: 2}
+  m_IsParticle: 0

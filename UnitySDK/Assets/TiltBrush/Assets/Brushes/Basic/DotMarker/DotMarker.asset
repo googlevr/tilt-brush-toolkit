@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: DotMarker
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: d1d991f2-e7a0-4cf1-b328-f57e915e6260
+  m_DurableName: DotMarker
+  m_Material: {fileID: 2100000, guid: d1d991f2e7a04cf1b328f57e915e6260, type: 2}
+  m_IsParticle: 0

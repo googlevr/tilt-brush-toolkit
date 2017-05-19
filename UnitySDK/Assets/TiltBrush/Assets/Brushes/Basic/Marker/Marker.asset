@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: Marker
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: 429ed64a-4e97-4466-84d3-145a861ef684
+  m_DurableName: Marker
+  m_Material: {fileID: 2100000, guid: 429ed64a4e97446684d3145a861ef684, type: 2}
+  m_IsParticle: 0

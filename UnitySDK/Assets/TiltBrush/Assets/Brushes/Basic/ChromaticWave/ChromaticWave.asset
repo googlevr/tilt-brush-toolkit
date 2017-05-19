@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: ChromaticWave
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: 0f0ff7b2-a677-45eb-a7d6-0cd7206f4816
+  m_DurableName: ChromaticWave
+  m_Material: {fileID: 2100000, guid: 0f0ff7b2a67745eba7d60cd7206f4816, type: 2}
+  m_IsParticle: 0

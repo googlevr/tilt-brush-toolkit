@@ -37,9 +37,9 @@ Category {
 			#pragma target 3.0
 			#pragma glsl
 			#pragma multi_compile __ AUDIO_REACTIVE
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 			#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc" 
 
 			sampler2D _MainTex;
@@ -62,6 +62,7 @@ Category {
 		
 			v2f vert (appdata_t v)
 			{
+				v.color = TbVertToSrgb(v.color);
 				v2f o;
 				// Subtract out the Canvas space pose to keep the verts from popping around while
 				// transforming (e.g. apply quantization in an immutable space).
@@ -91,11 +92,13 @@ Category {
 				return o;
 			}
 
+			// Input color is srgb
 			fixed4 frag (v2f i) : SV_Target
 			{			
-				i.color = ensureColorSpace(i.color);
 				float4 c = i.color * _TintColor * tex2D(_MainTex, i.texcoord);
-				return float4(c.rgb * c.a, 1.0);
+				c = float4(c.rgb * c.a, 1.0);
+				c = SrgbToNative(c);
+				return c;
 			}
 			ENDCG 
 		}

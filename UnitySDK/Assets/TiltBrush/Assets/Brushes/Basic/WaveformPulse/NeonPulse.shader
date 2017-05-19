@@ -26,14 +26,13 @@ Properties {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert
 		#pragma multi_compile __ AUDIO_REACTIVE
-		#include "../../../Shaders/Brush.cginc"
-		#pragma shader_feature FORCE_SRGB
+		#pragma multi_compile __ TBT_LINEAR_TARGET
+		#include "../../../Shaders/Include/Brush.cginc"
 		
-
 		struct Input {
 			float4 color : Color;
 			float2 tex : TEXCOORD0;
-            float3 viewDir;
+			float3 viewDir;
 			float3 worldNormal;
 			INTERNAL_DATA
 		};
@@ -41,13 +40,13 @@ Properties {
 		float _EmissionGain;
 
 		void vert (inout appdata_full i, out Input o) {
-
-          UNITY_INITIALIZE_OUTPUT(Input, o);
+			UNITY_INITIALIZE_OUTPUT(Input, o);
+			o.color = TbVertToSrgb(o.color);
 		  o.tex = i.texcoord;
 		}
 	
+		// Input color is srgb
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
-			IN.color = ensureColorSpace(IN.color);
 			o.Smoothness = .8;
 			o.Specular = .05;
 			float audioMultiplier = 1;
@@ -62,9 +61,9 @@ Properties {
 			float neon = saturate(pow( 10 * saturate(.2 - IN.tex.x),5) * audioMultiplier);
 			float4 bloom = bloomColor(IN.color, _EmissionGain);
 			float3 n = WorldNormalVector (IN, o.Normal);
-            half rim = 1.0 - saturate(dot (normalize(IN.viewDir), n));
+			half rim = 1.0 - saturate(dot (normalize(IN.viewDir), n));
 			bloom *= pow(1-rim,5);
-			o.Emission = bloom * neon; 
+			o.Emission = SrgbToNative(bloom * neon);
 		}
 		ENDCG 
     }

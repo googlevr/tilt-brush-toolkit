@@ -31,9 +31,9 @@ Category {
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile __ AUDIO_REACTIVE
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
-			#pragma shader_feature FORCE_SRGB
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			
@@ -59,20 +59,20 @@ Category {
 				
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);			
 #ifdef AUDIO_REACTIVE
+				v.color = TbVertToSrgb(v.color);
 				o.color = musicReactiveColor(v.color, _BeatOutput.w); 
 				v.vertex = musicReactiveAnimation(v.vertex, v.color, _BeatOutput.w, o.texcoord.x);
-#else 
-				o.color = v.color;
+				o.color = SrgbToNative(o.color);
+#else
+				o.color = TbVertToNative(v.color);
 #endif
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o; 
-
 			}
 		
 			fixed4 frag (v2f i) : COLOR 
 			{
-			 	i.color = ensureColorSpace(i.color);
 			 	half4 c = tex2D(_MainTex, i.texcoord );
 				return i.color * c;
 			}

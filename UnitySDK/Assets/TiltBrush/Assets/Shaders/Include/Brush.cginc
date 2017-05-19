@@ -75,33 +75,18 @@ float4 musicReactiveColor(float4 color, float beat) {
   return color;
 }
 
-float4 musicReactiveAnimation(float4 vertex, float4 color, float beat, float t) {
+float4 musicReactiveAnimationWorldSpace(float4 worldPos, float4 color, float beat, float t) {
   float intensity = .15;
-  float4 worldPos = mul(unity_ObjectToWorld, vertex);
-  float randomOffset = 2 * 3.14159 * randomizeByColor(color) + _Time.w + worldPos.z; 
-  // the first sin function makes the start and end points of the UV's (0:1) have zero modulation.  
+  float randomOffset = 2 * 3.14159 * randomizeByColor(color) + _Time.w + worldPos.z;
+  // the first sin function makes the start and end points of the UV's (0:1) have zero modulation.
   // The second sin term causes vibration along the stroke like a plucked guitar string - frequency defined by color
   worldPos.xyz += randomNormal(color.rgb) * beat * sin(t * 3.14159) * sin(randomOffset) * intensity;
-  return mul(unity_WorldToObject, worldPos);
+  return worldPos;
 }
 
-float3 toLinear(float3 sRGB) {
-  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-  return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
-float3 toSRGB(float3 linearColor) {
-  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-  float3 S1 = sqrt(linearColor);
-  float3 S2 = sqrt(S1);
-  float3 S3 = sqrt(S2);
-  return 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * linearColor;
-}
-float4 ensureColorSpace(float4 vertexColor) {
-  #ifdef FORCE_SRGB
-  // In the Unity SDK vertex colors are in linear space so we convert them when project is set to Gamma
-  vertexColor.rgb = toSRGB(vertexColor.rgb);
-  #endif
-  return vertexColor;
+float4 musicReactiveAnimation(float4 vertex, float4 color, float beat, float t) {
+  float4 worldPos = mul(unity_ObjectToWorld, vertex);
+  return mul(unity_WorldToObject, musicReactiveAnimationWorldSpace(worldPos, color, beat, t));
 }
 
 // Unity 5.1 and below use camera-space particle vertices
@@ -115,5 +100,51 @@ float4 ParticleVertexToWorld(float4 vertex) {
 float4 ParticleVertexToWorld(float4 vertex) {
   return vertex;
 }
+#endif
+
+//
+// For Toolkit support
+//
+
+float4 SrgbToLinear(float4 color) {
+  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
+  float3 sRGB = color.rgb;
+  color.rgb = sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
+  return color;
+}
+
+float4 SrgbToLinear_Large(float4 color) {
+    float4 linearColor = SrgbToLinear(color);
+	color.r = color.r < 1.0 ? linearColor.r : color.r;
+	color.g = color.g < 1.0 ? linearColor.g : color.g;
+	color.b = color.b < 1.0 ? linearColor.b : color.b;
+	return color;
+}
+
+float4 LinearToSrgb(float4 color) {
+  // Approximation http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
+  float3 linearColor = color.rgb;
+  float3 S1 = sqrt(linearColor);
+  float3 S2 = sqrt(S1);
+  float3 S3 = sqrt(S2);
+  color.rgb = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * linearColor;
+  return color;
+}
+
+// TB mesh colors are sRGB. TBT mesh colors are linear.
+float4 TbVertToSrgb(float4 color) { return LinearToSrgb(color); }
+float4 TbVertToLinear(float4 color) { return color; }
+
+// Conversions to and from native colorspace.
+// Note that SrgbToLinear_Large only converts to linear in the 0:1 range 
+// because Linear HDR values don't work with the Tilt Brush bloom filter
+#ifdef TBT_LINEAR_TARGET
+float4 SrgbToNative(float4 color) { return SrgbToLinear_Large(color); }
+float4 TbVertToNative(float4 color) { return TbVertToLinear(color); }
+float4 NativeToSrgb(float4 color) { return LinearToSrgb(color); }
+#else
+float4 SrgbToNative(float4 color) { return color; }
+float4 TbVertToNative(float4 color) { return TbVertToSrgb(color); }
+float4 NativeToSrgb(float4 color) { return color; }
 #endif
 

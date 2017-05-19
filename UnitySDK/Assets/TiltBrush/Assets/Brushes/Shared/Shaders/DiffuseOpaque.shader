@@ -22,9 +22,9 @@ SubShader {
 Cull Back
 
 CGPROGRAM
-#pragma surface surf Lambert addshadow
-#include "../../../Shaders/Brush.cginc"
-#pragma shader_feature FORCE_SRGB
+#pragma surface surf Lambert vertex:vert addshadow 
+#pragma multi_compile __ TBT_LINEAR_TARGET
+#include "../../../Shaders/Include/Brush.cginc"
 
 fixed4 _Color;
 
@@ -33,10 +33,10 @@ struct Input {
 };
 
 void vert(inout appdata_full v) {
+	v.color = TbVertToNative(v.color);
 }
 
 void surf (Input IN, inout SurfaceOutput o) {
-	IN.color = ensureColorSpace(IN.color);
 	o.Albedo = _Color * IN.color.rgb;   
 }
 ENDCG

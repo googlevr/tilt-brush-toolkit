@@ -45,10 +45,10 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			
@@ -94,7 +94,6 @@ Category {
 
 			fixed4 frag (v2f i) : COLOR
 			{
-				i.color = ensureColorSpace(i.color);
 				// Workaround for b/30500118, caused by b/30504121
 				i.color.a = saturate(i.color.a);
 

@@ -20,10 +20,10 @@ Properties {
 
 CGINCLUDE
 	#include "UnityCG.cginc"
-	#include "../../../Shaders/Brush.cginc"
+	#include "../../../Shaders/Include/Brush.cginc"
 	#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc"
 	#pragma multi_compile __ AUDIO_REACTIVE
-	#pragma shader_feature FORCE_SRGB
+	#pragma multi_compile __ TBT_LINEAR_TARGET
 	#pragma multi_compile_fog
 	#pragma target 3.0
 	sampler2D _MainTex;
@@ -98,11 +98,13 @@ CGINCLUDE
 
 	v2f vert (appdata_t v)
 	{
+		v.color = TbVertToNative(v.color);
 		return vertInflate(v,0);
 	}
 
 	v2f vertEdge (appdata_t v)
 	{
+		// v.color = TbVertToNative(v.color); no need
 		return vertInflate(v, 1.0);
 	}
 
@@ -115,7 +117,6 @@ CGINCLUDE
 
 	fixed4 fragColor (v2f i) : SV_Target
 	{
-		ensureColorSpace(i.color);
 		UNITY_APPLY_FOG(i.fogCoord, i.color);
 		return i.color;
 	}

@@ -26,8 +26,8 @@ Shader "Brush/Special/LightWire" {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert noshadow
 		#pragma multi_compile __ AUDIO_REACTIVE
-		#pragma shader_feature FORCE_SRGB
-		#include "../../../Shaders/Brush.cginc"
+		#pragma multi_compile __ TBT_LINEAR_TARGET
+		#include "../../../Shaders/Include/Brush.cginc"
 
 		struct Input {
 			float2 uv_MainTex;
@@ -43,6 +43,7 @@ Shader "Brush/Special/LightWire" {
 		half _Shininess;
 
 		void vert (inout appdata_full v) {
+			v.color = TbVertToSrgb(v.color);
 
 			// Radius is stored in texcoord (used to be tangent.w)
 			float radius = v.texcoord.z;
@@ -55,8 +56,12 @@ Shader "Brush/Special/LightWire" {
 			v.vertex.xyz += v.normal * lights * radius;
 		}
 
+		float3 SrgbToNative3(float3 color) {
+			return SrgbToNative(float4(color, 1)).rgb;
+		}
+
+		// Input color is srgb
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
-			IN.color = ensureColorSpace(IN.color);
 			float envelope = sin ( fmod ( IN.uv_MainTex.x*2, 1.0f) * 3.14159); 
 			float lights = envelope < .1 ? 1 : 0; 
 			float border = abs(envelope - .1) < .01 ? 0 : 1;
@@ -91,6 +96,10 @@ Shader "Brush/Special/LightWire" {
 			IN.color.rgb = IN.color.rgb * .25 + IN.color.rgb*_BeatOutput.x * .75;
 #endif
 			o.Emission += lights * IN.color.rgb; 
+
+			o.Albedo   = SrgbToNative3(o.Albedo);
+			o.Emission = SrgbToNative3(o.Emission);
+			o.Specular = SrgbToNative3(o.Specular);
 		}
 		ENDCG
   }

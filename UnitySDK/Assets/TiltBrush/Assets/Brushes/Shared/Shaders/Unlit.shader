@@ -30,10 +30,10 @@ SubShader {
 
         #pragma vertex vert
         #pragma fragment frag
+        #pragma multi_compile __ TBT_LINEAR_TARGET
         #pragma multi_compile_fog
-        #include "../../../Shaders/Brush.cginc"
+        #include "../../../Shaders/Include/Brush.cginc"
         #include "UnityCG.cginc"
-        #pragma shader_feature FORCE_SRGB
 
         sampler2D _MainTex;
         float _Cutoff;
@@ -58,14 +58,13 @@ SubShader {
             
             o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
             o.texcoord = v.texcoord;
-            o.color = v.color;
+            o.color = TbVertToNative(v.color);
             UNITY_TRANSFER_FOG(o, o.vertex);
             return o;
         }
 
         fixed4 frag (v2f i) : COLOR
         {
-            i.color = ensureColorSpace(i.color);
             fixed4 c;
             UNITY_APPLY_FOG(i.fogCoord, i.color);
             c = tex2D(_MainTex, i.texcoord) * i.color;

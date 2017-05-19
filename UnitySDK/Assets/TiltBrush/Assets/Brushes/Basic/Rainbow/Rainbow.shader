@@ -32,11 +32,11 @@ Category {
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile __ AUDIO_REACTIVE 
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 
 			#pragma target 3.0
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			
@@ -58,6 +58,7 @@ Category {
 
 			v2f vert (appdata_t v)
 			{
+				v.color = TbVertToSrgb(v.color);
 
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
@@ -151,9 +152,9 @@ Category {
 				return tex;
 			}
 
+			// Input color is srgb
 			fixed4 frag (v2f i) : COLOR 
 			{
-				i.color = ensureColorSpace(i.color);
 				i.color.a = 1; //ignore incoming vert alpha
 #ifdef AUDIO_REACTIVE
 				float4 tex =  GetAudioReactiveRainbowColor(i.texcoord.xy);
@@ -163,7 +164,9 @@ Category {
 				float4 tex =  GetRainbowColor(i.texcoord.xy);
 				tex = i.color * tex * exp(_EmissionGain * 3.0f);
 #endif
-				return float4(tex.rgb * tex.a, 1.0);
+				float4 color = float4(tex.rgb * tex.a, 1.0);
+				color = SrgbToNative(color);
+				return color;
 			}
 			ENDCG 
 		}

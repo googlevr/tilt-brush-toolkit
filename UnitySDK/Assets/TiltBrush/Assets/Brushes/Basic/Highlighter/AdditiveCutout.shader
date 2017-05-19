@@ -32,9 +32,9 @@ Category {
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
-			#pragma shader_feature FORCE_SRGB
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			uniform float _Cutoff;
@@ -59,15 +59,12 @@ Category {
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
-				o.color = v.color;
-
-
-				return o; 
+				o.color = TbVertToNative(v.color);
+				return o;
 			}
 		
 			fixed4 frag (v2f i) : COLOR 
 			{
-			 	i.color = ensureColorSpace(i.color);
 			 	half4 c = tex2D(_MainTex, i.texcoord );
 
 				// Cutoff the alpha value based on the incoming vertex alpha

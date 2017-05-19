@@ -21,7 +21,7 @@ Properties {
 
 CGINCLUDE
 	#include "UnityCG.cginc"
-	#include "../../../Shaders/Brush.cginc"
+	#include "../../../Shaders/Include/Brush.cginc"
 	#include "Assets/ThirdParty/Noise/Shaders/Noise.cginc"
 
 	struct appdata_t {
@@ -65,6 +65,7 @@ CGINCLUDE
 
 	v2f vertModulated (appdata_t v, float mod, float dir)
 	{
+		v.color = TbVertToSrgb(v.color);
 		v2f o; 
 		float envelope = sin(v.texcoord0.x * (3.14159));
 		float envelopePow =  (1-pow(1  - envelope, 10));
@@ -110,14 +111,16 @@ CGINCLUDE
 		return vertModulated(v, 1.77, -1);
 	}
 
+	// Input color is srgb
 	fixed4 frag (v2f i) : COLOR
-	{
-		i.color = ensureColorSpace(i.color);
+	{			
 		// interior procedural line
 		float procedural = ( abs(i.texcoord.y - 0.5) < .1 ) ? 2 : 0;
 		i.color.a = 1; // kill any other alpha values that may come into this brush
 		float4 c =  i.color + i.color * procedural;
-		return float4(c.rgb * c.a, 1.0);
+		c = float4(c.rgb * c.a, 1.0);
+		c = SrgbToNative(c);
+		return c;
 	}
 ENDCG
 
@@ -138,7 +141,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			ENDCG 
 		}
 
@@ -149,7 +152,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
-            #pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			ENDCG 
 		}
 
@@ -160,7 +163,7 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
-            #pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			ENDCG 
 		}
 	}	

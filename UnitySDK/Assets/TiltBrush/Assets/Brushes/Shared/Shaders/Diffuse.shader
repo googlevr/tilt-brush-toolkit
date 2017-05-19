@@ -26,8 +26,8 @@ SubShader {
 	
 CGPROGRAM
 #pragma surface surf Lambert vertex:vert alphatest:_Cutoff addshadow
-#include "../../../Shaders/Brush.cginc"
-#pragma shader_feature FORCE_SRGB
+#pragma multi_compile __ TBT_LINEAR_TARGET
+#include "../../../Shaders/Include/Brush.cginc"
 
 sampler2D _MainTex;
 fixed4 _Color;
@@ -38,12 +38,12 @@ struct Input {
 };
 
 void vert (inout appdata_full v) {
+	v.color = TbVertToNative(v.color);
 }
 	
 void surf (Input IN, inout SurfaceOutput o) {
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-	IN.color = ensureColorSpace(IN.color);
-	o.Albedo = c.rgb * IN.color.rgb;
+	o.Albedo = c.rgb * IN.color.rgb;   
 	o.Alpha = c.a * IN.color.a;
 }
 ENDCG
@@ -57,8 +57,8 @@ SubShader {
 	
 CGPROGRAM
 #pragma surface surf Lambert vertex:vert alphatest:_Cutoff
-#include "../../../Shaders/Brush.cginc"
-#pragma shader_feature FORCE_SRGB
+#pragma multi_compile __ TBT_LINEAR_TARGET
+#include "../../../Shaders/Include/Brush.cginc"
 
 sampler2D _MainTex;
 fixed4 _Color;
@@ -69,11 +69,11 @@ struct Input {
 };
 
 void vert (inout appdata_full v) {
+	v.color = TbVertToNative(v.color);
 }
 	
 void surf (Input IN, inout SurfaceOutput o) {
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-	IN.color = ensureColorSpace(IN.color);
 	o.Albedo = c.rgb * IN.color.rgb;   
 	o.Alpha = c.a * IN.color.a;
 }

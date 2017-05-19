@@ -26,8 +26,8 @@ Shader "Brush/Disco" {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert noshadow
 		#pragma multi_compile __ AUDIO_REACTIVE
-		#pragma shader_feature FORCE_SRGB
-		#include "../../../Shaders/Brush.cginc"
+		#pragma multi_compile __ TBT_LINEAR_TARGET
+		#include "../../../Shaders/Include/Brush.cginc"
 
 		struct Input {
 			float2 uv_MainTex;
@@ -42,6 +42,7 @@ Shader "Brush/Disco" {
 		half _Shininess;
 
 		void vert (inout appdata_full v) {
+			v.color = TbVertToNative(v.color);
 			float t, uTileRate, waveIntensity;
          
 			float radius = v.texcoord.z;
@@ -64,8 +65,8 @@ Shader "Brush/Disco" {
 						  * radius;
 		}
 
+		// Input color is _native_
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
-			IN.color = ensureColorSpace(IN.color);
 			fixed4 tex = tex2D(_MainTex, IN.uv_MainTex);
 			o.Albedo = tex.rgb * _Color.rgb * IN.color.rgb;	  
 			o.Smoothness = _Shininess;

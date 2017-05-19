@@ -30,8 +30,8 @@ Properties {
 		#pragma target 3.0
 		#pragma surface surf StandardSpecular vertex:vert alphatest:_Cutoff addshadow
 		#pragma multi_compile __ AUDIO_REACTIVE 
-		#pragma shader_feature FORCE_SRGB
-		#include "../../../Shaders/Brush.cginc"
+		#pragma multi_compile __ TBT_LINEAR_TARGET
+		#include "../../../Shaders/Include/Brush.cginc"
 
 		struct Input {
 			float2 uv_MainTex;
@@ -46,6 +46,7 @@ Properties {
 		half _Shininess;
       
 		void vert (inout appdata_full v) {
+			v.color = TbVertToNative(v.color);
 
 			float t = 0.0;
 
@@ -62,7 +63,6 @@ Properties {
 		}
 	
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
-			IN.color = ensureColorSpace(IN.color);
 			fixed4 tex = tex2D(_MainTex, IN.uv_MainTex);
 			
 			float scroll = _Time.z;

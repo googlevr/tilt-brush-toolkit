@@ -34,11 +34,11 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile __ AUDIO_REACTIVE 
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			#pragma target 3.0
 
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			float _EmissionGain;
 			
@@ -57,6 +57,7 @@ Category {
 
 			v2f vert (appdata_t v)
 			{ 
+				v.color = TbVertToSrgb(v.color);
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.texcoord = v.texcoord; 
@@ -65,9 +66,9 @@ Category {
 				return o; 
 			}
 
+			// Input color is srgb
 			fixed4 frag (v2f i) : COLOR
 			{
-				i.color = ensureColorSpace(i.color);
 				// Envelope
 				float envelope = sin(i.texcoord.x * 3.14159);
 				i.texcoord.y += i.texcoord.x * 3 + _BeatOutputAccum.b*3;
@@ -88,7 +89,9 @@ Category {
 				color.w = 1;
 				color = i.color * color;
 
-				return float4(color.rgb * color.a, 1.0);
+				color = float4(color.rgb * color.a, 1.0);
+				color = SrgbToNative(color);
+				return color;
 			}
 			ENDCG 
 		}

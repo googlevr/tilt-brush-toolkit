@@ -24,8 +24,8 @@ SubShader {
 	CGPROGRAM
 	#pragma surface surf Lambert vertex:vert addshadow
 	#pragma target 3.0
-	#include "../../../Shaders/Brush.cginc"
-	#pragma shader_feature FORCE_SRGB
+	#pragma multi_compile __ TBT_LINEAR_TARGET
+	#include "../../../Shaders/Include/Brush.cginc"
 
 	fixed4 _Color;
 
@@ -57,12 +57,10 @@ SubShader {
 		float envelope = sin(v.texcoord0.x * 3.14159);
 		float widthMultiplier = 1 - envelope;
 		v.vertex.xyz += -v.texcoord1 * widthMultiplier;
-		o.color = v.color;
-		o.uv_MainTex = v.texcoord0;
+		v.color = TbVertToNative(v.color);
 	}
 
 	void surf (Input IN, inout SurfaceOutput o) {
-		IN.color = ensureColorSpace(IN.color);
 		fixed4 c = _Color;
 		o.Normal = float3(0,0,IN.vface);
 		o.Albedo = c.rgb * IN.color.rgb;   

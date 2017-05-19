@@ -39,11 +39,11 @@ Category {
 			#pragma fragment frag
 			#pragma multi_compile __ AUDIO_REACTIVE 
 			#pragma multi_compile_particles
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 			#pragma target 3.0 // Required -> compiler error: too many instructions for SM 2.0
-			#pragma shader_feature FORCE_SRGB
 
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			
@@ -69,6 +69,7 @@ Category {
 
 			v2f vert (appdata_t v)
 			{
+				v.color = TbVertToSrgb(v.color);
 
 				v2f o;
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
@@ -76,7 +77,6 @@ Category {
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
 				o.color = v.color;
 				return o; 
-
 			}
 		
 			float rand_1_05(in float2 uv)
@@ -85,9 +85,9 @@ Category {
 				return abs(noise.x + noise.y) * 0.5;
 			}
 
+			// Input color is srgb
 			fixed4 frag (v2f i) : COLOR 
 			{
-				i.color.rgb = ensureColorSpace(i.color);
 				// Create parametric flowing UV's
 				half2 uvs = i.texcoord;
 				float row_id = floor(uvs.y * 5);
@@ -107,8 +107,6 @@ Category {
 				uvs.x -= _Time.y * (1 + fmod(row_id * 1.61803398875, 1) - 0.5);
 #endif
 
-				
-
 				// Sample final texture
 				half4 tex = tex2D(_MainTex, uvs);
 				
@@ -126,7 +124,9 @@ Category {
 #endif
 
 				float4 color = i.color * tex * exp(_EmissionGain * 5.0f);
-				return float4(color.rgb * color.a, 1.0);
+				color = float4(color.rgb * color.a, 1.0);
+				color = SrgbToNative(color);
+				return color;
 			}
 			ENDCG 
 		}

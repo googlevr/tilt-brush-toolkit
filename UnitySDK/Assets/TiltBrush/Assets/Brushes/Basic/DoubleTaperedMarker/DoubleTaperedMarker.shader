@@ -29,10 +29,10 @@ Category {
 			#pragma target 3.0
 			#pragma multi_compile_particles
 			#pragma multi_compile_fog
-			#pragma shader_feature FORCE_SRGB
+			#pragma multi_compile __ TBT_LINEAR_TARGET
 
 			#include "UnityCG.cginc"
-			#include "../../../Shaders/Brush.cginc"
+			#include "../../../Shaders/Include/Brush.cginc"
 
 			sampler2D _MainTex;
 			
@@ -62,7 +62,7 @@ Category {
 				float widthMultiplier = 1 - envelope;
 				v.vertex.xyz += -v.texcoord1 * widthMultiplier;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.color = v.color;
+				o.color = TbVertToNative(v.color);
 				o.texcoord = v.texcoord0;
 				UNITY_TRANSFER_FOG(o, o.vertex);
 				return o; 
@@ -70,7 +70,7 @@ Category {
 		
 			fixed4 frag (v2f i) : COLOR
 			{
-				i.color = ensureColorSpace(i.color);
+				
 				UNITY_APPLY_FOG(i.fogCoord, i.color.rgb);
 				return float4(i.color.rgb, 1);
 				

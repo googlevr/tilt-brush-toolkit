@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -21,13 +20,6 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class ModelImportSettings : AssetPostprocessor {
-
-  const int kNodeHeaderSize = 13;
-  const string kFbxTiltBrushPath = "FBXHeaderExtension/CreationTimeStamp/SceneInfo/MetaData/Properties70";
-  const string kApplicationNode           = "Original|ApplicationName";
-  const string kRequiredApplicationName   = "Tilt Brush";
-  const string kVersionNode               = "Original|ApplicationVersion";
-  const string kRequiredToolkitVersionNode= "Original|RequiredToolkitVersion";
   readonly Version kToolkitVersion            = new Version { major=10 };
   readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 

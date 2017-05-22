@@ -71,6 +71,19 @@ public class ModelImportSettings : AssetPostprocessor {
       if (renderer.GetComponent<MeshFilter>() != null) {
         var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
         CollapseUvs(mesh);
+        if (desc.m_IsParticle) {
+          // Would like to do this in OnPreprocessModel, but we don't yet
+          // know whether it's a particle mesh.
+          var importer = assetImporter as ModelImporter;
+          if (importer != null && importer.optimizeMesh) {
+            Debug.LogWarningFormat(
+                mesh, "Tilt Brush particle meshes must have optimizeMesh=false; disabling.");
+            importer.optimizeMesh = false;
+            importer.SaveAndReimport();
+          }
+
+          ParticleMesh.FilterMesh(mesh);
+        }
       }
       return desc.m_Material;
     } else {

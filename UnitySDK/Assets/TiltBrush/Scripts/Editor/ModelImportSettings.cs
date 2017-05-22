@@ -23,6 +23,38 @@ public class ModelImportSettings : AssetPostprocessor {
   readonly Version kToolkitVersion            = new Version { major=10 };
   readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 
+  // UVs come as four float2s so go through them and pack them back into two float4s
+  static void CollapseUvs(Mesh mesh) {
+    var finalUVs = new List<List<Vector4>>();
+    for (int iUnityChannel = 0; iUnityChannel < 2; iUnityChannel++) {
+      var sourceUVs = new List<Vector2>();
+      var targetUVs = new List<Vector4>();
+      int iFbxChannel = 2 * iUnityChannel;
+      mesh.GetUVs(iFbxChannel, targetUVs);
+      mesh.GetUVs(iFbxChannel + 1, sourceUVs);
+      if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
+        for (int i = 0; i < sourceUVs.Count; i++) {
+          if (i < targetUVs.Count) {
+            // Repack xy into zw
+            var v4 = targetUVs[i];
+            v4.z = sourceUVs[i].x;
+            v4.w = sourceUVs[i].y;
+            targetUVs[i] = v4;
+          } else {
+            targetUVs.Add(new Vector4(0, 0, sourceUVs[i].x, sourceUVs[i].y));
+          }
+        }
+      }
+      finalUVs.Add(targetUVs);
+    }
+    for (int i = 0; i < finalUVs.Count; i++) {
+      mesh.SetUVs(i, finalUVs[i]);
+    }
+    // Clear unused uv sets
+    mesh.SetUVs(2, new List<Vector2>());
+    mesh.SetUVs(3, new List<Vector2>());
+  }
+
   // Try to find a Tilt Brush material using the imported models's material name
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
     // Ignore models that aren't Tilt Brush - generated FBXs
@@ -33,34 +65,7 @@ public class ModelImportSettings : AssetPostprocessor {
     // UVs come as four float2s so go through them and pack them back into two float4s
     if (renderer.GetComponent<MeshFilter>() != null) {
       var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
-      var finalUVs = new List<List<Vector4>>();
-      for (int iUnityChannel = 0; iUnityChannel < 2; iUnityChannel++) {
-        var sourceUVs = new List<Vector2>();
-        var targetUVs = new List<Vector4>();
-        int iFbxChannel = 2 * iUnityChannel;
-        mesh.GetUVs(iFbxChannel, targetUVs);
-        mesh.GetUVs(iFbxChannel + 1, sourceUVs);
-        if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
-          for (int i = 0; i < sourceUVs.Count; i++) {
-            if (i < targetUVs.Count) {
-              // Repack xy into zw
-              var v4 = targetUVs[i];
-              v4.z = sourceUVs[i].x;
-              v4.w = sourceUVs[i].y;
-              targetUVs[i] = v4;
-            } else {
-              targetUVs.Add(new Vector4(0, 0, sourceUVs[i].x, sourceUVs[i].y));
-            }
-          }
-        }
-        finalUVs.Add(targetUVs);
-      }
-      for (int i = 0; i < finalUVs.Count; i++) {
-        mesh.SetUVs(i, finalUVs[i]);
-      }
-      // Clear unused uv sets
-      mesh.SetUVs(2, new List<Vector2>());
-      mesh.SetUVs(3, new List<Vector2>());
+      CollapseUvs(mesh);
     }
 
     if (!string.IsNullOrEmpty (EditorUtils.TiltBrushDirectory) ) {

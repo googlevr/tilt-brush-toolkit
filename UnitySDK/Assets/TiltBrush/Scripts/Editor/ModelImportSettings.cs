@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using System.Collections.Generic;
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -62,35 +64,18 @@ public class ModelImportSettings : AssetPostprocessor {
       return null;
     }
 
-    // UVs come as four float2s so go through them and pack them back into two float4s
-    if (renderer.GetComponent<MeshFilter>() != null) {
-      var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
-      CollapseUvs(mesh);
-    }
+    BrushDescriptor desc = GetDescriptorForStroke(material.name);
 
-    if (!string.IsNullOrEmpty (EditorUtils.TiltBrushDirectory) ) {
-      // Find the material through a filtered search, check if it's inside the Tilt Brush SDK folder
-      var materials = AssetDatabase.FindAssets ("t:material", new string[]{ EditorUtils.TiltBrushDirectory });
-      foreach (var m in materials) {
-        var path = AssetDatabase.GUIDToAssetPath (m);
-        if (path.Contains(EditorUtils.TiltBrushDirectory) && Path.GetFileNameWithoutExtension(path) == material.name)
-          return AssetDatabase.LoadAssetAtPath<Material> (path);
+    if (desc != null) {
+      // This is a stroke mesh and needs postprocessing.
+      if (renderer.GetComponent<MeshFilter>() != null) {
+        var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
+        CollapseUvs(mesh);
       }
-      // If material isn't found, search for it in a hard coded path
-      var manualPathAsset = AssetDatabase.LoadAssetAtPath<Material> (string.Format ("{0}/Assets/Brushes/Basic/{1}/{1}.mat", EditorUtils.TiltBrushDirectory, material.name));
-      if (manualPathAsset != null)
-        return manualPathAsset;
-      Debug.LogWarningFormat(
-        AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
-        "Couldn't find the Tilt Brush material '{0}' for model '{1}'. Reimport the Tilt Brush Unity SDK to ensure it's unmodified and import the model again.",
-        material.name, System.IO.Path.GetFileName(assetPath));
+      return desc.m_Material;
+    } else {
       return null;
     }
-    Debug.LogWarningFormat(
-      AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
-      "Couldn't find the TiltBrush folder when importing '{0}'. Reimport the Tilt Brush Unity SDK to ensure it's unmodified and import the model again.",
-      System.IO.Path.GetFileName(assetPath));
-    return null;
   }
 
   /// Returns true if the path refers to an fbx that can be processed
@@ -117,6 +102,43 @@ public class ModelImportSettings : AssetPostprocessor {
     }
 
     return true;
+  }
+
+  BrushDescriptor GetDescriptorForStroke(string oldMaterialName) {
+    // Newer versions of Tilt Brush embed the GUID in the material name
+    Match match = Regex.Match(oldMaterialName, @"^([0-9a-fA-F]{32})");
+    if (match.Success) {
+      Guid brushGuid = new Guid(match.Groups[1].Value);
+      try {
+        return BrushDescriptor.ByGuid[brushGuid];
+      } catch (KeyNotFoundException) {
+        Debug.LogWarningFormat(
+            AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+            "Unexpected: Couldn't find Tilt Brush material for guid {0}.",
+            brushGuid);
+        return null;
+      }
+    }
+
+    // Older versions use material.name == brush.m_DurableName
+    {
+      var descs = BrushDescriptor.ByName[oldMaterialName].ToArray();
+      if (descs.Length == 1) {
+        return descs[0];
+      } else if (descs.Length > 1) {
+        Debug.LogWarningFormat(
+              AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+              "Ambiguous brush name {0}; try exporting with the latest version of Tilt Brush. Brush may have the incorrect material.",
+              oldMaterialName);
+        return descs[0];
+      } else {
+        Debug.LogWarningFormat(
+              AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+              "Unexpected: Couldn't find Tilt Brush material for name {0}",
+              oldMaterialName);
+        return null;
+      }
+    }
   }
 }
 

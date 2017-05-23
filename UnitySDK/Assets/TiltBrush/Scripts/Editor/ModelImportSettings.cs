@@ -120,7 +120,7 @@ public class ModelImportSettings : AssetPostprocessor {
   void OnPostprocessModel(GameObject g) {
     // For backwards compatibility, if people have projects that use the old naming
     if (sm_forceOldMeshNamingConvention) {
-      Dictionary<Material, BrushDescriptor> lookup = BrushDescriptor.All
+      Dictionary<Material, BrushDescriptor> lookup = BrushManifest.Instance.AllBrushes
           .ToDictionary(desc => desc.m_Material);
       ChangeNamesRecursive(lookup, d => d.m_DurableName + "_geo", g.transform);
     }
@@ -183,7 +183,7 @@ public class ModelImportSettings : AssetPostprocessor {
     if (match.Success) {
       Guid brushGuid = new Guid(match.Groups[1].Value);
       try {
-        return BrushDescriptor.ByGuid[brushGuid];
+        return BrushManifest.Instance.BrushesByGuid[brushGuid];
       } catch (KeyNotFoundException) {
         LogWarningWithContext(string.Format(
             "Unexpected: Couldn't find Tilt Brush material for guid {0}.",
@@ -194,7 +194,7 @@ public class ModelImportSettings : AssetPostprocessor {
 
     // Older versions use material.name == brush.m_DurableName
     {
-      var descs = BrushDescriptor.ByName[oldMaterialName].ToArray();
+      var descs = BrushManifest.Instance.BrushesByName[oldMaterialName].ToArray();
       if (descs.Length == 1) {
         return descs[0];
       } else if (descs.Length > 1) {

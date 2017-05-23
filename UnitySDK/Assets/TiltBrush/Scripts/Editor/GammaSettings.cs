@@ -41,9 +41,9 @@ public class GammaSettings : EditorWindow {
   static void SetKeywords() {
     bool linear = PlayerSettings.colorSpace == ColorSpace.Linear;
     if (linear) {
-      Shader.DisableKeyword("FORCE_SRGB");
+      Shader.EnableKeyword("TBT_LINEAR_TARGET");
     } else {
-      Shader.EnableKeyword("FORCE_SRGB");
+      Shader.DisableKeyword("TBT_LINEAR_TARGET");
     }
   }
 

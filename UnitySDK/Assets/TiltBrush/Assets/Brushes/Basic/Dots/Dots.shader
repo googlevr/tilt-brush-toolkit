@@ -102,8 +102,11 @@ Category {
 #endif
 				float4 tex = tex2D(_MainTex, i.texcoord);
 				float4 c = i.color * _TintColor * tex;
+				
 				// Only alpha channel receives emission boost
 				c.rgb += c.rgb * c.a * _EmissionGain;
+				c.a = 1;
+				c = SrgbToNative(c);
 				return float4(c.rgb, 1.0);
 			}
 			ENDCG

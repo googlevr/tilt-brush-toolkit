@@ -79,7 +79,7 @@ Category {
 
 			v2f vert (ParticleVertex_t v)
 			{
-				v.color = TbVertToNative(v.color);
+				v.color = TbVertToSrgb(v.color);
 				v2f o;
 				float4 worldPos = OrientParticle_WS(
 						v.vid, v.corner.xyz, v.center,
@@ -136,6 +136,7 @@ Category {
 				*/
 
 				c *= i.color * _TintColor;
+				c = SrgbToNative(c);
 				return c;
 			}
 			ENDCG 

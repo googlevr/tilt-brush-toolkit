@@ -66,14 +66,15 @@ Category {
 				v.vertex = musicReactiveAnimation(v.vertex, v.color, _BeatOutput.y, o.texcoord.x);
 #endif
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.color = SrgbToNative(o.color);
 				return o;
 			}
 
 			fixed4 frag (v2f i) : COLOR
 			{
 				float4 color = i.color * tex2D(_MainTex, i.texcoord);
-				return float4(color.rgb * color.a, 1.0);
+				color = float4(color.rgb * color.a, 1.0);
+				color = SrgbToNative(color);
+				return float4(color.rgb, 1.0);
 			}
 
 			ENDCG 

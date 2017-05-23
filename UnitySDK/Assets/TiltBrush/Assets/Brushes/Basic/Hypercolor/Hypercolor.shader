@@ -46,7 +46,7 @@ Properties {
 		half _Shininess;
       
 		void vert (inout appdata_full v) {
-			v.color = TbVertToNative(v.color);
+			v.color = TbVertToSrgb(v.color);
 
 			float t = 0.0;
 
@@ -73,20 +73,18 @@ Properties {
 			float angle = atan2(localPos.x, localPos.y);
 			float waveform = tex2D(_WaveFormTex, float2(angle * 6,0)).g*2;
 
-			//t += waveform;
 			tex.rgb =  float3(1,0,0) * (sin(tex.r*2 + scroll*0.5 - t) + 1);
 			tex.rgb += float3(0,1,0) * (sin(tex.r*3 + scroll*1 - t) + 1);
 			tex.rgb += float3(0,0,1) * (sin(tex.r*4 + scroll*0.25 - t) + 1);
-			//tex.rgb += tex.rgb * _BeatOutput.y;
 #else
 			tex.rgb =  float3(1,0,0) * (sin(tex.r * 2 + scroll*0.5 - IN.uv_MainTex.x) + 1) * 2;
 			tex.rgb += float3(0,1,0) * (sin(tex.r * 3.3 + scroll*1 - IN.uv_MainTex.x) + 1) * 2;
 			tex.rgb += float3(0,0,1) * (sin(tex.r * 4.66 + scroll*0.25 - IN.uv_MainTex.x) + 1) * 2;
 #endif
-
-			o.Albedo = tex.rgb * _Color.rgb * IN.color.rgb;   
-			o.Smoothness = _Shininess;
-			o.Specular = _SpecColor * tex.rgb;
+ 
+			o.Albedo = SrgbToNative(tex * IN.color).rgb;   
+			o.Smoothness = _Shininess; 
+			o.Specular = SrgbToNative(_SpecColor * tex).rgb; 
 			o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
 			o.Alpha = tex.a * IN.color.a;
 #ifdef AUDIO_REACTIVE

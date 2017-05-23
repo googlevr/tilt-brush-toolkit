@@ -79,7 +79,7 @@ Category {
 
 			v2f vert (ParticleVertexWithSpread_t v) {
 				v2f o;
-				v.color = TbVertToNative(v.color);
+				v.color = TbVertToSrgb(v.color);
 				float4 pos_WS = OrientParticleAndSpread_WS(
 						v.vid, v.corner.xyz, v.center,
 						v.texcoord.z /* rotation */, v.texcoord.w /* birthTime */,
@@ -116,7 +116,8 @@ Category {
 				// Alpha channel of the texture is not affected by color.  It is the fake "highlight" bubble effect.
 				float3 highlightcolor = tex.a;
 
-				return float4(basecolor + highlightcolor, 1);
+				float4 color = float4(basecolor + highlightcolor, 1);
+				return SrgbToNative(color);
 			}
 			ENDCG
 		}

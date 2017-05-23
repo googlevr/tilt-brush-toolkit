@@ -57,6 +57,31 @@ public class ModelImportSettings : AssetPostprocessor {
     mesh.SetUVs(3, new List<Vector2>());
   }
 
+  // Pulls some shenanigans so that a proper context will be shown in the editor.
+  // null context means "the current asset".
+  // Useful because the objects we get during import are too transient for LogFormat()
+  // to use effectively.
+  public void LogWarningWithContext(string msg, UnityEngine.Object desiredContext=null) {
+    // If we call .SaveAndReimport, the context is only good for about a second or so.
+    // But otherwise, this (surprisingly) seems to work fairly well.
+
+    UnityEngine.Object actualContext = null;
+
+    if (desiredContext != null) {
+      foreach (var obj in AssetDatabase.LoadAllAssetsAtPath(assetPath)) {
+        if (obj.name == desiredContext.name && obj is GameObject) {
+          actualContext = obj;
+          break;
+        }
+      }
+    }
+
+    if (actualContext == null) {
+      actualContext = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+    }
+    Debug.LogWarning(msg, actualContext);
+  }
+
   // Try to find a Tilt Brush material using the imported models's material name
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
     // Ignore models that aren't Tilt Brush - generated FBXs
@@ -76,13 +101,12 @@ public class ModelImportSettings : AssetPostprocessor {
           // know whether it's a particle mesh.
           var importer = assetImporter as ModelImporter;
           if (importer != null && importer.optimizeMesh) {
-            Debug.LogWarningFormat(
-                mesh, "Tilt Brush particle meshes must have optimizeMesh=false; disabling.");
+            LogWarningWithContext("Tilt Brush particle meshes must have optimizeMesh=false; disabling. Please re-import.");
             importer.optimizeMesh = false;
             importer.SaveAndReimport();
           }
 
-          ParticleMesh.FilterMesh(mesh);
+          ParticleMesh.FilterMesh(mesh, s => LogWarningWithContext(s, renderer));
         }
       }
       return desc.m_Material;
@@ -100,17 +124,17 @@ public class ModelImportSettings : AssetPostprocessor {
     }
 
     if (info.tiltBrushVersion < kRequiredFbxExportVersion) {
-      Debug.LogWarningFormat(
+      LogWarningWithContext(string.Format(
           "{0} was exported with an older version of Tilt Brush ({1}) that is not supported by this version of the Toolkit. For best results, re-export it with a newer Tilt Brush version ({2}).",
-          assetPath, info.tiltBrushVersion, kRequiredFbxExportVersion);
+          assetPath, info.tiltBrushVersion, kRequiredFbxExportVersion));
       return false;
     }
 
     if (info.requiredToolkitVersion != null &&
         kToolkitVersion < info.requiredToolkitVersion) {
-      Debug.LogWarningFormat(
+      LogWarningWithContext(string.Format(
           "{0} was exported with an newer version of Tilt Brush that is not supported by this version of the Toolkit ({1}). For best results, upgrade your Toolkit to a newer version ({2}) or downgrade your Tilt Brush.",
-          assetPath, kToolkitVersion, info.requiredToolkitVersion);
+          assetPath, kToolkitVersion, info.requiredToolkitVersion));
       return false;
     }
 
@@ -125,10 +149,9 @@ public class ModelImportSettings : AssetPostprocessor {
       try {
         return BrushDescriptor.ByGuid[brushGuid];
       } catch (KeyNotFoundException) {
-        Debug.LogWarningFormat(
-            AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+        LogWarningWithContext(string.Format(
             "Unexpected: Couldn't find Tilt Brush material for guid {0}.",
-            brushGuid);
+            brushGuid));
         return null;
       }
     }
@@ -139,16 +162,14 @@ public class ModelImportSettings : AssetPostprocessor {
       if (descs.Length == 1) {
         return descs[0];
       } else if (descs.Length > 1) {
-        Debug.LogWarningFormat(
-              AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+        LogWarningWithContext(string.Format(
               "Ambiguous brush name {0}; try exporting with the latest version of Tilt Brush. Brush may have the incorrect material.",
-              oldMaterialName);
+              oldMaterialName));
         return descs[0];
       } else {
-        Debug.LogWarningFormat(
-              AssetDatabase.LoadAssetAtPath<GameObject>(assetPath),
+        LogWarningWithContext(string.Format(
               "Unexpected: Couldn't find Tilt Brush material for name {0}",
-              oldMaterialName);
+              oldMaterialName));
         return null;
       }
     }

@@ -42,10 +42,12 @@ internal class ParticleMesh {
     Unknown,            // everything else
   };
 
+  internal delegate void WarningCallback(string msg);
+
   // Static API
 
   // Rewrites data in mesh to ensure that it only contains valid particle quads.
-  internal static void FilterMesh(Mesh mesh) {
+  internal static void FilterMesh(Mesh mesh, WarningCallback callback) {
     ParticleMesh src = ParticleMesh.FromMesh(mesh);
     ParticleMesh dst = new ParticleMesh();
 
@@ -53,7 +55,7 @@ internal class ParticleMesh {
     int limit = src.VertexCount - 5;
     int iiVert = 0;
     while (iiVert < limit) {
-      switch (src.ClassifyQuad(iiVert)) {
+      switch (src.ClassifyQuad(iiVert, callback)) {
       case ParticleMesh.QuadType.FullParticle:
         dst.AppendQuad(src, iiVert);
         iiVert += 6;
@@ -104,9 +106,9 @@ internal class ParticleMesh {
 
   // iiVert is an index to an index to a vert (an index into m_triangles)
   // iiVert must be at least 6 verts from the end of the mesh.
-  internal QuadType ClassifyQuad(int iiVert) {
+  internal QuadType ClassifyQuad(int iiVert, WarningCallback callback) {
     if (iiVert + 6 > m_triangles.Count) {
-      Debug.Assert(false, "Invalid ClassifyQuad");
+      Debug.Assert(false, "Invalid ClassifyQuad {0}", m_sourceMesh);
       return QuadType.Unknown;
     }
 
@@ -147,12 +149,13 @@ internal class ParticleMesh {
     } else {
       if (m_bNoisy) {
         m_bNoisy = false;
-        Debug.LogWarningFormat(
-            m_sourceMesh,
+        if (callback != null) {
+          callback(string.Format(
             "Found unexpected index sequence @ {0}: {1} {2} {3} {4} {5} {6}",
             iiVert,
             m_triangles[i  ], m_triangles[i+1], m_triangles[i+2],
-            m_triangles[i+3], m_triangles[i+4], m_triangles[i+5]);
+            m_triangles[i+3], m_triangles[i+4], m_triangles[i+5]));
+        }
       }
       return QuadType.Unknown;
     }

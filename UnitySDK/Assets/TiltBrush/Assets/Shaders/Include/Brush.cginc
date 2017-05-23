@@ -129,7 +129,7 @@ float4 LinearToSrgb(float4 color) {
   float3 S3 = sqrt(S2);
   color.rgb = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * linearColor;
   return color;
-}
+} 
 
 // TB mesh colors are sRGB. TBT mesh colors are linear.
 float4 TbVertToSrgb(float4 color) { return LinearToSrgb(color); }
@@ -147,4 +147,7 @@ float4 SrgbToNative(float4 color) { return color; }
 float4 TbVertToNative(float4 color) { return TbVertToSrgb(color); }
 float4 NativeToSrgb(float4 color) { return color; }
 #endif
+
+// TBT is in meters, TB is in decimeters. 
+#define kDecimetersToWorldUnits 0.1  
 

@@ -22,7 +22,7 @@ Properties {
 	_ScrollJitterFrequency("Scroll Jitter Frequency", Float) = 1.0
 	_SpreadRate ("Spread Rate", Range(0.3, 5)) = 1.539
 }
-
+ 
 Category {
 	Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "DisableBatching"="True" }
 	Blend One One  // SrcAlpha One
@@ -63,13 +63,13 @@ Category {
 			float _ScrollJitterIntensity;
 			float _ScrollJitterFrequency;
 			float _SpreadRate;
-
+			 
 			// pos and seed should be stable values.
 			// seed is a value in [0, 1]
 			// t01 is a time value in [0, 1]
 			float3 ComputeDisplacement(float3 pos, float seed, float t01) {
 				float t2 = _Time.y;
-
+				 
 				// Animate the motion of the embers
 				// Accumulate all displacement into a common, pre-transformed space.
 				float4 dispVec = float4(_ScrollDistance, 0.0) * t01;
@@ -81,10 +81,10 @@ Category {
 #ifdef AUDIO_REACTIVE
 				float fft = (tex2Dlod(_FFTTex, float4(pos.y,0,0,0)).b)*2 + .1;
 				dispVec.y += fft;
-#endif
-				return dispVec;
+#endif 
+				return dispVec * kDecimetersToWorldUnits; 
 			}
-
+			 
 			v2f vert (ParticleVertexWithSpread_t v) {
 				v.color = TbVertToSrgb(v.color);
 				v2f o;

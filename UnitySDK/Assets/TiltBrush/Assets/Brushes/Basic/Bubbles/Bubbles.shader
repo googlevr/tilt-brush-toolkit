@@ -73,7 +73,7 @@ Category {
 				float3 disp = float3(1,0,0) * curlX(pos.xyz * freq + time, d);
 				disp += float3(0,1,0) * curlY(pos.xyz * freq +time, d);
 				disp += float3(0,0,1) * curlZ(pos.xyz * freq + time, d);
-				pos.xyz += disp * 10;
+				pos.xyz += disp * 10 * kDecimetersToWorldUnits;
 				return pos;
 			}
 

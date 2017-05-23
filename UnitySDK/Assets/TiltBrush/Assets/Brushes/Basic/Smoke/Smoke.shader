@@ -99,7 +99,7 @@ Category {
 				disp += float3(0,1,0) * curlY(worldPos.xyz * freq +time, d); 
 				disp += float3(0,0,1) * curlZ(worldPos.xyz * freq + time, d);
 
-				worldPos.xyz += disp * 5;
+				worldPos.xyz += disp * 5 * kDecimetersToWorldUnits;
 
 				// Back to transformed canvas space
 				worldPos = mul(xf_CS, worldPos);
@@ -118,23 +118,6 @@ Category {
 			{
 				float3 worldPos = i.worldPos.xyz;
 				float4 c =  tex2D(_MainTex, i.texcoord);
-
-				/*
-				// Calculate light show FX
-				float3 plane_normal = normalize(float3(0,1,0));
-				float3 point_on_plane = float3(0,12,0); 
-				float4 closest_point_on_plane = dist_from_plane(plane_normal, point_on_plane, i.worldPos);
-				float dist = abs(sin(closest_point_on_plane.w*2));
-				float laser =  .1 - min(dist,.1);
-
-				float3 line_dir = normalize(float3(cos(_Time.y),.5 + 0 * sin(_Time.y),sin(_Time.y)));
-				float3 point_on_line = float3(0,12,0); 
-				float dist_from_line =  dist_from_line_repeating(line_dir, point_on_line, i.worldPos);
-				float laser2 =  .2 - min(dist_from_line,.2);
-
-				c = c*.5 + c*laser2 * float4(0,40,0,0);
-				*/
-
 				c *= i.color * _TintColor;
 				c = SrgbToNative(c);
 				return c;

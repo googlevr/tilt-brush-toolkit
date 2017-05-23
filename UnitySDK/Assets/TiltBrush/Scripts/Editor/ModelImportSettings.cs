@@ -25,6 +25,8 @@ public class ModelImportSettings : AssetPostprocessor {
   readonly Version kToolkitVersion            = new Version { major=10 };
   readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 
+  public static bool sm_forceOldMeshNamingConvention = false;
+
   // UVs come as four float2s so go through them and pack them back into two float4s
   static void CollapseUvs(Mesh mesh) {
     var finalUVs = new List<List<Vector4>>();
@@ -112,6 +114,40 @@ public class ModelImportSettings : AssetPostprocessor {
       return desc.m_Material;
     } else {
       return null;
+    }
+  }
+
+  void OnPostprocessModel(GameObject g) {
+    // For backwards compatibility, if people have projects that use the old naming
+    if (sm_forceOldMeshNamingConvention) {
+      Dictionary<Material, BrushDescriptor> lookup = BrushDescriptor.All
+          .ToDictionary(desc => desc.m_Material);
+      ChangeNamesRecursive(lookup, d => d.m_DurableName + "_geo", g.transform);
+    }
+  }
+
+  delegate string NameCallback(BrushDescriptor desc);
+  void ChangeNamesRecursive(
+      Dictionary<Material, BrushDescriptor> lookup,
+      NameCallback callback,
+      Transform t) {
+    var filter = t.GetComponent<MeshFilter>();
+    var renderer = t.GetComponent<MeshRenderer>();
+    if (filter != null && renderer != null) {
+      var mesh = filter.sharedMesh;
+      var material = renderer.sharedMaterial;
+      if (mesh != null) {
+        BrushDescriptor desc;
+        if (lookup.TryGetValue(material, out desc)) {
+          string oldName = desc.m_DurableName + "_geo";
+          mesh.name = oldName;
+          filter.gameObject.name = oldName;
+        }
+      }
+    }
+
+    foreach (Transform child in t) {
+      ChangeNamesRecursive(lookup, callback, child);
     }
   }
 

@@ -48,8 +48,6 @@ public class BrushManifest : ScriptableObject {
   private BrushManifest m_DefaultManifest;
 
   [SerializeField] private BrushDescriptor[] m_Brushes;
-
-  private bool m_LookupInitialized;
   private Dictionary<Guid, BrushDescriptor> m_ByGuid;
   private ILookup<string, BrushDescriptor> m_ByName;
 
@@ -58,18 +56,21 @@ public class BrushManifest : ScriptableObject {
   }
 
   public Dictionary<Guid, BrushDescriptor> BrushesByGuid {
-    get { InitLookup(); return m_ByGuid; }
+    get {
+      if (m_ByGuid == null) {
+        m_ByGuid = m_Brushes.ToDictionary(desc => (Guid)desc.m_Guid);
+      }
+      return m_ByGuid;
+    }
   }
 
   public ILookup<string, BrushDescriptor> BrushesByName {
-    get { InitLookup(); return m_ByName; }
-  }
-
-  private void InitLookup() {
-    if (m_LookupInitialized) { return; }
-    m_LookupInitialized = true;
-    m_ByGuid = m_Brushes.ToDictionary(desc => (Guid)desc.m_Guid);
-    m_ByName = m_Brushes.ToLookup(desc => desc.m_DurableName);
+    get {
+      if (m_ByName == null) {
+        m_ByName = m_Brushes.ToLookup(desc => desc.m_DurableName);
+      }
+      return m_ByName; 
+    }
   }
 
   /*

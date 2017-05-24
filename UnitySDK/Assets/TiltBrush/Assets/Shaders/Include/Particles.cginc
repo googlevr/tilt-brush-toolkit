@@ -102,10 +102,11 @@ float3 _OrientParticle(float3 center, float halfSize, int corner, float rotation
   float3 up, rt; {
     float4x4 cameraToObject = mul(unity_WorldToObject, unity_CameraToWorld);
     float3 upIsh = mul(cameraToObject, float3(0, 1, 0));
-    float3 objSpaceCameraPos = mul(cameraToObject, float4(0,0,0,1));
+    float3 objSpaceCameraPos = mul(cameraToObject, float4(0, 0, 0, 1));
     float3 fwd = (center - objSpaceCameraPos);
     rt = normalize(cross(upIsh, fwd));
-    up = normalize(cross(fwd, rt));
+    // TODO(timaidley): Temporarily revert to previous behaviour; see b/62067322
+    up = upIsh;  // normalize(cross(fwd, rt));
   }
 
   return _RotatedQuadCorner(up, rt, center, halfSize, corner, rotation);
@@ -121,7 +122,8 @@ float3 _OrientParticle_WS(float3 center_OS, float halfSize_OS, int corner, float
     float3 cameraPos_WS = _WorldSpaceCameraPos;
     float3 fwd_WS = (center_WS - cameraPos_WS);
     rt_WS = normalize(cross(upIsh_WS, fwd_WS));
-    up_WS = normalize(cross(fwd_WS, rt_WS));
+    // TODO(timaidley): Temporarily revert to previous behaviour; see b/62067322
+    up_WS = upIsh_WS;  // normalize(cross(fwd_WS, rt_WS));
   }
 
   float halfSize_WS = halfSize_OS * length(unity_ObjectToWorld[0].xyz);

@@ -103,7 +103,7 @@ public class ModelImportSettings : AssetPostprocessor {
           // know whether it's a particle mesh.
           var importer = assetImporter as ModelImporter;
           if (importer != null && importer.optimizeMesh) {
-            LogWarningWithContext("Tilt Brush particle meshes must have optimizeMesh=false; disabling. Please re-import.");
+            LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have optimizeMesh=false.");
             importer.optimizeMesh = false;
             importer.SaveAndReimport();
           }

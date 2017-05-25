@@ -61,7 +61,7 @@ static class BuildPackage {
     return version;
   }
 
-  //[MenuItem("Tilt Brush/Build Package")]
+  [MenuItem("Tilt Brush/Build Package")]
   static void DoBuild() {
     string version = GetGitVersion();
     string name = string.Format("../../tiltbrushtoolkit-UnitySDK-{0}.unitypackage", version);
@@ -74,10 +74,7 @@ static class BuildPackage {
             "Assets/TiltBrushExamples"
           },
           name,
-          ExportPackageOptions.Recurse |
-          ExportPackageOptions.IncludeDependencies |
-          // not sure about this one?
-          ExportPackageOptions.IncludeLibraryAssets);
+          ExportPackageOptions.Recurse);
       Debug.LogFormat("Done building {0}", name);
     }
   }

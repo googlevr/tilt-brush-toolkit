@@ -139,7 +139,7 @@ public class ModelImportSettings : AssetPostprocessor {
       if (mesh != null) {
         BrushDescriptor desc;
         if (lookup.TryGetValue(material, out desc)) {
-          string oldName = desc.m_DurableName + "_geo";
+          string oldName = callback(desc);
           mesh.name = oldName;
           filter.gameObject.name = oldName;
         }

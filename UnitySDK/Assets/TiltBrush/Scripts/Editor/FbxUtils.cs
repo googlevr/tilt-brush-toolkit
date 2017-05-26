@@ -46,6 +46,14 @@ public struct Version {
     return lhs.minor < rhs.minor;
   }
 
+  public static bool operator <=(Version lhs, Version rhs) {
+    return (lhs < rhs || lhs == rhs);
+  }
+
+  public static bool operator >=(Version lhs, Version rhs) {
+    return (lhs > rhs || lhs == rhs);
+  }
+
   public static bool operator >(Version lhs, Version rhs) {
     if (lhs.major != rhs.major) {
       return lhs.major > rhs.major;

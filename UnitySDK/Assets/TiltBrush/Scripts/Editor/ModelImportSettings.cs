@@ -27,6 +27,10 @@ public class ModelImportSettings : AssetPostprocessor {
 
   public static bool sm_forceOldMeshNamingConvention = false;
 
+  private FbxUtils.FbxInfo m_Info;
+
+  private bool IsTiltBrush { get { return m_Info.tiltBrushVersion != null; } }
+
   // UVs come as four float2s so go through them and pack them back into two float4s
   static void CollapseUvs(Mesh mesh) {
     var finalUVs = new List<List<Vector4>>();
@@ -84,10 +88,37 @@ public class ModelImportSettings : AssetPostprocessor {
     Debug.LogWarning(msg, actualContext);
   }
 
+  void OnPreprocessModel() {
+    m_Info = FbxUtils.GetTiltBrushFbxInfo(assetPath);
+    if (! IsTiltBrush) {
+      return;
+    }
+
+    if (m_Info.tiltBrushVersion >= new Version { major=10 }) {
+      var importer = assetImporter as ModelImporter;
+      if (importer != null && importer.optimizeMesh) {
+        // Not a warning, just a friendly notification.
+        Debug.LogFormat("{0}: Tilt Brush Toolkit requires optimizeMesh=false; disabling.", assetPath);
+        importer.optimizeMesh = false;
+      }
+    }
+
+    if (m_Info.tiltBrushVersion < kRequiredFbxExportVersion) {
+      LogWarningWithContext(string.Format(
+          "{0} was exported with an older version of Tilt Brush ({1}) that is not supported by this version of the Toolkit. For best results, re-export it with a newer Tilt Brush version ({2}).",
+          assetPath, m_Info.tiltBrushVersion, kRequiredFbxExportVersion));
+    } else if (m_Info.requiredToolkitVersion != null &&
+        kToolkitVersion < m_Info.requiredToolkitVersion) {
+      LogWarningWithContext(string.Format(
+          "{0} was exported with an newer version of Tilt Brush that is not supported by this version of the Toolkit ({1}). For best results, upgrade your Toolkit to a newer version ({2}) or downgrade your Tilt Brush.",
+          assetPath, kToolkitVersion, m_Info.requiredToolkitVersion));
+    }
+  }
+
   // Try to find a Tilt Brush material using the imported models's material name
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
     // Ignore models that aren't Tilt Brush - generated FBXs
-    if (! IsSupportedTiltBrushFbx(assetPath)) {
+    if (! IsSupportedTiltBrushFbx()) {
       return null;
     }
 
@@ -103,6 +134,7 @@ public class ModelImportSettings : AssetPostprocessor {
           // know whether it's a particle mesh.
           var importer = assetImporter as ModelImporter;
           if (importer != null && importer.optimizeMesh) {
+            // Should never get here any more.
             LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have optimizeMesh=false.");
             importer.optimizeMesh = false;
             importer.SaveAndReimport();
@@ -153,24 +185,15 @@ public class ModelImportSettings : AssetPostprocessor {
 
   /// Returns true if the path refers to an fbx that can be processed
   /// by this version of the toolkit
-  bool IsSupportedTiltBrushFbx(string path) {
-    var info = FbxUtils.GetTiltBrushFbxInfo(path);
-    if (info.tiltBrushVersion == null) {
+  bool IsSupportedTiltBrushFbx() {
+    if (! IsTiltBrush) {
       return false;
     }
 
-    if (info.tiltBrushVersion < kRequiredFbxExportVersion) {
-      LogWarningWithContext(string.Format(
-          "{0} was exported with an older version of Tilt Brush ({1}) that is not supported by this version of the Toolkit. For best results, re-export it with a newer Tilt Brush version ({2}).",
-          assetPath, info.tiltBrushVersion, kRequiredFbxExportVersion));
+    if (m_Info.tiltBrushVersion < kRequiredFbxExportVersion) {
       return false;
-    }
-
-    if (info.requiredToolkitVersion != null &&
-        kToolkitVersion < info.requiredToolkitVersion) {
-      LogWarningWithContext(string.Format(
-          "{0} was exported with an newer version of Tilt Brush that is not supported by this version of the Toolkit ({1}). For best results, upgrade your Toolkit to a newer version ({2}) or downgrade your Tilt Brush.",
-          assetPath, kToolkitVersion, info.requiredToolkitVersion));
+    } else if (m_Info.requiredToolkitVersion != null &&
+        kToolkitVersion < m_Info.requiredToolkitVersion) {
       return false;
     }
 

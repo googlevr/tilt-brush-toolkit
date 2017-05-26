@@ -63,6 +63,14 @@ public class ModelImportSettings : AssetPostprocessor {
     mesh.SetUVs(3, new List<Vector2>());
   }
 
+  static void ConvertSrgbToLinear(Mesh mesh) {
+    Color32[] colors32 = mesh.colors32;
+    for (int i = 0; i < colors32.Length; ++i) {
+      colors32[i] = ((Color)colors32[i]).linear;
+    }
+    mesh.colors32 = colors32;
+  }
+
   // Pulls some shenanigans so that a proper context will be shown in the editor.
   // null context means "the current asset".
   // Useful because the objects we get during import are too transient for LogFormat()
@@ -118,9 +126,10 @@ public class ModelImportSettings : AssetPostprocessor {
   // Try to find a Tilt Brush material using the imported models's material name
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
     // Ignore models that aren't Tilt Brush - generated FBXs
-    if (! IsSupportedTiltBrushFbx()) {
+    if (! IsTiltBrush) {
       return null;
     }
+    // For now, don't be strict about versions, because we can do an okay job on TB7 fbx files
 
     BrushDescriptor desc = GetDescriptorForStroke(material.name);
 
@@ -129,6 +138,10 @@ public class ModelImportSettings : AssetPostprocessor {
       if (renderer.GetComponent<MeshFilter>() != null) {
         var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
         CollapseUvs(mesh);
+        if (m_Info.tiltBrushVersion < new Version { major = 10 }) {
+          // Old versions of TB use linear lighting
+          ConvertSrgbToLinear(mesh);
+        }
         if (desc.m_IsParticle) {
           // Would like to do this in OnPreprocessModel, but we don't yet
           // know whether it's a particle mesh.

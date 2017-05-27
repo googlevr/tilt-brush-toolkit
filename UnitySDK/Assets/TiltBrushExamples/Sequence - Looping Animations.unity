@@ -234,10 +234,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 359814653}
-  m_LocalRotation: {x: 0.06437293, y: -0.5427891, z: -0.28149644, w: 0.7886672}
+  m_LocalRotation: {x: -0.7505733, y: 0.6351686, z: 0.17708907, w: 0.04289747}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: -11.7738, y: -65.7247, z: -31.6642}
+  m_LocalEulerAnglesHint: {x: 343.23, y: 552.462, z: -101.13801}
   m_Children: []
   m_Father: {fileID: 1351257252}
   m_RootOrder: 1
@@ -441,7 +441,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!23 &590161289
 MeshRenderer:
@@ -529,8 +529,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 7
   m_Type: 2
-  m_Color: {r: 1, g: 0.98630834, b: 0.8014706, a: 1}
-  m_Intensity: 0.5
+  m_Color: {r: 0.75735295, g: 0.68945235, b: 0.4677768, a: 1}
+  m_Intensity: 0.4
   m_Range: 5.12
   m_SpotAngle: 30
   m_CookieSize: 10
@@ -539,7 +539,7 @@ Light:
     m_Resolution: 3
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0
     m_NormalBias: 0
     m_NearPlane: 0.1
   m_Cookie: {fileID: 0}
@@ -561,7 +561,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 639688204}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.021, z: 0}
+  m_LocalPosition: {x: 0.02, y: 0.161, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
@@ -737,7 +737,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: -1
+  m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -944,13 +944,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_FrameSources:
-  - m_Source: {fileID: 100004, guid: 354d53dd3fb5ef64c99fd6aff8414513, type: 3}
+  - m_Source: {fileID: 100000, guid: 36e1d6a93a460441b9a3b7d4df9b76b2, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
-  - m_Source: {fileID: 100004, guid: accbe8324097fda44a3a123140af5537, type: 3}
+  - m_Source: {fileID: 100000, guid: 2bf24411e9cbd4f7a9dde6e4f76b670c, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
-  - m_Source: {fileID: 100004, guid: b9b93665fc2358741a50f381ef2b17ab, type: 3}
+  - m_Source: {fileID: 100000, guid: eb53d0c5b64fb4b6098af48a0eef1c6d, type: 3}
+    m_Repetitions: 0
+    m_SourceType: 2
+  - m_Source: {fileID: 100000, guid: 0aa2869090bcd4393afe015df86aab6e, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
   m_ConstantFramesPerSecond: 5

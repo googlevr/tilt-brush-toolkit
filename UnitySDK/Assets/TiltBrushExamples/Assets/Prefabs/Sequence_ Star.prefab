@@ -52,16 +52,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_FrameSources:
-  - m_Source: {fileID: 100000, guid: b5703f0d6e039ae4a8d458db6b8050fb, type: 3}
+  - m_Source: {fileID: 100000, guid: e75a2c67f6d3641f08e83682db396bdd, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
-  - m_Source: {fileID: 100000, guid: 3649ace44f1dd26418693a6e9229258f, type: 3}
+  - m_Source: {fileID: 100000, guid: e21ed2d91295e436d8dd3946b4be4f44, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
-  - m_Source: {fileID: 100000, guid: 70d423be7e581694ab0632a21bd51a04, type: 3}
+  - m_Source: {fileID: 100000, guid: ce6406217e44c447aa6b296e43ec71e4, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
-  - m_Source: {fileID: 100000, guid: 3592dce770831a042b7507f775de074a, type: 3}
+  - m_Source: {fileID: 100000, guid: f50fef97415ea4d4682bd40416eb0804, type: 3}
     m_Repetitions: 0
     m_SourceType: 2
   m_ConstantFramesPerSecond: 5

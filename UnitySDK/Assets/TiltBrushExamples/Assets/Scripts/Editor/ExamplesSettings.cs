@@ -13,64 +13,64 @@
 // limitations under the License.
 using UnityEngine;
 using UnityEditor;
-using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace TiltBrushToolkit {
 
   [InitializeOnLoad]
   public class ExamplesSettings : EditorWindow {
-
-    const string DEFINE_STEAM = "TILTBRUSH_STEAMVRPRESENT";
-    const string DEFINE_CINEMADIRECTOR = "TILTBRUSH_CINEMADIRECTORPRESENT";
-
-    static bool m_SteamPresent = false;
-    static bool m_CinemaDirectorPresent = false;
+    struct Define {
+      public string symbol;
+      public string ns;
+    }
+    static readonly Define[] kDefines = new[] {
+      new Define { symbol = "TILTBRUSH_STEAMVRPRESENT", ns = "Valve.VR" },
+      new Define { symbol = "TILTBRUSH_CINEMADIRECTORPRESENT", ns = "CinemaDirector" },
+    };
 
     static ExamplesSettings() {
       EditorApplication.projectWindowChanged += OnProjectWindowChanged;
-
-      EnsureSymbols();
+      OnProjectWindowChanged();
     }
 
     static void OnProjectWindowChanged() {
-      EnsureSymbols();
-    }
-
-    static void EnsureSymbols() {
-      m_SteamPresent = NamespaceExists("Valve.VR");
-      EnsureSymbol(DEFINE_STEAM, m_SteamPresent);
-      m_CinemaDirectorPresent = NamespaceExists("CinemaDirector");
-      EnsureSymbol(DEFINE_CINEMADIRECTOR, m_CinemaDirectorPresent);
+      foreach (var define in kDefines) {
+        DefineSymbol(define.symbol, NamespaceExists(define.ns));
+      }
     }
 
     static bool NamespaceExists(string Namespace) {
       foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies()) {
         foreach(var t in assembly.GetTypes()) {
-          if (t.Namespace == Namespace)
+          if (t.Namespace == Namespace) {
             return true;
+          }
         }
       }
       return false;
     }
 
-    static bool HasSymbol(string Symbol) {
-      var symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
-      return !string.IsNullOrEmpty(symbols) && symbols.Contains(Symbol);
-    }
-    static void EnsureSymbol(string Symbol, bool Active = false) {
-      var symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
-      bool present = HasSymbol(Symbol);
-      if (present && !Active) {
-        symbols = symbols.Remove(symbols.IndexOf(Symbol), Symbol.Length); // TODO Remove ; too
-      } else if (!present && Active) {
-        if (symbols.Length > 0)
-          symbols += ";";
-        symbols += Symbol + ";";
+    static void DefineSymbol(string symbol, bool active = false) {
+      List<string> symbols = new List<string>();
+      string tmp = PlayerSettings.GetScriptingDefineSymbolsForGroup(
+          BuildTargetGroup.Standalone);
+      if (! string.IsNullOrEmpty(tmp)) {
+        symbols.AddRange(tmp.Split(';'));
       }
-      PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, symbols);
-      
-    }
 
+      bool present = symbols.Contains(symbol);
+      if (present != active) {
+        symbols = symbols.Where(s => s != "" && s != symbol).ToList();
+        if (active) {
+          symbols.Add(symbol);
+        }
+        Debug.LogFormat("{0} scripting define {1}", active ? "Adding" : "Removing", symbol);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(
+            BuildTargetGroup.Standalone,
+            string.Join(";", symbols.ToArray()));
+      }
+    }
   }
 }

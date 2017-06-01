@@ -34,12 +34,9 @@ namespace TiltBrushToolkit {
     }
 
     static void OnProjectWindowChanged() {
-      ClearSymbols ();
+      EnsureSymbols();
     }
-    static void ClearSymbols() {
-      EnsureSymbol(DEFINE_STEAM, false);
-      EnsureSymbol(DEFINE_CINEMADIRECTOR, false);
-    }
+
     static void EnsureSymbols() {
       m_SteamPresent = NamespaceExists("Valve.VR");
       EnsureSymbol(DEFINE_STEAM, m_SteamPresent);

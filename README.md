@@ -22,7 +22,7 @@ Check out the [Documentation](https://docs.google.com/document/d/1YID89te9oDjinC
 ![Unity SDK](http://i.imgur.com/VLWEkV6.png?1)
 
 ### Command Line Tools
-Python scripts for advanced Tilt Brush data manipulation.
+Python 2.7 code and scripts for advanced Tilt Brush data manipulation.
 
  * `bin` - command-line tools
    * `dump_tilt.py` - Sample code that uses the tiltbrush.tilt module to view raw Tilt Brush data.

@@ -31,7 +31,7 @@ Python 2.7 code and scripts for advanced Tilt Brush data manipulation.
    * `tilt_to_strokes_dae.py` - Converts .tilt files to a Collada .dae containing spline data.
    * `unpack_tilt.py` - Converts .tilt files from packed format (zip) to unpacked format (directory) and vice versa, optionally applying compression.
  * `Python` - Put this in your `PYTHONPATH`
-   * `tiltbrush` - Python package for manipulating Tilt Brush data
-     * `export.py` - Parse the legacy .json export format
-     * `tilt.py` - Read and write .tilt files
-     * `unpack.py` - Convert .tilt files from packed format to unpacked format and vice versa
+   * `tiltbrush` - Python package for manipulating Tilt Brush data.
+     * `export.py` - Parse the legacy .json export format. This format contains only the geometry.
+     * `tilt.py` - Read and write .tilt files. This format contains no geometry, but does contain timestamps, pressure, controller position and orientation, metadata, and so on -- everything Tilt Brush needs to regenerate the geometry.
+     * `unpack.py` - Convert .tilt files from packed format to unpacked format and vice versa.

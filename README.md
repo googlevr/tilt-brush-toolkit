@@ -26,12 +26,12 @@ Python 2.7 code and scripts for advanced Tilt Brush data manipulation.
 
  * `bin` - command-line tools
    * `dump_tilt.py` - Sample code that uses the tiltbrush.tilt module to view raw Tilt Brush data.
-   * `geometry_json_to_fbx.py` - Historical sample code that converts Tilt Brush .json exports to .fbx. This script is superseded by Tilt Brush native .fbx exports.
-   * `geometry_json_to_obj.py` - Historical sample code that converts Tilt Brush .json exports to .obj. This script is superseded by Tilt Brush native .fbx exports.
+   * `geometry_json_to_fbx.py` - Sample code that shows how to postprocess the raw per-stroke geometry in various ways that might be needed for more-sophisticated workflows involving DCC tools and raytracers. This variant packages the result as a .fbx file.
+   * `geometry_json_to_obj.py` - Sample code that shows how to postprocess the raw per-stroke geometry in various ways that might be needed for more-sophisticated workflows involving DCC tools and raytracers. This variant packages the result as a .obj file.
    * `tilt_to_strokes_dae.py` - Converts .tilt files to a Collada .dae containing spline data.
    * `unpack_tilt.py` - Converts .tilt files from packed format (zip) to unpacked format (directory) and vice versa, optionally applying compression.
  * `Python` - Put this in your `PYTHONPATH`
    * `tiltbrush` - Python package for manipulating Tilt Brush data.
-     * `export.py` - Parse the legacy .json export format. This format contains only the geometry.
+     * `export.py` - Parse the legacy .json export format. This format contains the raw per-stroke geometry in a form intended to be easy to postprocess.
      * `tilt.py` - Read and write .tilt files. This format contains no geometry, but does contain timestamps, pressure, controller position and orientation, metadata, and so on -- everything Tilt Brush needs to regenerate the geometry.
      * `unpack.py` - Convert .tilt files from packed format to unpacked format and vice versa.

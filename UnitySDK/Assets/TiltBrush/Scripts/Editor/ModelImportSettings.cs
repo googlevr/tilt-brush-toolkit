@@ -22,7 +22,7 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class ModelImportSettings : AssetPostprocessor {
-  readonly Version kToolkitVersion            = new Version { major=11 };
+  readonly Version kToolkitVersion            = new Version { major=12 };
   readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 
   public static bool sm_forceOldMeshNamingConvention = false;
@@ -142,6 +142,16 @@ public class ModelImportSettings : AssetPostprocessor {
           // Old versions of TB use linear lighting
           ConvertSrgbToLinear(mesh);
         }
+
+        if (m_Info.tiltBrushVersion.Value.major >= 12) {
+          // Pre-TB12, Tilt Brush did unit conversion but not coord system conversion
+          // when exporting texcoords with Position semantics. TB12 fixes this, so now
+          // texcoord Position data are in fbx coordinates rather than Unity coordinates.
+          // However, this means we need to convert from fbx -> Unity coords on import,
+          // since Unity only takes care of mesh.vertices, tangents, normals, binormals.
+          FixDataWithPositionSemantic(desc, mesh);
+        }
+
         if (desc.m_IsParticle) {
           // Would like to do this in OnPreprocessModel, but we don't yet
           // know whether it's a particle mesh.
@@ -159,6 +169,24 @@ public class ModelImportSettings : AssetPostprocessor {
       return desc.m_Material;
     } else {
       return null;
+    }
+  }
+
+  // Convert from fbx coordinate conventions to Unity coordinate conventions
+  static Vector3 UnityFromFbx(Vector3 v) {
+    return new Vector3(-v.x, v.y, v.z);
+  }
+
+  void FixDataWithPositionSemantic(BrushDescriptor desc, Mesh mesh) {
+    // We don't have full VertexLayout data in BrushDescriptor; currently, particles
+    // are the only brushes that use Semantic.Position in texcoords
+    if (desc.m_IsParticle) {
+      List<Vector3> uv1 = new List<Vector3>();
+      mesh.GetUVs(1, uv1);
+      for (int i = 0; i < uv1.Count; ++i) {
+        uv1[i] = UnityFromFbx(uv1[i]);
+      }
+      mesh.SetUVs(1, uv1);
     }
   }
 

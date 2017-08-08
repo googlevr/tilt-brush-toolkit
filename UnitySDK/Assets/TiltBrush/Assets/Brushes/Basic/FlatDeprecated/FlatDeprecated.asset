@@ -16,3 +16,10 @@ MonoBehaviour:
   m_DurableName: FlatDeprecated
   m_Material: {fileID: 2100000, guid: 55303bc4c7494a7298d9d23e68e76e18, type: 2}
   m_IsParticle: 0
+  m_uv0Size: 2
+  m_uv0Semantic: 0
+  m_uv1Size: 0
+  m_uv1Semantic: 0
+  m_bUseNormals: 1
+  m_normalSemantic: 0
+  m_bFbxExportNormalAsTexcoord1: 0

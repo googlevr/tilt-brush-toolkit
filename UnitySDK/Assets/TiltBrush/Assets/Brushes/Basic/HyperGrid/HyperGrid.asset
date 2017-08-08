@@ -16,3 +16,10 @@ MonoBehaviour:
   m_DurableName: HyperGrid
   m_Material: {fileID: 2100000, guid: 6a1cf9f9032c45ec9b6ea6680bee32e9, type: 2}
   m_IsParticle: 0
+  m_uv0Size: 2
+  m_uv0Semantic: 0
+  m_uv1Size: 4
+  m_uv1Semantic: 2
+  m_bUseNormals: 1
+  m_normalSemantic: 0
+  m_bFbxExportNormalAsTexcoord1: 0

@@ -16,3 +16,10 @@ MonoBehaviour:
   m_DurableName: Toon
   m_Material: {fileID: 2100000, guid: 4391385adf7343969e3331e4e4930b27, type: 2}
   m_IsParticle: 0
+  m_uv0Size: 3
+  m_uv0Semantic: 3
+  m_uv1Size: 0
+  m_uv1Semantic: 0
+  m_bUseNormals: 1
+  m_normalSemantic: 0
+  m_bFbxExportNormalAsTexcoord1: 0

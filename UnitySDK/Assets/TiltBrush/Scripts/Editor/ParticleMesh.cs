@@ -26,6 +26,13 @@ namespace TiltBrushToolkit {
 // expects n to be a multiple of 4, because a vert's location in the
 // quad is implicit in SV_VertexId rather than explicit in the data.
 //
+// Sometimes for no known reason, Unity completely rearranges the
+// triangle indexing -- maybe it's reordering the vertex data, too?
+// This means that a particle quad can also look like:
+//   [n+0 n+1 n+2] [n+0 n+2 n+3]
+// Thankfully, this bizarre ordering can at least be unambiguously
+// distinguished from the normal ordering.
+//
 // We expect to see that pattern, but also expect that sometimes n will
 // not be a multiple of 4 -- this can happen if Unity splits a mesh
 // into multiple parts, or if Unity performs (unavoidable)
@@ -37,8 +44,8 @@ internal class ParticleMesh {
   // Classifies a sequence of 6 indices
   internal enum QuadType {
     Degenerate,         // [n n n] [n n n]
-    FullParticle,       // [n n+1 n+3] [n n+3 n+2]
-    LatterHalfParticle, // [n n+3 n+2] ...
+    FullParticle,       // [n n+1 n+3] [n n+3 n+2]    also [n n+1 n+2] [n n+2 n+3]
+    LatterHalfParticle, // [n n+3 n+2] ...            also [n n+2 n+3] ...
     Unknown,            // everything else
   };
 
@@ -114,12 +121,18 @@ internal class ParticleMesh {
 
     int i = iiVert;
     int v = m_triangles[i];
-    if (m_triangles[i  ] == v   &&
-        m_triangles[i+1] == v+1 &&
-        m_triangles[i+2] == v+3 &&
-        m_triangles[i+3] == v+0 &&
-        m_triangles[i+4] == v+3 &&
-        m_triangles[i+5] == v+2) {
+    if ((m_triangles[i  ] == v   &&
+         m_triangles[i+1] == v+1 &&
+         m_triangles[i+2] == v+3 &&
+         m_triangles[i+3] == v+0 &&
+         m_triangles[i+4] == v+3 &&
+         m_triangles[i+5] == v+2) ||
+        (m_triangles[i  ] == v   &&
+         m_triangles[i+1] == v+1 &&
+         m_triangles[i+2] == v+2 &&
+         m_triangles[i+3] == v+0 &&
+         m_triangles[i+4] == v+2 &&
+         m_triangles[i+5] == v+3)) {
       if (m_lastMod == null || (v % 4) != m_lastMod.Value) {
         // if (m_lastMod != null) {
         //   Debug.LogFormat(
@@ -140,9 +153,12 @@ internal class ParticleMesh {
       // Seems to be produced by either TB or FBX export
       // Debug.LogFormat("At {0}: degenerate quad", iiVert);
       return QuadType.Degenerate;
-    } else if (m_triangles[i  ] == v   &&
-               m_triangles[i+1] == v+3 &&
-               m_triangles[i+2] == v+2) {
+    } else if ((m_triangles[i  ] == v   &&
+                m_triangles[i+1] == v+3 &&
+                m_triangles[i+2] == v+2) ||
+               (m_triangles[i  ] == v   &&
+                m_triangles[i+1] == v+2 &&
+                m_triangles[i+2] == v+3)) {
       // Will be produced by Unity splitting the particle mesh up
       // Debug.LogFormat("At {0}: half-particle", iiVert);
       return QuadType.LatterHalfParticle;
@@ -151,10 +167,11 @@ internal class ParticleMesh {
         m_bNoisy = false;
         if (callback != null) {
           callback(string.Format(
-            "Found unexpected index sequence @ {0}: {1} {2} {3} {4} {5} {6}",
+            "Found unexpected index sequence @ {0}: {1} {2} {3} {4} {5} {6} {7} {8} {9}",
             iiVert,
             m_triangles[i  ], m_triangles[i+1], m_triangles[i+2],
-            m_triangles[i+3], m_triangles[i+4], m_triangles[i+5]));
+            m_triangles[i+3], m_triangles[i+4], m_triangles[i+5],
+            m_triangles[i+9], m_triangles[i+10], m_triangles[i+11]));
         }
       }
       return QuadType.Unknown;

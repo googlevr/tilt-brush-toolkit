@@ -20,11 +20,27 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class BrushDescriptor : ScriptableObject {
+  [Serializable]
+  public enum Semantic {
+    Unspecified,
+    Position,
+    Vector,
+    ZIsDistance,
+  }
+
   public SerializableGuid m_Guid;
   [Tooltip("A human readable name that cannot change, but is not guaranteed to be unique.")]
   public string m_DurableName;
   public Material m_Material;
   public bool m_IsParticle;
+
+  public int m_uv0Size;
+  public Semantic m_uv0Semantic;
+  public int m_uv1Size;
+  public Semantic m_uv1Semantic;
+  public bool m_bUseNormals;
+  public Semantic m_normalSemantic;
+  public bool m_bFbxExportNormalAsTexcoord1;
 }
 
 }

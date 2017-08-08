@@ -149,7 +149,8 @@ public class ModelImportSettings : AssetPostprocessor {
           // texcoord Position data are in fbx coordinates rather than Unity coordinates.
           // However, this means we need to convert from fbx -> Unity coords on import,
           // since Unity only takes care of mesh.vertices, tangents, normals, binormals.
-          FixDataWithPositionSemantic(desc, mesh);
+          PerformTexcoordCoordinateConversion(desc, mesh, 0);
+          PerformTexcoordCoordinateConversion(desc, mesh, 1);
         }
 
         if (desc.m_IsParticle) {
@@ -176,17 +177,67 @@ public class ModelImportSettings : AssetPostprocessor {
   static Vector3 UnityFromFbx(Vector3 v) {
     return new Vector3(-v.x, v.y, v.z);
   }
+  static Vector4 UnityFromFbx(Vector4 v) {
+    return new Vector4(-v.x, v.y, v.z, v.w);
+  }
 
-  void FixDataWithPositionSemantic(BrushDescriptor desc, Mesh mesh) {
-    // We don't have full VertexLayout data in BrushDescriptor; currently, particles
-    // are the only brushes that use Semantic.Position in texcoords
-    if (desc.m_IsParticle) {
-      List<Vector3> uv1 = new List<Vector3>();
-      mesh.GetUVs(1, uv1);
-      for (int i = 0; i < uv1.Count; ++i) {
-        uv1[i] = UnityFromFbx(uv1[i]);
+  static BrushDescriptor.Semantic GetUvsetSemantic(BrushDescriptor desc, int uvSet) {
+    switch (uvSet) {
+    case 0:
+      return desc.m_uv0Semantic;
+    case 1:
+      // Unity's mesh importer destroys non-unit data in fbx.normals, so Tilt Brush
+      // sometimes routes mesh.normals through fbx.texcoord1 instead.
+      if (desc.m_bFbxExportNormalAsTexcoord1) {
+        return desc.m_normalSemantic;
+      } else {
+        return desc.m_uv1Semantic;
       }
-      mesh.SetUVs(1, uv1);
+    default:
+      throw new ArgumentException("uvSet");
+    }
+  }
+
+  static int GetUvsetSize(BrushDescriptor desc, int uvSet) {
+    switch (uvSet) {
+    case 0: return desc.m_uv0Size;
+    case 1:
+      // Unity's mesh importer destroys non-unit data in fbx.normals, so Tilt Brush
+      // sometimes routes mesh.normals through fbx.texcoord1 instead.
+      if (desc.m_bFbxExportNormalAsTexcoord1) {
+        return 3;
+      } else {
+        return desc.m_uv1Size;
+      }
+    default:
+      throw new ArgumentException("uvSet");
+    }
+  }
+
+  void PerformTexcoordCoordinateConversion(BrushDescriptor desc, Mesh mesh, int uvSet) {
+    var semantic = GetUvsetSemantic(desc, uvSet);
+    if (semantic == BrushDescriptor.Semantic.Vector ||
+        semantic == BrushDescriptor.Semantic.Position) {
+      var size = GetUvsetSize(desc, uvSet);
+      if (size == 3) {
+        var data = new List<Vector3>();
+        mesh.GetUVs(uvSet, data);
+        for (int i = 0; i < data.Count; ++i) {
+          data[i] = UnityFromFbx(data[i]);
+        }
+        mesh.SetUVs(uvSet, data);
+      } else if (size == 4) {
+        var data = new List<Vector4>();
+        mesh.GetUVs(uvSet, data);
+        for (int i = 0; i < data.Count; ++i) {
+          data[i] = UnityFromFbx(data[i]);
+        }
+        mesh.SetUVs(uvSet, data);
+      } else {
+        LogWarningWithContext(string.Format(
+            "Unexpected: Semantic {0} on texcoord of size {1}, guid {2}",
+            semantic, size, desc.m_Guid));
+      }
     }
   }
 

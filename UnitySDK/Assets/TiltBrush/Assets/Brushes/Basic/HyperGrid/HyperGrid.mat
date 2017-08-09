@@ -50,3 +50,6 @@ Material:
     - first:
         name: _WaveformIntensity
       second: {r: 0, g: 0.3, b: 0, a: 1}
+--- !u!1002 &2100001
+EditorExtensionImpl:
+  serializedVersion: 6

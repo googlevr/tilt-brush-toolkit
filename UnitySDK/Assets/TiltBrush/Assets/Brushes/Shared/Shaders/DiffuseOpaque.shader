@@ -14,30 +14,30 @@
 
 Shader "Brush/DiffuseOpaque" {
 Properties {
-	_Color ("Main Color", Color) = (1,1,1,1)
+  _Color ("Main Color", Color) = (1,1,1,1)
 }
 
 SubShader {
-	
+
 Cull Back
 
 CGPROGRAM
-#pragma surface surf Lambert vertex:vert addshadow 
+#pragma surface surf Lambert vertex:vert addshadow
 #pragma multi_compile __ TBT_LINEAR_TARGET
 #include "../../../Shaders/Include/Brush.cginc"
 
 fixed4 _Color;
 
-struct Input { 
-	float4 color : COLOR;
+struct Input {
+  float4 color : COLOR;
 };
 
 void vert(inout appdata_full v) {
-	v.color = TbVertToNative(v.color);
+  v.color = TbVertToNative(v.color);
 }
 
 void surf (Input IN, inout SurfaceOutput o) {
-	o.Albedo = _Color * IN.color.rgb;   
+  o.Albedo = _Color * IN.color.rgb;
 }
 ENDCG
 }

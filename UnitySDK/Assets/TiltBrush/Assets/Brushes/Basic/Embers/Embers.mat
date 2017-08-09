@@ -131,9 +131,6 @@ Material:
         name: _SpecularHighlights
       second: 1
     - first:
-        name: _SpreadRate
-      second: 1.539
-    - first:
         name: _SpreadSize
       second: 1
     - first:

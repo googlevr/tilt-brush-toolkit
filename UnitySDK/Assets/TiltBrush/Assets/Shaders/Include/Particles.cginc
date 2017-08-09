@@ -90,31 +90,32 @@ float3 _RotatedQuadCorner(float3 up, float3 rt, float3 center,
 }
 
 // Returns the position of a camera-oriented quad corner.
-// The _WS variant returns a worldspace position.
 //
 //   center   - object-space center of quad
 //   halfSize - distance from center to an edge
-//   corner   - a number in [0,3] in CCW order as seen from front, bottom-left is 0
+//   corner   - A non-negative number whose value mod 4 indicates the corner.
+//              In CCW order as seen from front, bottom-left is 0.
 //   rotation - in radians
 //
-float3 _OrientParticle(float3 center, float halfSize, int corner, float rotation)
-{
+float4 OrientParticle(float3 center, float halfSize, int corner, float rotation) {
+  corner = corner & 3;
   float3 up, rt; {
     float4x4 cameraToObject = mul(unity_WorldToObject, unity_CameraToWorld);
     float3 upIsh = mul(cameraToObject, float3(0, 1, 0));
     float3 objSpaceCameraPos = mul(cameraToObject, float4(0, 0, 0, 1));
     float3 fwd = (center - objSpaceCameraPos);
     rt = normalize(cross(upIsh, fwd));
-    // TODO(timaidley): Temporarily revert to previous behaviour; see b/62067322
-    up = upIsh;  // normalize(cross(fwd, rt));
+    up = normalize(cross(fwd, rt));
   }
 
-  return _RotatedQuadCorner(up, rt, center, halfSize, corner, rotation);
+  return float4(_RotatedQuadCorner(up, rt, center, halfSize, corner, rotation).xyz, 1);
 }
 
-float3 _OrientParticle_WS(float3 center_OS, float halfSize_OS, int corner, float rotation)
-{
-  float3 center_WS = mul(unity_ObjectToWorld, float4(center_OS, 1));
+// Like OrientParticle, but takes the center in WS
+// Slightly fewer matrix multiplies than the other version,
+// but susceptible to FP inaccuracy when far away from the origin
+float4 OrientParticle_WS(float3 center_WS, float halfSize_OS, int corner, float rotation) {
+  corner = corner & 3;
   float3 up_WS, rt_WS; {
     // Trying to write this without using unity_CameraToWorld because some renderers
     // don't keep around the inverse view matrix. upIsh_WS won't be unit-length, but that's fine.
@@ -122,12 +123,11 @@ float3 _OrientParticle_WS(float3 center_OS, float halfSize_OS, int corner, float
     float3 cameraPos_WS = _WorldSpaceCameraPos;
     float3 fwd_WS = (center_WS - cameraPos_WS);
     rt_WS = normalize(cross(upIsh_WS, fwd_WS));
-    // TODO(timaidley): Temporarily revert to previous behaviour; see b/62067322
-    up_WS = upIsh_WS;  // normalize(cross(fwd_WS, rt_WS));
+    up_WS = normalize(cross(fwd_WS, rt_WS));
   }
 
   float halfSize_WS = halfSize_OS * length(unity_ObjectToWorld[0].xyz);
-  return _RotatedQuadCorner(up_WS, rt_WS, center_WS, halfSize_WS, corner, rotation);
+  return float4(_RotatedQuadCorner(up_WS, rt_WS, center_WS, halfSize_WS, corner, rotation), 1);
 }
 
 // Sign bit of time is used to determine if this is a preview brush or not.
@@ -144,38 +144,36 @@ float _ParticleUnpackTime(inout float time) {
   return sizeAdjust;
 }
 
-// Adjusts a quad vertex to make the quad camera-facing, and scales the particle
-// if the particle is in "preview mode".
+// Works out the size of a particle from its corner and center positions,
+// and the amount of time since it was spawned.
 //
-// The "AndSpread" versions additionally cause the quad to spread out from
-// an origin position.
-// The "_WS" versions return the result in worldspace instead of objectspace.
-//
-//   vertexId   - Which corner of the quad (0 lower-left, increasing CCW)
 //   corner     - Object-space position of this corner; only used to compute particle size
 //   center     - Object-space position of the center after fully-born
-//   rotation   - in radians
 //   birthTime  - Particle birth time; sign bit indicates preview-ness
-//   origin     - Object-space position of center at birth
-//   spreadRate - How fast quad moves from origin to center. Units of periods-per-second,
-//                where one period is about 63% (ie, a decay to 1/e)
-
-#define OrientParticleAndSpread(a,b,c,d,e,f,g) OrientParticle(a,b,c,d,e)
-
-#define OrientParticleAndSpread_WS(a,b,c,d,e,f,g) OrientParticle_WS(a,b,c,d,e)
-
-float4 OrientParticle(
-    uint vertexId, float3 corner, float3 center, float rotation, float birthTime) {
+//
+float GetParticleHalfSize(float3 corner, float3 center, float birthTime) {
   float sizeAdjust = _ParticleUnpackTime(/* inout */ birthTime);
   float halfSize = length(corner - center) * kRecipSquareRootOfTwo * sizeAdjust;
-  float3 newCorner = _OrientParticle(center, halfSize, vertexId & 3, rotation);
-  return float4(newCorner.xyz, 1);
+  return halfSize;
 }
 
-float4 OrientParticle_WS(
-    uint vertexId, float3 corner, float3 center, float rotation, float birthTime) {
-  float sizeAdjust = _ParticleUnpackTime(/* inout */ birthTime);
-  float halfSize = length(corner - center) * kRecipSquareRootOfTwo * sizeAdjust;
-  float3 newCorner_WS = _OrientParticle_WS(center, halfSize, vertexId & 3, rotation);
-  return float4(newCorner_WS.xyz, 1);
+// Determines how far a particle halfSize moved from its origin to its resting position.
+// Result its between 0 .. 1
+//
+//   birthTime  - Particle birth time; sign bit indicates preview-ness
+//   spreadRate - How fast quad moves from origin to center. Units of periods-per-second,
+//                where one period is about 63% (ie, a decay to 1/e)
+//
+float SpreadProgress(float birthTime, float spreadRate) {
+  return 1;
+}
+
+// Animates a particle position from its origin to its resting position
+//
+//   center     - Object-space position of the center after fully-born
+//   origin     - Object-space position of center at birth
+//   progress   - How far between the origin and center to place the particle
+//
+float4 SpreadParticle(ParticleVertexWithSpread_t particle, float progress) {
+  return float4(particle.center.xyz, 1);
 }

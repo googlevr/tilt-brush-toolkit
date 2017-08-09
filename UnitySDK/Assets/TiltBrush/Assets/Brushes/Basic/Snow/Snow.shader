@@ -14,97 +14,95 @@
 
 Shader "Brush/Particle/Snow" {
 Properties {
-	_TintColor ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
-	_MainTex ("Particle Texture", 2D) = "white" {}
-	_ScrollRate("Scroll Rate", Float) = 1.0
-	_ScrollDistance("Scroll Distance", Vector) = (1.0, 0, 0)
-	_ScrollJitterIntensity("Scroll Jitter Intensity", Float) = 1.0
-	_ScrollJitterFrequency("Scroll Jitter Frequency", Float) = 1.0
-	_SpreadRate ("Spread Rate", Range(0.3, 5)) = 1.539
+  _TintColor ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
+  _MainTex ("Particle Texture", 2D) = "white" {}
+  _ScrollRate("Scroll Rate", Float) = 1.0
+  _ScrollDistance("Scroll Distance", Vector) = (1.0, 0, 0)
+  _ScrollJitterIntensity("Scroll Jitter Intensity", Float) = 1.0
+  _ScrollJitterFrequency("Scroll Jitter Frequency", Float) = 1.0
+  _SpreadRate ("Spread Rate", Range(0.3, 5)) = 1.539
 }
 
 Category {
-	Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "DisableBatching"="True" }
-	Blend SrcAlpha One
-	AlphaTest Greater .01
-	ColorMask RGB
-	Cull Off Lighting Off ZWrite Off Fog { Color (0,0,0,0) }
+  Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "DisableBatching"="True" }
+  Blend SrcAlpha One
+  AlphaTest Greater .01
+  ColorMask RGB
+  Cull Off Lighting Off ZWrite Off Fog { Color (0,0,0,0) }
 
-	SubShader {
-		Pass {
+  SubShader {
+    Pass {
 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_particles
-			#pragma multi_compile __ AUDIO_REACTIVE
-			#pragma multi_compile __ TBT_LINEAR_TARGET
-			#pragma target 3.0
+      CGPROGRAM
+      #pragma vertex vert
+      #pragma fragment frag
+      #pragma multi_compile_particles
+      #pragma multi_compile __ AUDIO_REACTIVE
+      #pragma multi_compile __ TBT_LINEAR_TARGET
+      #pragma target 3.0
 
-			#include "UnityCG.cginc"
-			#include "../../../Shaders/Include/Brush.cginc"
-			#include "../../../Shaders/Include/Particles.cginc"
+      #include "UnityCG.cginc"
+      #include "../../../Shaders/Include/Brush.cginc"
+      #include "../../../Shaders/Include/Particles.cginc"
 
-			sampler2D _MainTex;
-			fixed4 _TintColor;
+      sampler2D _MainTex;
+      fixed4 _TintColor;
 
-			struct v2f {
-				float4 vertex : SV_POSITION;
-				fixed4 color : COLOR;
-				float2 texcoord : TEXCOORD0;
-			};
+      struct v2f {
+        float4 vertex : SV_POSITION;
+        fixed4 color : COLOR;
+        float2 texcoord : TEXCOORD0;
+      };
 
-			float4 _MainTex_ST;
-			float _ScrollRate;
-			float3 _ScrollDistance;
-			float _ScrollJitterIntensity;
-			float _ScrollJitterFrequency;
-			float _SpreadRate;
+      float4 _MainTex_ST;
+      float _ScrollRate;
+      float3 _ScrollDistance;
+      float _ScrollJitterIntensity;
+      float _ScrollJitterFrequency;
+      float _SpreadRate;
 
-			v2f vert (ParticleVertexWithSpread_t v)
-			{
-				v2f o;
-				v.color = TbVertToSrgb(v.color);
-				float4 worldPos = OrientParticleAndSpread_WS(
-						v.vid, v.corner.xyz, v.center,
-						v.texcoord.z /* rotation */, v.texcoord.w /* birthTime */,
-						v.origin, _SpreadRate);
+      v2f vert (ParticleVertexWithSpread_t v)
+      {
+        v2f o;
+        v.color = TbVertToSrgb(v.color);
+        float birthTime = v.texcoord.w;
+        float rotation = v.texcoord.z;
+        float halfSize = GetParticleHalfSize(v.corner.xyz, v.center, birthTime);
+        float spreadProgress = SpreadProgress(birthTime, _SpreadRate);
+        float4 center = SpreadParticle(v, spreadProgress);
+        float4 center_WS = mul(unity_ObjectToWorld, center);
 
-				// Custom vertex animation
-				// Accumulate all displacement into a common, pre-transformed space.
-				float scrollAmount = _Time.y;
-				float t = fmod(scrollAmount * _ScrollRate + v.color.a, 1);
-				float4 dispVec = (t - .5f) * float4(_ScrollDistance, 0.0);
+        // Custom vertex animation
+        float scrollAmount = _Time.y;
+        float t = fmod(scrollAmount * _ScrollRate + v.color.a, 1);
+        float4 dispVec = (t - .5f) * float4(_ScrollDistance, 0.0);
+        dispVec.x += sin(t * _ScrollJitterFrequency + _Time.y) * _ScrollJitterIntensity;
+        dispVec.z += cos(t * _ScrollJitterFrequency * .5 + _Time.y) * _ScrollJitterIntensity;
+        dispVec.xyz = spreadProgress * dispVec * kDecimetersToWorldUnits;
+        center_WS += mul(xf_CS, dispVec);
 
-				dispVec.x += sin(t * _ScrollJitterFrequency + _Time.y) * _ScrollJitterIntensity;
-				dispVec.z += cos(t * _ScrollJitterFrequency * .5 + _Time.y) * _ScrollJitterIntensity;
 
-				dispVec = mul(xf_CS, dispVec);
-				dispVec.w = 0.0;
-
-				worldPos += dispVec;
-
+        float4 corner_WS = OrientParticle_WS(center_WS.xyz, halfSize, v.vid, rotation);
 #ifdef AUDIO_REACTIVE
-				o.color = musicReactiveColor(v.color, _BeatOutput.w);
-				worldPos = musicReactiveAnimationWorldSpace(worldPos, v.color, _BeatOutput.w, worldPos.y*5);
+        o.color = musicReactiveColor(v.color, _BeatOutput.w);
+        corner_WS = musicReactiveAnimationWorldSpace(corner_WS, v.color, _BeatOutput.w, corner_WS.y*5);
 #else
-				o.color = v.color;
+        o.color = v.color;
 #endif
 
-				o.vertex = mul(UNITY_MATRIX_VP, worldPos);
-				o.color.a = pow(1 - abs(2*(t - .5)), 3);
-				o.texcoord = TRANSFORM_TEX(v.texcoord.xy, _MainTex);
+        o.vertex = mul(UNITY_MATRIX_VP, corner_WS);
+        o.color.a = pow(1 - abs(2*(t - .5)), 3);
+        o.texcoord = TRANSFORM_TEX(v.texcoord.xy, _MainTex);
+        return o;
+      }
 
-				return o;
-			}
-
-			// Input color is srgb
-			fixed4 frag (v2f i) : SV_Target
-			{
-				return SrgbToNative(2.0f * i.color * _TintColor * tex2D(_MainTex, i.texcoord));
-			}
-			ENDCG
-		}
-	}
+      // Input color is srgb
+      fixed4 frag (v2f i) : SV_Target
+      {
+        return SrgbToNative(2.0f * i.color * _TintColor * tex2D(_MainTex, i.texcoord));
+      }
+      ENDCG
+    }
+  }
 }
 }

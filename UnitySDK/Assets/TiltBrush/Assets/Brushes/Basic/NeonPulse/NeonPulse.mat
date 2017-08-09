@@ -41,3 +41,6 @@ Material:
     - first:
         name: _TintColor
       second: {r: 0.99999994, g: 0.99999994, b: 0.99999994, a: 1}
+--- !u!1002 &2100001
+EditorExtensionImpl:
+  serializedVersion: 6

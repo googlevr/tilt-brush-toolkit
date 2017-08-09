@@ -14,58 +14,58 @@
 
 Shader "Brush/Special/DiffuseNoTextureDoubleSided" {
 Properties {
-	_Color ("Main Color", Color) = (1,1,1,1)
+  _Color ("Main Color", Color) = (1,1,1,1)
 }
 
 SubShader {
-	Cull Off
-	Tags{ "DisableBatching" = "True" }
+  Cull Off
+  Tags{ "DisableBatching" = "True" }
 
-	CGPROGRAM
-	#pragma surface surf Lambert vertex:vert addshadow
-	#pragma target 3.0
-	#pragma multi_compile __ TBT_LINEAR_TARGET
-	#include "../../../Shaders/Include/Brush.cginc"
+  CGPROGRAM
+  #pragma surface surf Lambert vertex:vert addshadow
+  #pragma target 3.0
+  #pragma multi_compile __ TBT_LINEAR_TARGET
+  #include "../../../Shaders/Include/Brush.cginc"
 
-	fixed4 _Color;
+  fixed4 _Color;
 
-	struct appdata_t {
-		float4 vertex : POSITION; 
-		fixed4 color : COLOR; 
-		float3 normal : NORMAL;
-		float4 tangent : TANGENT;
-		float2 texcoord0 : TEXCOORD0;
-		float4 texcoord1 : TEXCOORD1;
-		float4 texcoord2 : TEXCOORD2;
-	};
+  struct appdata_t {
+    float4 vertex : POSITION;
+    fixed4 color : COLOR;
+    float3 normal : NORMAL;
+    float4 tangent : TANGENT;
+    float2 texcoord0 : TEXCOORD0;
+    float4 texcoord1 : TEXCOORD1;
+    float4 texcoord2 : TEXCOORD2;
+  };
 
 
-	struct Input { 
-		float2 uv_MainTex;
-		float4 color : COLOR;
-		fixed vface : VFACE;
-	};
+  struct Input {
+    float2 uv_MainTex;
+    float4 color : COLOR;
+    fixed vface : VFACE;
+  };
 
-	void vert (inout appdata_t v, out Input o) {
+  void vert (inout appdata_t v, out Input o) {
 
-		//
-		// XXX - THIS TAPERING CODE SHOULD BE REMOVED ONCE THE TAPERING IS DONE IN THE GEOMETRY GENERATION
-		// THE SHADER WILL REMAIN AS A SIMPLE "DiffuseNoTextureDoubleSided" SHADER.
-		//
+    //
+    // XXX - THIS TAPERING CODE SHOULD BE REMOVED ONCE THE TAPERING IS DONE IN THE GEOMETRY GENERATION
+    // THE SHADER WILL REMAIN AS A SIMPLE "DiffuseNoTextureDoubleSided" SHADER.
+    //
 
-		UNITY_INITIALIZE_OUTPUT(Input, o);
-		float envelope = sin(v.texcoord0.x * 3.14159);
-		float widthMultiplier = 1 - envelope;
-		v.vertex.xyz += -v.texcoord1 * widthMultiplier;
-		v.color = TbVertToNative(v.color);
-	}
+    UNITY_INITIALIZE_OUTPUT(Input, o);
+    float envelope = sin(v.texcoord0.x * 3.14159);
+    float widthMultiplier = 1 - envelope;
+    v.vertex.xyz += -v.texcoord1 * widthMultiplier;
+    v.color = TbVertToNative(v.color);
+  }
 
-	void surf (Input IN, inout SurfaceOutput o) {
-		fixed4 c = _Color;
-		o.Normal = float3(0,0,IN.vface);
-		o.Albedo = c.rgb * IN.color.rgb;   
-	}
-	ENDCG
+  void surf (Input IN, inout SurfaceOutput o) {
+    fixed4 c = _Color;
+    o.Normal = float3(0,0,IN.vface);
+    o.Albedo = c.rgb * IN.color.rgb;
+  }
+  ENDCG
 }
 
 Fallback "Transparent/Cutout/VertexLit"

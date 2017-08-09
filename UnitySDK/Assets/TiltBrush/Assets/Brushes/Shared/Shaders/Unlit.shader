@@ -55,7 +55,7 @@ SubShader {
         {
 
             v2f o;
-            
+
             o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
             o.texcoord = v.texcoord;
             o.color = TbVertToNative(v.color);

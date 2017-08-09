@@ -40,9 +40,6 @@ Material:
     - first:
         name: _InvFade
       second: 1
-    - first:
-        name: _OutlineMax
-      second: 0.005
     m_Colors:
     - first:
         name: _Color

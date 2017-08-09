@@ -63,10 +63,10 @@ float randomizeByColor(float4 color) {
 }
 
 float3 randomNormal(float3 color) {
-  float noiseX = frac(sin(color.x))*46336.23745f; 
-  float noiseY = frac(sin(color.y))*34748.34744f; 
-  float noiseZ = frac(sin(color.z))*59998.47362f; 
-  return normalize(float3(noiseX, noiseY, noiseZ)); 
+  float noiseX = frac(sin(color.x))*46336.23745f;
+  float noiseY = frac(sin(color.y))*34748.34744f;
+  float noiseZ = frac(sin(color.z))*59998.47362f;
+  return normalize(float3(noiseX, noiseY, noiseZ));
 }
 
 float4 musicReactiveColor(float4 color, float beat) {
@@ -115,10 +115,10 @@ float4 SrgbToLinear(float4 color) {
 
 float4 SrgbToLinear_Large(float4 color) {
     float4 linearColor = SrgbToLinear(color);
-	color.r = color.r < 1.0 ? linearColor.r : color.r;
-	color.g = color.g < 1.0 ? linearColor.g : color.g;
-	color.b = color.b < 1.0 ? linearColor.b : color.b;
-	return color;
+  color.r = color.r < 1.0 ? linearColor.r : color.r;
+  color.g = color.g < 1.0 ? linearColor.g : color.g;
+  color.b = color.b < 1.0 ? linearColor.b : color.b;
+  return color;
 }
 
 float4 LinearToSrgb(float4 color) {
@@ -129,14 +129,14 @@ float4 LinearToSrgb(float4 color) {
   float3 S3 = sqrt(S2);
   color.rgb = 0.662002687 * S1 + 0.684122060 * S2 - 0.323583601 * S3 - 0.0225411470 * linearColor;
   return color;
-} 
+}
 
 // TB mesh colors are sRGB. TBT mesh colors are linear.
 float4 TbVertToSrgb(float4 color) { return LinearToSrgb(color); }
 float4 TbVertToLinear(float4 color) { return color; }
 
 // Conversions to and from native colorspace.
-// Note that SrgbToLinear_Large only converts to linear in the 0:1 range 
+// Note that SrgbToLinear_Large only converts to linear in the 0:1 range
 // because Linear HDR values don't work with the Tilt Brush bloom filter
 #ifdef TBT_LINEAR_TARGET
 float4 SrgbToNative(float4 color) { return SrgbToLinear_Large(color); }
@@ -148,6 +148,6 @@ float4 TbVertToNative(float4 color) { return TbVertToSrgb(color); }
 float4 NativeToSrgb(float4 color) { return color; }
 #endif
 
-// TBT is in meters, TB is in decimeters. 
-#define kDecimetersToWorldUnits 0.1  
+// TBT is in meters, TB is in decimeters.
+#define kDecimetersToWorldUnits 0.1
 

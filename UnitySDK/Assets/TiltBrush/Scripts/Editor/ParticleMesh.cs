@@ -58,8 +58,8 @@ internal class ParticleMesh {
     ParticleMesh src = ParticleMesh.FromMesh(mesh);
     ParticleMesh dst = new ParticleMesh();
 
-    // ClassifyQuad wants at least 6 verts to examine
-    int limit = src.VertexCount - 5;
+    // ClassifyQuad wants at least 6 indices (2 triangles) to examine
+    int limit = src.TriangleCount - 6;
     int iiVert = 0;
     while (iiVert < limit) {
       switch (src.ClassifyQuad(iiVert, callback)) {
@@ -109,7 +109,7 @@ internal class ParticleMesh {
   bool m_bNoisy = true;
   int? m_lastMod;
 
-  internal int VertexCount { get { return m_vertices.Count; } }
+  internal int TriangleCount { get { return m_triangles.Count; } }
 
   // iiVert is an index to an index to a vert (an index into m_triangles)
   // iiVert must be at least 6 verts from the end of the mesh.

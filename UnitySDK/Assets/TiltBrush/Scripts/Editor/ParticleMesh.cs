@@ -121,6 +121,8 @@ internal class ParticleMesh {
 
     int i = iiVert;
     int v = m_triangles[i];
+    // AppendQuad assumes that the first index of the quad is the lowest index.
+    // All of these "+n" offsets should be positive.
     if ((m_triangles[i  ] == v   &&
          m_triangles[i+1] == v+1 &&
          m_triangles[i+2] == v+3 &&
@@ -179,19 +181,24 @@ internal class ParticleMesh {
   }
 
   internal void AppendQuad(ParticleMesh rhs, int iiVert) {
+    // Valid particles are contiguous ranges of 4 verts and 6 indices,
+    // and the first index refers to the first vert.
+
     int rv0 = rhs.m_triangles[iiVert];
     int indexOffset = m_vertices.Count - rv0;
     bool hasNormals = rhs.m_normals != null && rhs.m_normals.Count > 0;
     bool hasTangents = rhs.m_tangents != null && rhs.m_tangents.Count > 0;
-    // Assume IsValidParticle, and therefore [v0, v0+6) should be copied
-    for (int i = 0; i < 6; ++i) {
-      m_vertices.Add (rhs.m_vertices [rv0 + i]);
-      if (hasNormals) { m_normals.Add  (rhs.m_normals  [rv0 + i]); }
-      m_uv0.Add      (rhs.m_uv0      [rv0 + i]);
-      m_uv1.Add      (rhs.m_uv1      [rv0 + i]);
-      m_colors.Add   (rhs.m_colors   [rv0 + i]);
-      if (hasTangents) { m_tangents.Add(rhs.m_tangents[rv0 + i]); }
-      m_triangles.Add(rhs.m_triangles[iiVert + i] + indexOffset);
+    for (int iv = 0; iv < 4; ++iv) {
+      m_vertices.Add(rhs.m_vertices[rv0 + iv]);
+      if (hasNormals) { m_normals.Add(rhs.m_normals[rv0 + iv]); }
+      m_uv0.Add(rhs.m_uv0[rv0 + iv]);
+      m_uv1.Add(rhs.m_uv1[rv0 + iv]);
+      m_colors.Add(rhs.m_colors[rv0 + iv]);
+      if (hasTangents) { m_tangents.Add(rhs.m_tangents[rv0 + iv]); }
+    }
+
+    for (int ii = 0; ii < 6; ++ii) {
+      m_triangles.Add(rhs.m_triangles[iiVert + ii] + indexOffset);
     }
   }
 

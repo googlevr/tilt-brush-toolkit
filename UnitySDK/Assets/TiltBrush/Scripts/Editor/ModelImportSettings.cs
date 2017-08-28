@@ -152,6 +152,12 @@ public class ModelImportSettings : AssetPostprocessor {
           PerformTexcoordCoordinateConversion(desc, mesh, 0);
           PerformTexcoordCoordinateConversion(desc, mesh, 1);
         }
+        if (m_Info.tiltBrushVersion.Value.major < 14 &&
+            desc.m_Guid == new Guid("e8ef32b1-baa8-460a-9c2c-9cf8506794f5")) {
+          // Pre-TB14, Tilt Brush hadn't set the "Z is distance" semantic and texcoord0.z
+          // ended up in decimeters
+          FixupHypercolorTexcoord(desc, mesh);
+        }
 
         if (desc.m_IsParticle) {
           // Would like to do this in OnPreprocessModel, but we don't yet
@@ -212,6 +218,24 @@ public class ModelImportSettings : AssetPostprocessor {
     default:
       throw new ArgumentException("uvSet");
     }
+  }
+
+  void FixupHypercolorTexcoord(BrushDescriptor desc, Mesh mesh) {
+    int uvSet = 0;
+    var semantic = GetUvsetSemantic(desc, uvSet);
+    if (semantic != BrushDescriptor.Semantic.ZIsDistance ||
+        GetUvsetSize(desc, uvSet) != 3) {
+      LogWarningWithContext("Not hypercolor?");
+    }
+
+    var data = new List<Vector3>();
+    mesh.GetUVs(uvSet, data);
+    for (int i = 0; i < data.Count; ++i) {
+      Vector3 tmp = data[i];
+      tmp.z *= .1f;
+      data[i] = tmp;
+    }
+    mesh.SetUVs(uvSet, data);
   }
 
   void PerformTexcoordCoordinateConversion(BrushDescriptor desc, Mesh mesh, int uvSet) {

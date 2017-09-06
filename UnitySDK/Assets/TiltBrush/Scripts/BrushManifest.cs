@@ -72,17 +72,19 @@ public class BrushManifest : ScriptableObject {
     }
   }
 
-  /*
-  [MenuItem("Tilt Brush/Update Manifest")]
+#if false
+#if UNITY_EDITOR
+  [UnityEditor.MenuItem("Tilt Brush/Update Manifest")]
   public static void MenuItem_UpdateManifest() {
     BrushManifest manifest = Instance;
-    Undo.RecordObject(manifest, "Recreate brush list");
-    manifest.m_Brushes = AssetDatabase.FindAssets("t:BrushDescriptor")
-        .Select(g => AssetDatabase.GUIDToAssetPath(g))
-        .Select(p => AssetDatabase.LoadAssetAtPath<BrushDescriptor>(p))
+    manifest.m_Brushes = UnityEditor.AssetDatabase.FindAssets("t:BrushDescriptor")
+        .Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g))
+        .Select(p => UnityEditor.AssetDatabase.LoadAssetAtPath<BrushDescriptor>(p))
         .ToArray();
+    UnityEditor.EditorUtility.SetDirty(manifest);
   }
-  */
+#endif
+#endif
 }
 
 }

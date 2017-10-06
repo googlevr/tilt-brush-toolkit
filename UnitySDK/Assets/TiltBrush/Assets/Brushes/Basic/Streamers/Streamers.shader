@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
 Shader "Brush/Special/Streamers" {
 Properties {
   _MainTex ("Particle Texture", 2D) = "white" {}
@@ -73,7 +71,7 @@ Category {
 
         v2f o;
         o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
         o.color = v.color;
         return o;

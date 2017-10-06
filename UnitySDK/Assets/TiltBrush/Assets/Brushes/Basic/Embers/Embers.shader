@@ -130,7 +130,7 @@ Category {
         // Note that we assume object space == canvas space (which it is, for TB)
         center = center + float4(disp.xyz, 0);
         float4 corner = OrientParticle(center.xyz, halfSize, v.vid, rotation);
-        o.vertex = mul(UNITY_MATRIX_MVP, corner);
+        o.vertex = UnityObjectToClipPos(corner);
 #endif
 
         o.color = v.color;

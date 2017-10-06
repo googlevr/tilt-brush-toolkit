@@ -66,7 +66,7 @@ Category {
 #else
         o.color = TbVertToNative(v.color);
 #endif
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
 
         return o;
       }

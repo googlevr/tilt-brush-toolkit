@@ -91,7 +91,7 @@ Category {
         float3 displacement_OS = mul(unity_WorldToObject, displacement_WS);
         center.xyz += displacement_OS;
         float4 corner = OrientParticle(center.xyz, halfSize, v.vid, rotation);
-        o.vertex = mul(UNITY_MATRIX_MVP, corner);
+        o.vertex = UnityObjectToClipPos(corner);
 
         // Brighten up the bubbles
         o.color = v.color;

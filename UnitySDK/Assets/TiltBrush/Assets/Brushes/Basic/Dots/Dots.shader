@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
 Shader "Brush/Visualizer/Dots" {
 Properties {
   _TintColor ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
@@ -82,7 +80,7 @@ Category {
         dispVec.xyz += waveform * _WaveformIntensity.xyz;
         corner = corner + dispVec;
 #endif
-        o.vertex = mul(UNITY_MATRIX_MVP, corner);
+        o.vertex = UnityObjectToClipPos(corner);
         o.color = v.color * _BaseGain;
         o.texcoord = TRANSFORM_TEX(v.texcoord.xy,_MainTex);
         o.waveform = waveform * 15;

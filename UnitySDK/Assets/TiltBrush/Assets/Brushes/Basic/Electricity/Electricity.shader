@@ -89,7 +89,7 @@ CGINCLUDE
     // This adds curl noise
     v.vertex.xyz += disp * _DisplacementIntensity * envelopePow;
 
-    o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+    o.vertex = UnityObjectToClipPos(v.vertex);
     o.color = bloomColor(v.color, _EmissionGain);
     o.texcoord = v.texcoord0;
 

@@ -61,7 +61,7 @@ Category {
         float envelope = sin(v.texcoord0.x * 3.14159);
         float widthMultiplier = 1 - envelope;
         v.vertex.xyz += -v.texcoord1 * widthMultiplier;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.color = TbVertToNative(v.color);
         o.texcoord = v.texcoord0;
         UNITY_TRANSFER_FOG(o, o.vertex);

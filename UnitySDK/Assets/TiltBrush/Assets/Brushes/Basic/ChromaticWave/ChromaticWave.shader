@@ -59,7 +59,7 @@ Category {
       {
         v.color = TbVertToSrgb(v.color);
         v2f o;
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         o.texcoord = v.texcoord;
         o.color = bloomColor(v.color, _EmissionGain);
         o.unbloomedColor = v.color;

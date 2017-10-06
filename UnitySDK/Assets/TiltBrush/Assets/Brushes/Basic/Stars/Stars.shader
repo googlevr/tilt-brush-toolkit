@@ -78,7 +78,7 @@ Category {
         o.texcoord = TRANSFORM_TEX(v.texcoord.xy,_MainTex);
 
         float4 corner = OrientParticle(center.xyz, halfSize, v.vid, rotation);
-        o.vertex = mul(UNITY_MATRIX_MVP, corner);
+        o.vertex = UnityObjectToClipPos(corner);
 
         return o;
       }

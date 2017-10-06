@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
 
 // -*- c -*-
 
@@ -42,6 +40,7 @@ float4 bloomColor(float4 color, float gain) {
 float4 GetAnimatedSelectionColor( float4 color) {
   return color + sin(_Time.w*2)*.1 + .2f;
 }
+
 
 //
 // Common for Music Reactive Brushes

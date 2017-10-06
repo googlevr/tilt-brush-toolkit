@@ -65,7 +65,7 @@ Category {
         o.color = musicReactiveColor(o.color, _BeatOutput.y);
         v.vertex = musicReactiveAnimation(v.vertex, v.color, _BeatOutput.y, o.texcoord.x);
 #endif
-        o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+        o.vertex = UnityObjectToClipPos(v.vertex);
         return o;
       }
 

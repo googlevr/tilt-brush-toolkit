@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: BlocksPaper
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: 0e87b49c-6546-3a34-3a44-8a556d7d6c3e
+  m_DurableName: BlocksBasic
+  m_Material: {fileID: 2100000, guid: 0e87b49c65463a343a448a556d7d6c3e, type: 2}
+  m_IsParticle: 0
+  m_uv0Size: 0
+  m_uv0Semantic: 0
+  m_uv1Size: 0
+  m_uv1Semantic: 0
+  m_bUseNormals: 1
+  m_normalSemantic: 0
+  m_bFbxExportNormalAsTexcoord1: 0

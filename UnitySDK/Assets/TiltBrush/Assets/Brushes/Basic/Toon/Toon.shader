@@ -65,9 +65,8 @@ CGINCLUDE
 
     // Technically these are not yet in NDC because they haven't been divided by W, so their
     // range is currently [-W, W].
-    o.vertex = mul(UNITY_MATRIX_MVP, float4(v.vertex.xyz + v.normal.xyz * bulge, v.vertex.w));
-    float4 outline_NDC = mul(UNITY_MATRIX_MVP,
-                 float4(v.vertex.xyz + v.normal.xyz * inflate, v.vertex.w));
+    o.vertex = UnityObjectToClipPos(float4(v.vertex.xyz + v.normal.xyz * bulge, v.vertex.w));
+    float4 outline_NDC = UnityObjectToClipPos(float4(v.vertex.xyz + v.normal.xyz * inflate, v.vertex.w));
 
     // Displacement in proper NDC coords (e.g. [-1, 1])
     float3 disp = outline_NDC.xyz / outline_NDC.w - o.vertex.xyz / o.vertex.w;

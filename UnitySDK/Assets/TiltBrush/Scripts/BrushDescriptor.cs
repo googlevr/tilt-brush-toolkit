@@ -25,9 +25,12 @@ public class BrushDescriptor : ScriptableObject {
     Unspecified,
     Position,
     Vector,
-    ZIsDistance,
+    XyIsUvZIsDistance,
+    UnitlessVector,
+    XyIsUv,
   }
 
+  public Material Material { get { return m_Material; } }
   public SerializableGuid m_Guid;
   [Tooltip("A human readable name that cannot change, but is not guaranteed to be unique.")]
   public string m_DurableName;

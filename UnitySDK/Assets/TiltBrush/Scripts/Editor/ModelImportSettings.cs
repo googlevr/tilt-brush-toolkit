@@ -223,7 +223,7 @@ public class ModelImportSettings : AssetPostprocessor {
   void FixupHypercolorTexcoord(BrushDescriptor desc, Mesh mesh) {
     int uvSet = 0;
     var semantic = GetUvsetSemantic(desc, uvSet);
-    if (semantic != BrushDescriptor.Semantic.ZIsDistance ||
+    if (semantic != BrushDescriptor.Semantic.XyIsUvZIsDistance ||
         GetUvsetSize(desc, uvSet) != 3) {
       LogWarningWithContext("Not hypercolor?");
     }

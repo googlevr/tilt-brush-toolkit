@@ -9,10 +9,9 @@
 *.dll.mdb.meta
 
 # MonoDevelop and Visual Studio files, automatically created by Unity
-/Assembly-Csharp*.csproj
-/Assembly-UnityScript*.unityproj
-/*.CSharp.*csproj
-/*.CSharp.*user
+/*.csproj
+/*.unityproj
+/*.user
 *.suo
 /*.sln
 /*.userprefs

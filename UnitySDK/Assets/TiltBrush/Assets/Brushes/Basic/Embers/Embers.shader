@@ -121,7 +121,7 @@ Category {
         // The problem with this is that if you scale up a layer, the particles
         // get big but the overall motion stays the same.
         float4 center_WS = mul(unity_ObjectToWorld, center);
-        center_WS.xyz += mul(xf_CS, disp);
+        center_WS.xyz += mul(xf_CS, float4(disp, 0));
         float4 corner_WS = OrientParticle_WS(center_WS.xyz, halfSize, v.vid, rotation);
         o.vertex = mul(UNITY_MATRIX_VP, corner_WS);
 #else

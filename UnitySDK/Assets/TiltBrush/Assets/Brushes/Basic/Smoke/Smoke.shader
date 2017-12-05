@@ -95,7 +95,7 @@ Category {
         disp += float3(0,0,1) * curlZ(center_WS.xyz * freq + time, d);
         disp = disp * 5 * kDecimetersToWorldUnits;
 
-        center_WS.xyz += mul(xf_CS, disp);
+        center_WS.xyz += mul(xf_CS, float4(disp, 0));
 
         float4 corner = OrientParticle_WS(center_WS.xyz, halfSize, v.vid, rotation);
         o.vertex = mul(UNITY_MATRIX_VP, corner);

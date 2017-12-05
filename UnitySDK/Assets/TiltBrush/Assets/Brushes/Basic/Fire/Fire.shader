@@ -48,14 +48,22 @@ Category {
         float4 vertex : POSITION;
         fixed4 color : COLOR;
         float3 normal : NORMAL;
+#if SHADER_TARGET >= 40
         centroid float2 texcoord : TEXCOORD0;
+#else
+        float2 texcoord : TEXCOORD0;
+#endif
         float3 worldPos : TEXCOORD1;
       };
 
       struct v2f {
         float4 vertex : POSITION;
         float4 color : COLOR;
+#if SHADER_TARGET >= 40
         centroid float2 texcoord : TEXCOORD0;
+#else
+        float2 texcoord : TEXCOORD0;
+#endif
         float3 worldPos : TEXCOORD1;
       };
 

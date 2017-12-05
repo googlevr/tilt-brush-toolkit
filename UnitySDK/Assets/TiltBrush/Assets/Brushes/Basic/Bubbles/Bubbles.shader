@@ -87,8 +87,8 @@ Category {
         float4 center = SpreadParticle(v, spreadProgress);
 
         float3 displacement_SS = spreadProgress * computeDisplacement(center, 1);
-        float3 displacement_WS = mul(xf_CS, displacement_SS);
-        float3 displacement_OS = mul(unity_WorldToObject, displacement_WS);
+        float3 displacement_WS = mul(xf_CS, float4(displacement_SS, 0));
+        float3 displacement_OS = mul(unity_WorldToObject, float4(displacement_WS, 0));
         center.xyz += displacement_OS;
         float4 corner = OrientParticle(center.xyz, halfSize, v.vid, rotation);
         o.vertex = UnityObjectToClipPos(corner);

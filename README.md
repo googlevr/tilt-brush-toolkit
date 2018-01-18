@@ -1,6 +1,6 @@
 # Tilt Brush Toolkit
 
-The Tilt Brush Toolkit is a collection of scripts and assets that allow you to use [Tilt Brush](http://g.co/tiltbrush) data in your creative projects.
+The Tilt Brush Toolkit is a collection of scripts and assets that allow you to use [Tilt Brush](http://g.co/tiltbrush) data in your creative projects. If you simply want to import Tilt Brush geometry into Unity, this package is mostly superseded by [Poly Toolkit](https://github.com/googlevr/poly-toolkit-unity).
 
 ## Contents
 
@@ -8,7 +8,7 @@ The Tilt Brush Toolkit is a collection of scripts and assets that allow you to u
 
 ![Unity SDK](http://i.imgur.com/UdJg4Tz.gif)
 
-Scripts, shaders and tools for importing and manipulating Tilt Brush  sketches in [Unity](http://unity3d.com/)
+Scripts, shaders and tools for importing and manipulating Tilt Brush .fbx exports in [Unity](http://unity3d.com/). Unless you specifically need to use .fbx -- for instance, because Maya is part of your workflow -- try Poly Toolkit first.
 
 * Easily import sketches into Unity
 * Brush shaders and materials

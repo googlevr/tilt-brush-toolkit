@@ -375,7 +375,21 @@ class Stroke(object):
     .flags          Wrapper around get/set_stroke_extension('flags')
     .scale          Wrapper around get/set_stroke_extension('scale')
 
-  Also see has_stroke_extension(), get_stroke_extension()."""
+  Also see has_stroke_extension(), get_stroke_extension(), set_stroke_extension()."""
+
+  # Stroke extension data:
+  #   self.extension is a list of optional per-stroke data.
+  #   self.stroke_ext_lookup maps the name of an extension field
+  #   (eg, "flags") to an index in that list.
+  #
+  # Control point extension data:
+  #   ControlPoint.extension is a list of optional per-CP data.
+  #   The layout of this list is guaranteed to be identical to the
+  #   layout of all other control points in the stroke.
+  #
+  #   Because of this homogeneity, the lookup table is stored in
+  #   stroke.cp_ext_lookup, not in the control point.
+
   @classmethod
   def from_file(cls, b):
     inst = cls()
@@ -514,6 +528,11 @@ class Stroke(object):
     """Returns the requested extension data, or raises LookupError if it doesn't exist."""
     idx = self.cp_ext_lookup[name]
     return cp.extension[idx]
+
+  def set_cp_extension(self, sp, name, value):
+    """Sets the requested extension data, or raises LookupError if it doesn't exist."""
+    idx = self.cp_ext_lookup[name]
+    cp.extension[idx] = value
 
   def _write(self, b):
     b.pack("<i", self.brush_idx)

@@ -16,11 +16,11 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000010593891442}
-  - 114: {fileID: 114000010696251976}
-  - 114: {fileID: 114000012335345310}
+  - component: {fileID: 4000010593891442}
+  - component: {fileID: 114000010696251976}
+  - component: {fileID: 114000012335345310}
   m_Layer: 0
   m_Name: ReaktorAlt
   m_TagString: Untagged
@@ -33,11 +33,11 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000011781381318}
-  - 114: {fileID: 114000010446094510}
-  - 114: {fileID: 114000012874619816}
+  - component: {fileID: 4000011781381318}
+  - component: {fileID: 114000010446094510}
+  - component: {fileID: 114000012874619816}
   m_Layer: 0
   m_Name: Reaktor
   m_TagString: Untagged
@@ -50,11 +50,11 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000012531293136}
-  - 114: {fileID: 114000014155852724}
-  - 114: {fileID: 114000010481597740}
+  - component: {fileID: 4000012531293136}
+  - component: {fileID: 114000014155852724}
+  - component: {fileID: 114000010481597740}
   m_Layer: 0
   m_Name: ReaktorLowPass
   m_TagString: Untagged
@@ -67,11 +67,11 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000010910385420}
-  - 114: {fileID: 114000013154065996}
-  - 114: {fileID: 114000011743892918}
+  - component: {fileID: 4000010910385420}
+  - component: {fileID: 114000013154065996}
+  - component: {fileID: 114000011743892918}
   m_Layer: 0
   m_Name: '[TiltBrush Audio Reactivity]'
   m_TagString: Untagged
@@ -84,11 +84,11 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000013507144258}
-  - 114: {fileID: 114000012541350442}
-  - 114: {fileID: 114000013149674652}
+  - component: {fileID: 4000013507144258}
+  - component: {fileID: 114000012541350442}
+  - component: {fileID: 114000013149674652}
   m_Layer: 0
   m_Name: ReaktorHighPass
   m_TagString: Untagged
@@ -101,9 +101,9 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 4000011157745698}
+  - component: {fileID: 4000011157745698}
   m_Layer: 0
   m_Name: Reaktor
   m_TagString: Untagged
@@ -120,10 +120,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000011157745698}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000010910385420
 Transform:
   m_ObjectHideFlags: 1
@@ -133,11 +133,11 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 4000011157745698}
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000011157745698
 Transform:
   m_ObjectHideFlags: 1
@@ -147,7 +147,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 4000011781381318}
   - {fileID: 4000010593891442}
@@ -155,6 +154,7 @@ Transform:
   - {fileID: 4000013507144258}
   m_Father: {fileID: 4000010910385420}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000011781381318
 Transform:
   m_ObjectHideFlags: 1
@@ -164,10 +164,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000011157745698}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000012531293136
 Transform:
   m_ObjectHideFlags: 1
@@ -177,10 +177,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000011157745698}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4000013507144258
 Transform:
   m_ObjectHideFlags: 1
@@ -190,10 +190,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000011157745698}
   m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114000010446094510
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -224,12 +224,14 @@ MonoBehaviour:
   audioCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 1
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 1
       inSlope: 1
       outSlope: 0
@@ -243,12 +245,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -262,12 +266,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -326,17 +332,20 @@ MonoBehaviour:
   audioCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
-    - time: 0.801922
+    - serializedVersion: 2
+      time: 0.801922
       value: 0.3166489
       inSlope: 1.4290214
       outSlope: 1.4290214
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 1
       inSlope: 5.045454
       outSlope: 5.045454
@@ -350,12 +359,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -369,12 +380,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -422,12 +435,14 @@ MonoBehaviour:
   audioCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 1
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 1
       inSlope: 1
       outSlope: 0
@@ -441,12 +456,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -460,12 +477,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -502,12 +521,14 @@ MonoBehaviour:
   audioCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 1
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 1
       inSlope: 1
       outSlope: 0
@@ -521,12 +542,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -540,12 +563,14 @@ MonoBehaviour:
     _curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 1
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 1
         outSlope: 0
@@ -574,7 +599,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a58c5b457c20933488c10c4e5ecf71a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AudioReactivity: 1
   m_AudioInput: {fileID: 114000011743892918}
   m_BandPeakDecay: 0.999
   m_NormalizedBandPeakLerp: 0.95
@@ -582,7 +606,7 @@ MonoBehaviour:
   m_FFTScale: 2
   m_FFTPowerScale: 20
   m_FFTPower: 0.5
-  m_WeirdWaveformLerp: 0.7
+  m_WaveformLerp: 0.7
   m_HighPassFreq: 2000
   m_LowPassFreq: 150
   m_SystemAudioInjector: {fileID: 114000010446094510}

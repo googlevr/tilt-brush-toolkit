@@ -10,25 +10,20 @@ Material:
   m_Shader: {fileID: 4800000, guid: 8ba476407d28f1543840bb66bc92452f, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
+  disabledShaderPasses: []
   m_SavedProperties:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TexEnvs:
-    - first:
-        name: _Tex
-      second:
+    - _Tex:
         m_Texture: {fileID: 8900000, guid: def076629937db44abdd24cbee1afa16, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - first:
-        name: _Exposure
-      second: 0.9
+    - _Exposure: 0.9
     m_Colors:
-    - first:
-        name: _SkyboxRotation
-      second: {r: 0, g: 0, b: 0, a: 1}
-    - first:
-        name: _Tint
-      second: {r: 0.23529412, g: 0.2509804, b: 0.3529412, a: 1}
+    - _SkyboxRotation: {r: 0, g: 0, b: 0, a: 1}
+    - _Tint: {r: 0.23529412, g: 0.2509804, b: 0.3529412, a: 1}

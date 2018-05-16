@@ -43,10 +43,10 @@ public class ReaktionWindow : EditorWindow
 
     void OnEnable ()
     {
-        EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
+        EditorApplication.pauseStateChanged += OnPlaymodeStateChanged;
     }
 
-    public void OnPlaymodeStateChanged ()
+    public void OnPlaymodeStateChanged (PauseState pauseState)
     {
         autoRepaintOnSceneChange = !EditorApplication.isPlaying;
         Repaint ();

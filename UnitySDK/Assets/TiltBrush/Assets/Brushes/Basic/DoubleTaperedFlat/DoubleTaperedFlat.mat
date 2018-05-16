@@ -10,67 +10,38 @@ Material:
   m_Shader: {fileID: 4800000, guid: 4496a9baf3f2fc446bbaff38336003df, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2000
   stringTagMap: {}
+  disabledShaderPasses: []
   m_SavedProperties:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TexEnvs:
-    - first:
-        name: _BumpMap
-      second:
+    - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 0.1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - first:
-        name: _MainTex
-      second:
+    - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 0.5, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - first:
-        name: _Cutoff
-      second: 0.5
-    - first:
-        name: _DisplacementIntensity
-      second: 0.2
-    - first:
-        name: _EmissionGain
-      second: 0.5
-    - first:
-        name: _EmissionScroll1
-      second: 15
-    - first:
-        name: _EmissionScroll2
-      second: -10
-    - first:
-        name: _InvFade
-      second: 1
-    - first:
-        name: _Scroll1
-      second: 20
-    - first:
-        name: _Scroll2
-      second: 50
-    - first:
-        name: _Scroll3
-      second: 0.05
-    - first:
-        name: _UVTile1
-      second: 1
-    - first:
-        name: _UVTile2
-      second: 1
-    - first:
-        name: _UVTile3
-      second: 1
+    - _Cutoff: 0.5
+    - _DisplacementIntensity: 0.2
+    - _EmissionGain: 0.5
+    - _EmissionScroll1: 15
+    - _EmissionScroll2: -10
+    - _InvFade: 1
+    - _Scroll1: 20
+    - _Scroll2: 50
+    - _Scroll3: 0.05
+    - _UVTile1: 1
+    - _UVTile2: 1
+    - _UVTile3: 1
     m_Colors:
-    - first:
-        name: _Color
-      second: {r: 1, g: 1, b: 1, a: 1}
-    - first:
-        name: _TintColor
-      second: {r: 0.99999994, g: 0.99999994, b: 0.99999994, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _TintColor: {r: 0.99999994, g: 0.99999994, b: 0.99999994, a: 1}
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6

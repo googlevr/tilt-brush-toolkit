@@ -60,7 +60,7 @@ SubShader {
     {
       v2f o;
       float4 quatConjugate = float4(-_SkyboxRotation.x, -_SkyboxRotation.y, -_SkyboxRotation.z, _SkyboxRotation.w);
-      o.vertex = mul(UNITY_MATRIX_MVP, quat_mult(_SkyboxRotation, quat_mult(v.vertex, quatConjugate)));
+      o.vertex = UnityObjectToClipPos(quat_mult(_SkyboxRotation, quat_mult(v.vertex, quatConjugate)));
       o.texcoord = v.vertex;
       return o;
     }

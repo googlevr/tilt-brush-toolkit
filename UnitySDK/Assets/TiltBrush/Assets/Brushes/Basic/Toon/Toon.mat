@@ -31,7 +31,6 @@ Material:
     - _EmissionGain: 0.5
     - _EmissionLM: 0
     - _InvFade: 1
-    - _OutlineMax: 0.005
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _TintColor: {r: 0.5441177, g: 0.16886412, b: 0, a: 0.5019608}

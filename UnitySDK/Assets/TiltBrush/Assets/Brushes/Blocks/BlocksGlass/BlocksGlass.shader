@@ -25,7 +25,7 @@ Shader  "Blocks/BlocksGlass"  {
   }
 
   SubShader {
-   
+
   Tags { "RenderType"="Transparent" "Queue"="Transparent"}
   LOD 200
 
@@ -34,36 +34,46 @@ Shader  "Blocks/BlocksGlass"  {
   Cull Off
 
   CGPROGRAM
-  #pragma surface surf StandardSpecular fullforwardshadows nofog
+  #pragma surface surf StandardSpecular vertex:vert fullforwardshadows nofog
   #pragma target 3.0
+  #pragma multi_compile __ TBT_LINEAR_TARGET
+
+  #include "../../../Shaders/Include/Brush.cginc"
 
   struct Input {
-    float null; //not used, but the Input struct can't be empty
     float3 viewDir;
     fixed vface : VFACE;
   };
 
-  half _Shininess; 
+  half _Shininess;
   half _RimIntensity;
   half _RimPower;
   fixed4 _Color;
 
+  void vert(inout appdata_full i, out Input o) {
+    UNITY_INITIALIZE_OUTPUT(Input, o);
+  }
+
   void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
     o.Normal = float3(0,0,IN.vface);
-    
+
     // Dim Backfaces
     float backfaceDimming = IN.vface == -1 ? .25 : 1;
 
     o.Albedo = 0;
     o.Specular = _Color.rgb * backfaceDimming;
 
+    // Currently rim lighting is causing the entire object to go white in ODS renders.
+    // TODO(jcowles,skillman): figure out what's causing this.
+    #if !defined(ODS_RENDER_CM)
     // Rim Lighting
-    o.Emission =  (pow(1 - saturate(dot(IN.viewDir, o.Normal)), _RimPower)) * _RimIntensity * backfaceDimming;
+    o.Emission = (pow(1 - saturate(dot(IN.viewDir, o.Normal)), _RimPower)) * _RimIntensity * backfaceDimming;
+    #endif
 
     o.Smoothness = _Shininess;
   }
   ENDCG
-    
+
   }
 
   FallBack "Diffuse"

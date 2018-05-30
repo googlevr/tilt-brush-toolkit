@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Flat
-  m_Shader: {fileID: 4800000, guid: fc163d24473ddd04881e4fc188ed5802, type: 3}
+  m_Shader: {fileID: 4800000, guid: 86ab46f12486fa446b99415e1f4785ca, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

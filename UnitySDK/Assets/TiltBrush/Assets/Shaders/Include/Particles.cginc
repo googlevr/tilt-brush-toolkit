@@ -101,7 +101,7 @@ float4 OrientParticle(float3 center, float halfSize, int corner, float rotation)
   corner = corner & 3;
   float3 up, rt; {
     float4x4 cameraToObject = mul(unity_WorldToObject, unity_CameraToWorld);
-    float3 upIsh = mul(cameraToObject, float3(0, 1, 0));
+    float3 upIsh = mul(cameraToObject, float4(0, 1, 0, 0)).xyz;
     float3 objSpaceCameraPos = mul(cameraToObject, float4(0, 0, 0, 1));
     float3 fwd = (center - objSpaceCameraPos);
     rt = normalize(cross(upIsh, fwd));

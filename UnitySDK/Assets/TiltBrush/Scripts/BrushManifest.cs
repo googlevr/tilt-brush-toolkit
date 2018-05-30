@@ -72,7 +72,7 @@ public class BrushManifest : ScriptableObject {
     }
   }
 
-#if false
+#if true
 #if UNITY_EDITOR
   [UnityEditor.MenuItem("Tilt Brush/Update Manifest")]
   public static void MenuItem_UpdateManifest() {

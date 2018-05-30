@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-Shader "Brush/Special/Hypercolor" {
+Shader "Brush/Special/HypercolorDoubleSided" {
 Properties {
   _Color ("Main Color", Color) = (1,1,1,1)
   _SpecColor ("Specular Color", Color) = (0.5, 0.5, 0.5, 0)
@@ -23,7 +23,7 @@ Properties {
 }
     SubShader {
     Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="TransparentCutout"}
-    Cull Back
+    Cull Off
     LOD 100
 
     CGPROGRAM
@@ -38,6 +38,7 @@ Properties {
       float2 uv_BumpMap;
       float4 color : Color;
       float3 worldPos;
+      fixed vface : VFACE;
     };
 
     sampler2D _MainTex;
@@ -92,6 +93,8 @@ Properties {
       o.Albedo = .2;
       o.Specular *= .5;
 #endif
+
+      o.Normal.z *= IN.vface;
 
     }
     ENDCG

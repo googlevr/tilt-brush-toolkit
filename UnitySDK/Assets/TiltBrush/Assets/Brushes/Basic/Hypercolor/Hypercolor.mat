@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Hypercolor
-  m_Shader: {fileID: 4800000, guid: ea5570411cfab2d4b9b3f053e5497f0a, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9a1f8894d4b051a43a120f0b237cd2f8, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0

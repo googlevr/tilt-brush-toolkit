@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
+  m_Name: TaperedFlatSingleSided
+  m_EditorClassIdentifier: 
+  m_Guid:
+    m_storage: c8ccb53d-ae13-45ef-8afb-b730d81394eb
+  m_DurableName: TaperedFlat
+  m_Material: {fileID: 2100000, guid: c8ccb53dae1345ef8afbb730d81394eb, type: 2}
+  m_IsParticle: 0
+  m_uv0Size: 2
+  m_uv0Semantic: 5
+  m_uv1Size: 0
+  m_uv1Semantic: 0
+  m_bUseNormals: 1
+  m_normalSemantic: 0
+  m_bFbxExportNormalAsTexcoord1: 0

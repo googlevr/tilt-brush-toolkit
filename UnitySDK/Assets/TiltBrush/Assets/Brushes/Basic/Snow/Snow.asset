@@ -17,7 +17,7 @@ MonoBehaviour:
   m_Material: {fileID: 2100000, guid: d902ed8bd0d1476ca8de878a79e3a34c, type: 2}
   m_IsParticle: 1
   m_uv0Size: 4
-  m_uv0Semantic: 0
+  m_uv0Semantic: 5
   m_uv1Size: 3
   m_uv1Semantic: 1
   m_bUseNormals: 1

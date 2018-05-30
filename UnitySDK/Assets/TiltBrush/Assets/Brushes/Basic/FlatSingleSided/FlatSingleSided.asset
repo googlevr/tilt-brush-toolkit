@@ -9,15 +9,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 103cd3480fe93f646be28a7da5812871, type: 3}
-  m_Name: Leaves
+  m_Name: FlatSingleSided
   m_EditorClassIdentifier: 
   m_Guid:
-    m_storage: ea19de07-d0c0-4484-9198-18489a3c1487
-  m_DurableName: Leaves
-  m_Material: {fileID: 2100000, guid: ea19de07d0c04484919818489a3c1487, type: 2}
+    m_storage: 280c0a7a-aad8-416c-a7d2-df63d129ca70
+  m_DurableName: Flat
+  m_Material: {fileID: 2100000, guid: 280c0a7aaad8416ca7d2df63d129ca70, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
-  m_uv0Semantic: 0
+  m_uv0Semantic: 5
   m_uv1Size: 0
   m_uv1Semantic: 0
   m_bUseNormals: 1

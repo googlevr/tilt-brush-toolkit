@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: OilPaint
-  m_Shader: {fileID: 4800000, guid: 6af6ca8fad7576846a6a44f5c6d7bf6b, type: 3}
+  m_Shader: {fileID: 4800000, guid: 6eca343108a01a946a82e0c33f58fda1, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

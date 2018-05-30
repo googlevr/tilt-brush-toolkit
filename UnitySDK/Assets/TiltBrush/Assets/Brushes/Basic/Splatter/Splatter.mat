@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Splatter
-  m_Shader: {fileID: 4800000, guid: 561cd39ab4e063843a09f5c11c3a8531, type: 3}
+  m_Shader: {fileID: 4800000, guid: 76dc2f7fe973ede4bbbedfc291269c84, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

@@ -48,7 +48,11 @@ Shader "Brush/Special/WigglyGraphiteDoubleSided" {
         fixed2 scrollUV = IN.uv_MainTex;
 
         // Animate flipbook motion. Currently tuned to taste.
+#ifdef AUDIO_REACTIVE
+        float anim = ceil(fmod(_Time.y * 3.0 + _BeatOutput.x * 3.0, 6.0));
+#else
         float anim = ceil(fmod(_Time.y * 12.0, 6.0));
+#endif
         scrollUV.x += anim;
         scrollUV.x *= 1.1;
 

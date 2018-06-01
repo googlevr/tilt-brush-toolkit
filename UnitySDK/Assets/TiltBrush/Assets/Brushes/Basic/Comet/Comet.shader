@@ -67,9 +67,9 @@ Category {
         o.color = TbVertToNative(v.color);
 
 #ifdef AUDIO_REACTIVE
-        float3 displacement = _BeatOutput.y * v.normal * saturate(smoothstep(0, .3, v.texcoord.x) * v.texcoord.z);
+        float3 displacement = _BeatOutput.y * v.normal *
+            saturate((1.0 - smoothstep(0, .3, v.texcoord.x)) * v.texcoord.z);
         v.vertex.xyz += displacement;
-
 #endif
         o.vertex = UnityObjectToClipPos(v.vertex);
 

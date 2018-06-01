@@ -9,7 +9,7 @@
 //     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
 //               Distributed under the MIT License. See LICENSE file.
 //               https://github.com/ashima/webgl-noise
-// 
+//
 float4 mod289(float4 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
@@ -22,7 +22,7 @@ float2 mod289(float2 x) {
 }
 
 float mod289(float x) {
-  return x - floor(x * (1.0 / 289.0)) * 289.0; 
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
 
 float permute(float x) {
@@ -71,7 +71,7 @@ if(p.w<0)
     s.w = 1;
 else
     s.w = 0;
-p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www; 
+p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;
 
 return p;
 }
@@ -124,7 +124,7 @@ g.yz = a0.yz * x12.xz + h.yz * x12.yw;
 return 130.0 * dot(m, g);
 }
 
-float snoise(float3 v) { 
+float snoise(float3 v) {
   const float2  C = float2(1.0/6.0, 1.0/3.0) ;
 const float4  D = float4(0.0, 0.5, 1.0, 2.0);
 
@@ -147,10 +147,10 @@ float3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
 float3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
 
 // Permutations
-i = mod289(i); 
-float4 p = permute( permute( permute( 
+i = mod289(i);
+float4 p = permute( permute( permute(
            i.z + float4(0.0, i1.z, i2.z, 1.0 ))
-         + i.y + float4(0.0, i1.y, i2.y, 1.0 )) 
+         + i.y + float4(0.0, i1.y, i2.y, 1.0 ))
          + i.x + float4(0.0, i1.x, i2.x, 1.0 ));
 
 // Gradients: 7x7 points over a square, mapped onto an octahedron.
@@ -194,7 +194,7 @@ p3 *= norm.w;
 // Mix final noise value
 float4 m = max(0.5 - float4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
 m = m * m;
-return 42.0 * dot( m*m, float4( dot(p0,x0), dot(p1,x1), 
+return 42.0 * dot( m*m, float4( dot(p0,x0), dot(p1,x1),
                               dot(p2,x2), dot(p3,x3) ) );
 }
 
@@ -242,7 +242,7 @@ float4 x3 = x0 - i3 + C.zzzz;
 float4 x4 = x0 + C.wwww;
 
 // Permutations
-i = mod289(i); 
+i = mod289(i);
 float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);
 float4 j1 = permute( permute( permute( permute (
            i.w + float4(i1.w, i2.w, i3.w, 1.0 ))
@@ -277,7 +277,7 @@ return 49.0 * ( dot(m0*m0, float3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
              + dot(m1*m1, float2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;
 
 }
-  
+
 float3 snoise3D(float3 v){
   	float3 n = float3(
   		snoise(float2(v.x, v.y)),
@@ -286,25 +286,80 @@ float3 snoise3D(float3 v){
   	);
 return n;
 }
-  
+
 float curlX(float3 v, float d){
   return (
           (snoise3D(float3(v.x,v.y+d,v.z)).z - snoise3D(float3(v.x,v.y-d,v.z)).z)
 -(snoise3D(float3(v.x,v.y,v.z+d)).y - snoise3D(float3(v.x,v.y,v.z-d)).y)
   		) /2/d;
 }
-  
+
 float curlY(float3 v, float d){
   return (
           (snoise3D(float3(v.x,v.y,v.z+d)).x - snoise3D(float3(v.x,v.y,v.z-d)).x)
 -(snoise3D(float3(v.x+d,v.y,v.z)).z - snoise3D(float3(v.x-d,v.y,v.z)).z)
   		) /2/d;
 }
-  
+
 float curlZ(float3 v, float d){
   return (
           (snoise3D(float3(v.x+d,v.y,v.z)).y - snoise3D(float3(v.x-d,v.y,v.z)).y)
 -(snoise3D(float3(v.x,v.y+d,v.z)).x - snoise3D(float3(v.x,v.y-d,v.z)).x)
   		) /2/d;
 }
+
+// range: 0-1
+float random(float2 st) {
+  return frac(sin(dot(st.xy,
+      float2(12.9898,78.233)))*
+      43758.5453123);
+}
+
+// range: 0-1
+float2 random2(float2 st) {
+  return float2(random(float2(st.x, st.x)), random(float2(st.y, st.y)));
+}
+
+// fractional brownian motion
+float fbm(float st)
+{
+  float value = 0.0;
+  float amplitude = .5;
+  float frequency = 0.;
+  for (int i = 0; i < 6; i++) {
+      value += amplitude * snoise(float2(st,0));
+      st *= 2.;
+      amplitude *= 0.516;
+  }
+  return value;
+}
+
+// fractional brownian motion
+float fbm(float2 st)
+{
+  float value = 0.0;
+  float amplitude = .5;
+  float frequency = 0.;
+  for (int i = 0; i < 6; i++) {
+      value += amplitude * snoise(st);
+      st *= 2.;
+      amplitude *= 0.516;
+  }
+  return value;
+}
+
+// fractional brownian motion
+float fbm(float3 st)
+{
+  float value = 0.0;
+  float amplitude = .5;
+  float frequency = 0.;
+  for (int i = 0; i < 6; i++) {
+      value += amplitude * snoise(st);
+      st *= 2.;
+      amplitude *= 0.516;
+  }
+  return value;
+}
+
 #endif // NOISE_INCLUDED

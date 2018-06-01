@@ -418,6 +418,13 @@ Properties {
 
           col.rgb *= lighting;
 
+          // TODO(jcowles): only apply a discard when MSAA is disabled. This kills the nicely
+          // anti-aliased edges above, however that anti-aliasing manifests as bloom when in LDR
+          // mode.
+          if (col.a < _Cutoff) {
+            discard;
+          }
+          col.a = 1.0;
           return col;
         }
       ENDCG

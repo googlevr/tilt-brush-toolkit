@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: 3ca16e2f-bdcd-4da2-8631-dcef342f40f1
   m_DurableName: DuctTape
-  m_Material: {fileID: 2100000, guid: 3ca16e2fbdcd4da28631dcef342f40f1, type: 2}
+  m_Material: {fileID: 2100000, guid: 36f0c0b1c78894749856e18a3db6b977, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

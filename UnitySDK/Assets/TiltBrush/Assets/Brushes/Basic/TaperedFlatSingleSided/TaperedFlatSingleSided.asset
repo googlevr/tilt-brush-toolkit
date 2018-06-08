@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: c8ccb53d-ae13-45ef-8afb-b730d81394eb
   m_DurableName: TaperedFlat
-  m_Material: {fileID: 2100000, guid: c8ccb53dae1345ef8afbb730d81394eb, type: 2}
+  m_Material: {fileID: 2100000, guid: 1141f164821a5dc45b8947749893a437, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

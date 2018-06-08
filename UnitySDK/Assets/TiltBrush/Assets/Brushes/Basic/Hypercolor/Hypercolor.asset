@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: dce872c2-7b49-4684-b59b-c45387949c5c
   m_DurableName: Hypercolor
-  m_Material: {fileID: 2100000, guid: dce872c27b494684b59bc45387949c5c, type: 2}
+  m_Material: {fileID: 2100000, guid: e8ef32b1baa8460a9c2c9cf8506794f5, type: 2}
   m_IsParticle: 0
   m_uv0Size: 3
   m_uv0Semantic: 3

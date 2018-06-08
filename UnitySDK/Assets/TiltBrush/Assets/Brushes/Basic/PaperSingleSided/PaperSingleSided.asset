@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: 759f1ebd-20cd-4720-8d41-234e0da63716
   m_DurableName: Paper
-  m_Material: {fileID: 2100000, guid: 759f1ebd20cd47208d41234e0da63716, type: 2}
+  m_Material: {fileID: 2100000, guid: 00eef7962e21b7e4c93923f2df9dd2d6, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

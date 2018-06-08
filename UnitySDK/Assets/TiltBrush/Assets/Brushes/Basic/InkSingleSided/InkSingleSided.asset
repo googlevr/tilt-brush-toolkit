@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: c0012095-3ffd-4040-8ee1-fc180d346eaa
   m_DurableName: Ink
-  m_Material: {fileID: 2100000, guid: c00120953ffd40408ee1fc180d346eaa, type: 2}
+  m_Material: {fileID: 2100000, guid: 64315fdda6c2aff498d9c604970985d7, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

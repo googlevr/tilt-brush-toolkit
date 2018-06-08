@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: 280c0a7a-aad8-416c-a7d2-df63d129ca70
   m_DurableName: Flat
-  m_Material: {fileID: 2100000, guid: 280c0a7aaad8416ca7d2df63d129ca70, type: 2}
+  m_Material: {fileID: 2100000, guid: 0873c6d5f77394b49bf0cf994f054864, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

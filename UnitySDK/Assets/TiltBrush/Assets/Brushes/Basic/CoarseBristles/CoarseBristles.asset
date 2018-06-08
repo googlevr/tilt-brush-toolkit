@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: 1161af82-50cf-47db-9706-0c3576d43c43
   m_DurableName: CoarseBristles
-  m_Material: {fileID: 2100000, guid: 1161af8250cf47db97060c3576d43c43, type: 2}
+  m_Material: {fileID: 2100000, guid: 79168f106961464a8be157ed364c5600, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: 75b32cf0-fdd6-4d89-a64b-e2a00b247b0f
   m_DurableName: ThickPaint
-  m_Material: {fileID: 2100000, guid: 75b32cf0fdd64d89a64be2a00b247b0f, type: 2}
+  m_Material: {fileID: 2100000, guid: fdf0326ac0d14fedb1019db0ff6d071f, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

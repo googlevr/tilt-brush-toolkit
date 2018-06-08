@@ -14,7 +14,7 @@ MonoBehaviour:
   m_Guid:
     m_storage: c515dad7-4393-4681-81ad-162ef052241b
   m_DurableName: OilPaint
-  m_Material: {fileID: 2100000, guid: c515dad74393468181ad162ef052241b, type: 2}
+  m_Material: {fileID: 2100000, guid: 85d15b97869a89c4e897d370d5ec658c, type: 2}
   m_IsParticle: 0
   m_uv0Size: 2
   m_uv0Semantic: 5

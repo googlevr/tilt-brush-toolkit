@@ -529,7 +529,7 @@ class Stroke(object):
     idx = self.cp_ext_lookup[name]
     return cp.extension[idx]
 
-  def set_cp_extension(self, sp, name, value):
+  def set_cp_extension(self, cp, name, value):
     """Sets the requested extension data, or raises LookupError if it doesn't exist."""
     idx = self.cp_ext_lookup[name]
     cp.extension[idx] = value

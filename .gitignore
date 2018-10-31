@@ -1,2 +1,5 @@
 *.pyc
 *.DS_Store
+C#/TiltbrushHelper/bin/
+C#/TiltbrushHelper/obj/
+C#/TiltbrushHelper/.vs/Dissertation.TiltbrushHelper/v14/.suo

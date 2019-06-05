@@ -104,11 +104,20 @@ public class ModelImportSettings : AssetPostprocessor {
 
     if (m_Info.tiltBrushVersion >= new Version { major=10 }) {
       var importer = assetImporter as ModelImporter;
+#if UNITY_2019_1_OR_NEWER
+      if (importer != null && importer.optimizeMeshPolygons && importer.optimizeMeshVertices) {
+        // Not a warning, just a friendly notification.
+        Debug.LogFormat("{0}: Tilt Brush Toolkit requires optimizeMeshPolygons=true; and importer.optimizeMeshVertices = false; disabling.", assetPath);
+        importer.optimizeMeshPolygons = true;
+        importer.optimizeMeshVertices = false;
+      }
+#else
       if (importer != null && importer.optimizeMesh) {
         // Not a warning, just a friendly notification.
         Debug.LogFormat("{0}: Tilt Brush Toolkit requires optimizeMesh=false; disabling.", assetPath);
         importer.optimizeMesh = false;
       }
+#endif
     }
 
     if (m_Info.tiltBrushVersion < kRequiredFbxExportVersion) {
@@ -163,12 +172,22 @@ public class ModelImportSettings : AssetPostprocessor {
           // Would like to do this in OnPreprocessModel, but we don't yet
           // know whether it's a particle mesh.
           var importer = assetImporter as ModelImporter;
+#if UNITY_2019_1_OR_NEWER
+      if (importer != null && importer.optimizeMeshPolygons && importer.optimizeMeshVertices) {
+            // Should never get here any more.
+            LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have optimizeMeshPolygons=true and importer.optimizeMeshVertices = false.");
+            importer.optimizeMeshPolygons = true;
+            importer.optimizeMeshVertices = false;
+            importer.SaveAndReimport();
+          }
+#else
           if (importer != null && importer.optimizeMesh) {
             // Should never get here any more.
             LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have optimizeMesh=false.");
             importer.optimizeMesh = false;
             importer.SaveAndReimport();
           }
+#endif
 
           ParticleMesh.FilterMesh(mesh, s => LogWarningWithContext(s, renderer));
         }

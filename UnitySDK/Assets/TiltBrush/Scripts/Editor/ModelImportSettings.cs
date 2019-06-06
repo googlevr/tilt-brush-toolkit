@@ -105,10 +105,9 @@ public class ModelImportSettings : AssetPostprocessor {
     if (m_Info.tiltBrushVersion >= new Version { major=10 }) {
       var importer = assetImporter as ModelImporter;
 #if UNITY_2019_1_OR_NEWER
-      if (importer != null && importer.optimizeMeshPolygons && importer.optimizeMeshVertices) {
+      if (importer != null && importer.optimizeMeshVertices) {
         // Not a warning, just a friendly notification.
-        Debug.LogFormat("{0}: Tilt Brush Toolkit requires optimizeMeshPolygons=true; and importer.optimizeMeshVertices = false; disabling.", assetPath);
-        importer.optimizeMeshPolygons = true;
+        Debug.LogFormat("{0}: Tilt Brush Toolkit requires importer.optimizeMeshVertices = false; disabling.", assetPath);
         importer.optimizeMeshVertices = false;
       }
 #else
@@ -173,10 +172,9 @@ public class ModelImportSettings : AssetPostprocessor {
           // know whether it's a particle mesh.
           var importer = assetImporter as ModelImporter;
 #if UNITY_2019_1_OR_NEWER
-      if (importer != null && importer.optimizeMeshPolygons && importer.optimizeMeshVertices) {
+          if (importer != null && importer.optimizeMeshVertices) {
             // Should never get here any more.
-            LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have optimizeMeshPolygons=true and importer.optimizeMeshVertices = false.");
-            importer.optimizeMeshPolygons = true;
+            LogWarningWithContext("Disabling optimizeMesh and reimporting. Tilt Brush particle meshes must have importer.optimizeMeshVertices = false.");
             importer.optimizeMeshVertices = false;
             importer.SaveAndReimport();
           }

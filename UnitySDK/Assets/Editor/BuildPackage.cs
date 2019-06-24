@@ -64,14 +64,13 @@ static class BuildPackage {
   [MenuItem("Tilt Brush/Build Package")]
   static void DoBuild() {
     string version = GetGitVersion();
-    string name = string.Format("../../tiltbrushtoolkit-UnitySDK-{0}.unitypackage", version);
+    string name = string.Format("../../tilt-brush-toolkit-UnitySDK-{0}.unitypackage", version);
 
     using (var tmp = new TempBuildStamp(version)) {
       AssetDatabase.ExportPackage(
           new string[] {
             "Assets/ThirdParty",
             "Assets/TiltBrush",
-            "Assets/TiltBrushExamples"
           },
           name,
           ExportPackageOptions.Recurse);

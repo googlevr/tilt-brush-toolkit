@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 114000013154065996}
   - component: {fileID: 114000011743892918}
   m_Layer: 0
-  m_Name: '[TiltBrush Audio Reactivity]'
+  m_Name: '[Tilt Brush Audio Reactivity]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

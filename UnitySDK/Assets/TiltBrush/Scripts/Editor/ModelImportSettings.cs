@@ -33,16 +33,19 @@ public class ModelImportSettings : AssetPostprocessor {
 
   // UVs come as four float2s so go through them and pack them back into two float4s
   static void CollapseUvs(Mesh mesh) {
-    var finalUVs = new List<List<Vector4>>();
+    var finalUVs = new List<List<Vector4>>(mesh.vertexCount);
+
     for (int iUnityChannel = 0; iUnityChannel < 2; iUnityChannel++) {
-      var sourceUVs = new List<Vector2>();
-      var targetUVs = new List<Vector4>();
+      var sourceUVs = new List<Vector2>(mesh.vertexCount);
+      var targetUVs = new List<Vector4>(mesh.vertexCount);
       int iFbxChannel = 2 * iUnityChannel;
       mesh.GetUVs(iFbxChannel, targetUVs);
       mesh.GetUVs(iFbxChannel + 1, sourceUVs);
-      if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
-        for (int i = 0; i < sourceUVs.Count; i++) {
-          if (i < targetUVs.Count) {
+      int sourceUVsCount = sourceUVs.Count;
+      int targetUVsCount = targetUVs.Count;
+      if (sourceUVsCount > 0 || targetUVsCount > 0) {
+        for (int i = 0; i < sourceUVsCount; i++) {
+          if (i < targetUVsCount) {
             // Repack xy into zw
             var v4 = targetUVs[i];
             v4.z = sourceUVs[i].x;
@@ -55,7 +58,9 @@ public class ModelImportSettings : AssetPostprocessor {
       }
       finalUVs.Add(targetUVs);
     }
-    for (int i = 0; i < finalUVs.Count; i++) {
+
+    int finalUVsCount = finalUVs.Count;
+    for (int i = 0; i < finalUVsCount; i++) {
       mesh.SetUVs(i, finalUVs[i]);
     }
     // Clear unused uv sets
@@ -245,14 +250,16 @@ public class ModelImportSettings : AssetPostprocessor {
       LogWarningWithContext("Not hypercolor?");
     }
 
-    var data = new List<Vector3>();
+    var data = new List<Vector3>(mesh.vertexCount);
     mesh.GetUVs(uvSet, data);
-    for (int i = 0; i < data.Count; ++i) {
+    int dataCount = data.Count;
+    for (int i = 0; i < dataCount; ++i) {
       Vector3 tmp = data[i];
       tmp.z *= .1f;
       data[i] = tmp;
     }
     mesh.SetUVs(uvSet, data);
+    data.Clear();
   }
 
   void PerformTexcoordCoordinateConversion(BrushDescriptor desc, Mesh mesh, int uvSet) {
@@ -261,19 +268,27 @@ public class ModelImportSettings : AssetPostprocessor {
         semantic == BrushDescriptor.Semantic.Position) {
       var size = GetUvsetSize(desc, uvSet);
       if (size == 3) {
-        var data = new List<Vector3>();
+        var data = new List<Vector3>(mesh.vertexCount);
         mesh.GetUVs(uvSet, data);
-        for (int i = 0; i < data.Count; ++i) {
-          data[i] = UnityFromFbx(data[i]);
+        int dataCount = data.Count;
+        for (int i = 0; i < dataCount; ++i) {
+          Vector3 v = data[i];
+          v.x = -v.x;
+          data[i] = v;
         }
         mesh.SetUVs(uvSet, data);
+        data.Clear();
       } else if (size == 4) {
-        var data = new List<Vector4>();
+        var data = new List<Vector4>(mesh.vertexCount);
         mesh.GetUVs(uvSet, data);
-        for (int i = 0; i < data.Count; ++i) {
-          data[i] = UnityFromFbx(data[i]);
+        int dataCount = data.Count;
+        for (int i = 0; i < dataCount; ++i) {
+          Vector4 v = data[i];
+          v.x = -v.x;
+          data[i] = v;
         }
         mesh.SetUVs(uvSet, data);
+        data.Clear();
       } else {
         LogWarningWithContext(string.Format(
             "Unexpected: Semantic {0} on texcoord of size {1}, guid {2}",

@@ -134,6 +134,12 @@ internal class ParticleMesh {
          m_triangles[i+2] == v+2 &&
          m_triangles[i+3] == v+0 &&
          m_triangles[i+4] == v+2 &&
+         m_triangles[i+5] == v+3) ||
+        (m_triangles[i  ] == v   &&
+         m_triangles[i+1] == v+3 &&
+         m_triangles[i+2] == v+1 &&
+         m_triangles[i+3] == v+0 &&
+         m_triangles[i+4] == v+2 &&
          m_triangles[i+5] == v+3)) {
       if (m_lastMod == null || (v % 4) != m_lastMod.Value) {
         // if (m_lastMod != null) {

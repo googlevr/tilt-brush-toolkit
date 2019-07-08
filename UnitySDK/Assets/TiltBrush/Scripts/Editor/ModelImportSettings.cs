@@ -31,6 +31,19 @@ public class ModelImportSettings : AssetPostprocessor {
 
   private bool IsTiltBrush { get { return m_Info.tiltBrushVersion != null; } }
 
+  // Similar to our ListExtensions.SetCount() but only handles resizing upwards.
+  // New values are default-initialized.
+  static void ListSetCount<T>(List<T> lst, int newCount) where T : struct {
+    int delta = newCount - lst.Count;
+    Debug.Assert(delta >= 0);
+    if (delta > 0) {
+      lst.Capacity = newCount;
+      for (int i = 0; i < delta; ++i) {
+        lst.Add(default(T));
+      }
+    }
+  }
+
   // UVs come as four float2s so go through them and pack them back into two float4s
   static void CollapseUvs(Mesh mesh) {
     var finalUVs = new List<List<Vector4>>();
@@ -38,20 +51,32 @@ public class ModelImportSettings : AssetPostprocessor {
       var sourceUVs = new List<Vector2>();
       var targetUVs = new List<Vector4>();
       int iFbxChannel = 2 * iUnityChannel;
-      mesh.GetUVs(iFbxChannel, targetUVs);
-      mesh.GetUVs(iFbxChannel + 1, sourceUVs);
-      if (sourceUVs.Count > 0 || targetUVs.Count > 0) {
-        for (int i = 0; i < sourceUVs.Count; i++) {
-          if (i < targetUVs.Count) {
-            // Repack xy into zw
-            var v4 = targetUVs[i];
-            v4.z = sourceUVs[i].x;
-            v4.w = sourceUVs[i].y;
-            targetUVs[i] = v4;
-          } else {
-            targetUVs.Add(new Vector4(0, 0, sourceUVs[i].x, sourceUVs[i].y));
-          }
+      mesh.GetUVs(iFbxChannel, targetUVs);  // aka "uv0" in comments below
+      mesh.GetUVs(iFbxChannel + 1, sourceUVs);  // aka "uv1" in comments below
+      // In Unity, texcoord array lengths are always either 0 or vertexCount.
+      // We aren't guaranteed that the fbx's texcoord arrays come in matched pairs, so we
+      // have to deal with 4 cases: only uv0 empty, only uv1 empty, neither empty, both empty.
+      // Recent Tilt Brush won't generate .fbx with "gaps" in the UV channels, so the
+      // "only uv0 empty" case is only seen with old/legacy fbx exports.
+      if (targetUVs.Count <= sourceUVs.Count) {
+        // cases: both empty, neither empty, only uv0 empty
+        int count = sourceUVs.Count;
+
+        // Handles the uv0-empty case; only needed for legacy reasons.
+        ListSetCount(targetUVs, count);
+
+        // Pack source.xy into target.zw
+        for (int i = 0; i < count; i++) {
+          var v4 = targetUVs[i];
+          v4.z = sourceUVs[i].x;
+          v4.w = sourceUVs[i].y;
+          targetUVs[i] = v4;
         }
+      } else {
+        // case: only uv1 empty.
+        // Nothing to do.
+        // TODO(pld): targetUVs is untouched; we should avoid assigning it (because it widens to V4)
+        Debug.Assert(sourceUVs.Count == 0);
       }
       finalUVs.Add(targetUVs);
     }

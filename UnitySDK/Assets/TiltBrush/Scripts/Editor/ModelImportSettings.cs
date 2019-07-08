@@ -222,11 +222,22 @@ public class ModelImportSettings : AssetPostprocessor {
   }
 
   // Convert from fbx coordinate conventions to Unity coordinate conventions
-  static Vector3 UnityFromFbx(Vector3 v) {
-    return new Vector3(-v.x, v.y, v.z);
+  static void InPlaceUnityFromFbx(List<Vector3> vs) {
+    var length = vs.Count;
+    for (int i = 0; i < length; ++i) {
+      var val = vs[i];
+      val.x = -val.x;
+      vs[i] = val;
+    }
   }
-  static Vector4 UnityFromFbx(Vector4 v) {
-    return new Vector4(-v.x, v.y, v.z, v.w);
+
+  static void InPlaceUnityFromFbx(List<Vector4> vs) {
+    var length = vs.Count;
+    for (int i = 0; i < length; ++i) {
+      var val = vs[i];
+      val.x = -val.x;
+      vs[i] = val;
+    }
   }
 
   static BrushDescriptor.Semantic GetUvsetSemantic(BrushDescriptor desc, int uvSet) {
@@ -288,16 +299,12 @@ public class ModelImportSettings : AssetPostprocessor {
       if (size == 3) {
         var data = new List<Vector3>();
         mesh.GetUVs(uvSet, data);
-        for (int i = 0; i < data.Count; ++i) {
-          data[i] = UnityFromFbx(data[i]);
-        }
+        InPlaceUnityFromFbx(data);
         mesh.SetUVs(uvSet, data);
       } else if (size == 4) {
         var data = new List<Vector4>();
         mesh.GetUVs(uvSet, data);
-        for (int i = 0; i < data.Count; ++i) {
-          data[i] = UnityFromFbx(data[i]);
-        }
+        InPlaceUnityFromFbx(data);
         mesh.SetUVs(uvSet, data);
       } else {
         LogWarningWithContext(string.Format(

@@ -75,14 +75,18 @@ public class ModelImportSettings : AssetPostprocessor {
       } else {
         // case: only uv1 empty.
         // Nothing to do.
-        // TODO(pld): targetUVs is untouched; we should avoid assigning it (because it widens to V4)
         Debug.Assert(sourceUVs.Count == 0);
+        targetUVs = null;  // Use null to indicate "unchanged"
       }
       finalUVs.Add(targetUVs);
     }
+
     for (int i = 0; i < finalUVs.Count; i++) {
-      mesh.SetUVs(i, finalUVs[i]);
+      if (finalUVs[i] != null) {
+        mesh.SetUVs(i, finalUVs[i]);
+      }
     }
+
     // Clear unused uv sets
     mesh.SetUVs(2, new List<Vector2>());
     mesh.SetUVs(3, new List<Vector2>());

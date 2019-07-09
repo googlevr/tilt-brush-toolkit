@@ -33,7 +33,7 @@ public class ModelImportSettings : AssetPostprocessor {
 
   // UVs come as four float2s so go through them and pack them back into two float4s
   static void CollapseUvs(Mesh mesh) {
-    var finalUVs = new List<List<Vector4>>(mesh.vertexCount);
+    var finalUVs = new List<List<Vector4>>(2);
 
     for (int iUnityChannel = 0; iUnityChannel < 2; iUnityChannel++) {
       var sourceUVs = new List<Vector2>(mesh.vertexCount);
@@ -58,9 +58,8 @@ public class ModelImportSettings : AssetPostprocessor {
       }
       finalUVs.Add(targetUVs);
     }
-
-    int finalUVsCount = finalUVs.Count;
-    for (int i = 0; i < finalUVsCount; i++) {
+    
+    for (int i = 0; i < finalUVs.Count; i++) {
       mesh.SetUVs(i, finalUVs[i]);
     }
     // Clear unused uv sets
@@ -201,14 +200,6 @@ public class ModelImportSettings : AssetPostprocessor {
     }
   }
 
-  // Convert from fbx coordinate conventions to Unity coordinate conventions
-  static Vector3 UnityFromFbx(Vector3 v) {
-    return new Vector3(-v.x, v.y, v.z);
-  }
-  static Vector4 UnityFromFbx(Vector4 v) {
-    return new Vector4(-v.x, v.y, v.z, v.w);
-  }
-
   static BrushDescriptor.Semantic GetUvsetSemantic(BrushDescriptor desc, int uvSet) {
     switch (uvSet) {
     case 0:
@@ -250,7 +241,7 @@ public class ModelImportSettings : AssetPostprocessor {
       LogWarningWithContext("Not hypercolor?");
     }
 
-    var data = new List<Vector3>(mesh.vertexCount);
+    var data = new List<Vector3>();
     mesh.GetUVs(uvSet, data);
     int dataCount = data.Count;
     for (int i = 0; i < dataCount; ++i) {
@@ -259,7 +250,6 @@ public class ModelImportSettings : AssetPostprocessor {
       data[i] = tmp;
     }
     mesh.SetUVs(uvSet, data);
-    data.Clear();
   }
 
   void PerformTexcoordCoordinateConversion(BrushDescriptor desc, Mesh mesh, int uvSet) {
@@ -268,27 +258,27 @@ public class ModelImportSettings : AssetPostprocessor {
         semantic == BrushDescriptor.Semantic.Position) {
       var size = GetUvsetSize(desc, uvSet);
       if (size == 3) {
-        var data = new List<Vector3>(mesh.vertexCount);
+        var data = new List<Vector3>();
         mesh.GetUVs(uvSet, data);
         int dataCount = data.Count;
         for (int i = 0; i < dataCount; ++i) {
+          // Convert from fbx coordinate conventions to Unity coordinate conventions
           Vector3 v = data[i];
           v.x = -v.x;
           data[i] = v;
         }
         mesh.SetUVs(uvSet, data);
-        data.Clear();
       } else if (size == 4) {
-        var data = new List<Vector4>(mesh.vertexCount);
+        var data = new List<Vector4>();
         mesh.GetUVs(uvSet, data);
         int dataCount = data.Count;
         for (int i = 0; i < dataCount; ++i) {
+          // Convert from fbx coordinate conventions to Unity coordinate conventions
           Vector4 v = data[i];
           v.x = -v.x;
           data[i] = v;
         }
         mesh.SetUVs(uvSet, data);
-        data.Clear();
       } else {
         LogWarningWithContext(string.Format(
             "Unexpected: Semantic {0} on texcoord of size {1}, guid {2}",

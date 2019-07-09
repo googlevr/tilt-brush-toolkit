@@ -20,32 +20,6 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class BrushManifest : ScriptableObject {
-  // static API
-
-  private static BrushManifest sm_Instance;
-  public static BrushManifest Instance {
-    get {
-      // How can we get a reference to the singleton AllBrushes.asset?
-      // LoadAssetAtPath<>() is fragile, because it bakes in a file path.
-      // Instead, (ab)use the ability for scripts to have default values
-      // (which are stored in the .meta)
-      if (sm_Instance == null) {
-        var dummy = CreateInstance<BrushManifest>();
-        sm_Instance = dummy.m_DefaultManifest;
-        DestroyImmediate(dummy);
-      }
-      Debug.Assert(sm_Instance != null, "Misconfigured singleton");
-      return sm_Instance;
-    }
-  }
-
-  // instance API
-
-  // See Instance.get for an explanation of this
-  [HideInInspector]
-  [SerializeField]
-  private BrushManifest m_DefaultManifest;
-
   [SerializeField] private BrushDescriptor[] m_Brushes;
   private Dictionary<Guid, BrushDescriptor> m_ByGuid;
   private ILookup<string, BrushDescriptor> m_ByName;
@@ -76,7 +50,7 @@ public class BrushManifest : ScriptableObject {
 #if UNITY_EDITOR
   [UnityEditor.MenuItem("Tilt Brush/Update Manifest")]
   public static void MenuItem_UpdateManifest() {
-    BrushManifest manifest = Instance;
+    BrushManifest manifest = TbtSettings.BrushManifest;
     manifest.m_Brushes = UnityEditor.AssetDatabase.FindAssets("t:BrushDescriptor")
         .Select(g => UnityEditor.AssetDatabase.GUIDToAssetPath(g))
         .Select(p => UnityEditor.AssetDatabase.LoadAssetAtPath<BrushDescriptor>(p))

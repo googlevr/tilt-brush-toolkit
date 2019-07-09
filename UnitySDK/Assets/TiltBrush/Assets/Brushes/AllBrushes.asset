@@ -11,7 +11,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a4e1c4479d3ef54a83ac7187217ec6a, type: 3}
   m_Name: AllBrushes
   m_EditorClassIdentifier: 
-  m_DefaultManifest: {fileID: 0}
   m_Brushes:
   - {fileID: 11400000, guid: cadc04d18daae874aa63168911a19ba6, type: 2}
   - {fileID: 11400000, guid: 94e865ca3b92ee5568334254825adac1, type: 2}

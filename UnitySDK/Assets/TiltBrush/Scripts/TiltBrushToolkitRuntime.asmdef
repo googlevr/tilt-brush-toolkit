@@ -1,0 +1,14 @@
+{
+    "name": "TiltBrushToolkitRuntime",
+    "references": [
+        "TiltBrushToolkitThirdParty"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

@@ -49,7 +49,7 @@ public class VisualizerManager : MonoBehaviour {
 
   [Header("Source")]
   [SerializeField]
-  private VisualizerAudioInput m_AudioInput;
+  private VisualizerAudioInput m_AudioInput = null;
 
   [Header("Band Levels")]
   // These parameters rescale processed audio data like FFT's and Band Levels
@@ -78,13 +78,13 @@ public class VisualizerManager : MonoBehaviour {
 
   [Header("Reaktor")]
   [SerializeField]
-  private SystemAudioInjector m_SystemAudioInjector;
+  private SystemAudioInjector m_SystemAudioInjector = null;
   [SerializeField]
-  private SystemAudioInjector m_SystemAudioInjectorAlt;
+  private SystemAudioInjector m_SystemAudioInjectorAlt = null;
   [SerializeField]
-  private SystemAudioInjector m_SystemAudioInjectorLowPass;
+  private SystemAudioInjector m_SystemAudioInjectorLowPass = null;
   [SerializeField]
-  private SystemAudioInjector m_SystemAudioInjectorHighPass;
+  private SystemAudioInjector m_SystemAudioInjectorHighPass = null;
 
   private int m_SampleRate;
   // Band levels and frequencies derived from https://github.com/keijiro/unity-audio-spectrum/blob/master/AudioSpectrum.cs

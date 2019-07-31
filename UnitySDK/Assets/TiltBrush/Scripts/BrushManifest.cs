@@ -20,7 +20,7 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class BrushManifest : ScriptableObject {
-  [SerializeField] private BrushDescriptor[] m_Brushes;
+  [SerializeField] private BrushDescriptor[] m_Brushes = null;
   private Dictionary<Guid, BrushDescriptor> m_ByGuid;
   private ILookup<string, BrushDescriptor> m_ByName;
 

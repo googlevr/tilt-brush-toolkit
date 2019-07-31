@@ -3,6 +3,7 @@
 /Obj/
 /Build/
 /Library/
+/Logs/
 
 # mono debugging files, automatically created by UnityVS
 *.dll.mdb

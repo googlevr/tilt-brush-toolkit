@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Name: TiltBrushToolkitSettings
   m_EditorClassIdentifier: 
   m_BrushManifest: {fileID: 11400000, guid: 2b3e59298bb8cfc47bddd1e1ea01be06, type: 2}
+  m_BasePbrOpaqueDoubleSidedMaterial: {fileID: 2100000, guid: b4680970cf3f2cb4587c64bf5611a465,
+    type: 2}
+  m_BasePbrBlendDoubleSidedMaterial: {fileID: 2100000, guid: a2aba1a3a34f13e4d8e014a86ab47661,
+    type: 2}

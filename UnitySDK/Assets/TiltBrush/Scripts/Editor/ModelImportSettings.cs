@@ -22,7 +22,7 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class ModelImportSettings : AssetPostprocessor {
-  readonly Version kToolkitVersion            = new Version { major=16 };
+  private readonly Version kToolkitVersion = TbtSettings.Version;
   readonly Version kRequiredFbxExportVersion  = new Version { major=10 };
 
   public static bool sm_forceOldMeshNamingConvention = false;

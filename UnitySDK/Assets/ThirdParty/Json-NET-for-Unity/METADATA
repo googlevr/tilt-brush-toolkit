@@ -1,0 +1,19 @@
+name: "Json-NET-for-Unity"
+description:
+    "JSON parsing library for Unity based on JSON.NET."
+
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://github.com/ianmacgillivray/Json-NET-for-Unity/"
+  }
+  url {
+    type: GIT
+    value: "https://github.com/ianmacgillivray/Json-NET-for-Unity/"
+  }
+  version: "0b8416150e0a72df2ce91c97169275806f9e1515"
+  last_upgrade_date { year: 2017 month: 11 day: 7 }
+  license_type: NOTICE
+  local_modifications:
+    "Built DLLs locally from source, placed them in Assemblies/"
+}

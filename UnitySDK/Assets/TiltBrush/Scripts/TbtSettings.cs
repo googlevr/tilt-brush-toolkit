@@ -34,11 +34,21 @@ public class TbtSettings : ScriptableObject {
     }
   }
 
+  public static Version Version {
+    get { return new Version { major = 21, minor = 0 }; }
+  }
+
   public static BrushManifest BrushManifest {
     get { return Instance.m_BrushManifest; }
   }
 
-  [SerializeField] private BrushManifest m_BrushManifest;
+  [SerializeField] private BrushManifest m_BrushManifest = null;
+
+  // This is the same material used by the BrushDescriptor "PbrTemplate".
+  // The Brush descriptor version is used when Tilt Brush exports to gltf1 (which has no PBR)
+  public Material m_BasePbrOpaqueDoubleSidedMaterial;
+  // This is the same material used by the BrushDescriptor "PbrTransparentTemplate"
+  public Material m_BasePbrBlendDoubleSidedMaterial;
 }
 
 }

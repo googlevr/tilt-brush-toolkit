@@ -1,2 +1,4 @@
 *.mat text eol=lf
 *.meta text eol=lf
+Packages/manifest.json text eol=lf
+ProjectSettings/*.txt text eol=lf

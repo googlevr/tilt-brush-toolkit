@@ -1,16 +1,16 @@
 {
-    "name": "TiltBrushToolkitEditor",
+    "name": "TiltBrushToolkitThirdPartyEditor",
     "references": [
-        "TiltBrushToolkitRuntime"
+        "TiltBrushToolkitThirdParty"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": []
+    "defineConstraints": []
 }

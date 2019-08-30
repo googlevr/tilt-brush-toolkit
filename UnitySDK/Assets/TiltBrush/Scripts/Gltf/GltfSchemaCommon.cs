@@ -134,7 +134,7 @@ public class MeshPrecursor {
   public Vector3[] normals;
   public Color[] colors;
   public Vector4[] tangents;
-  public Array[] uvSets = new Array[2];
+  public Array[] uvSets = new Array[4];
   public int[] triangles;
 }
 

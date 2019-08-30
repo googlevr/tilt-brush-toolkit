@@ -825,6 +825,7 @@ public static class ImportGltf {
       ImportState state,
       BrushDescriptor desc, string semantic, Array data,
       MeshPrecursor mesh) {
+    int txcChannel;
     switch (semantic) {
     case "POSITION":
       ChangeBasisAndApplyScale(data, Semantic.Position, state.scaleFactor, state.unityFromGltf);
@@ -872,20 +873,24 @@ public static class ImportGltf {
           data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
       mesh.tangents = (Vector4[]) data;
       break;
-    case "TEXCOORD_0": {
-      var ptSemantic = GetTexcoordSemantic(state, desc, 0);
+    case "TEXCOORD_0":
+      txcChannel = 0;
+      goto GenericTexcoord;
+    case "TEXCOORD_1":
+      txcChannel = 1;
+      goto GenericTexcoord;
+    case "TEXCOORD_2":
+      txcChannel = 2;
+      goto GenericTexcoord;
+    case "TEXCOORD_3":
+      txcChannel = 3;
+      goto GenericTexcoord;
+GenericTexcoord:
+      var ptSemantic = GetTexcoordSemantic(state, desc, txcChannel);
       ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
       ChangeUvBasis(data, ptSemantic);
-      mesh.uvSets[0] = data;
+      mesh.uvSets[txcChannel] = data;
       break;
-    }
-    case "TEXCOORD_1": {
-      var ptSemantic = GetTexcoordSemantic(state, desc, 1);
-      ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
-      ChangeUvBasis(data, ptSemantic);
-      mesh.uvSets[1] = data;
-      break;
-    }
     case "VERTEXID":
       // This was an attempt to get vertex id in webgl, but it didn't work out.
       // The data is not fully hooked-up in the gltf, and it doesn't make its way to THREE.
@@ -992,6 +997,9 @@ public static class ImportGltf {
           return desc.m_uv0Semantic;
         } else if (uvChannel == 1) {
           return desc.m_uv1Semantic;
+        } else if (uvChannel == 2) {
+          // All brushes use texcoord2 as (optional) timestamp data
+          return Semantic.Timestamp;
         } else {
           Debug.LogWarningFormat("Unexpected TB texcoord: {0}", uvChannel);
           return Semantic.Unspecified;

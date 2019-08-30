@@ -28,6 +28,7 @@ public class BrushDescriptor : ScriptableObject {
     XyIsUvZIsDistance,
     UnitlessVector,
     XyIsUv,
+    Timestamp,
   }
 
   public Material Material { get { return m_Material; } }

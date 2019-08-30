@@ -792,76 +792,7 @@ public static class ImportGltf {
         // all the vertices, even if (due to the problems described above) the accessor is missing
         // some elements. The missing elements will be initialized to zero.
         data = PadArrayToSize(data, subset.vertices.Size);
-        switch (semantic) {
-        case "POSITION":
-          ChangeBasisAndApplyScale(data, Semantic.Position, state.scaleFactor, state.unityFromGltf);
-          mesh.vertices = (Vector3[]) data;
-          break;
-        case "NORMAL":
-          ChangeBasisAndApplyScale(
-              data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
-          mesh.normals = (Vector3[]) data;
-          break;
-        case "COLOR":
-        case "COLOR_0": {
-          Color[] colors = data as Color[];
-          if (colors == null) {
-            Debug.LogWarningFormat(
-                "Unsupported: color buffer of type {0}",
-                data == null ? "null" : data.GetType().ToString());
-            break;
-          }
-
-          var desiredSpace = GetDesiredColorSpace(state.root);
-          var actualSpace = GetActualColorSpace(state.root);
-          if (actualSpace == ColorSpace.Unknown) {
-            Debug.LogWarning("Reading color buffer in unknown color space");
-            // Guess at something, so we at least offer consistent results.
-            // sRGB is the most likely.
-            actualSpace = ColorSpace.Srgb;
-          }
-
-          if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
-            for (int i = 0; i < colors.Length; ++i) {
-              colors[i] = colors[i].gamma;
-            }
-          } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
-            for (int i = 0; i < colors.Length; ++i) {
-              colors[i] = colors[i].linear;
-            }
-          }
-
-          mesh.colors = colors;
-          break;
-        }
-        case "TANGENT":
-          ChangeBasisAndApplyScale(
-              data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
-          mesh.tangents = (Vector4[]) data;
-          break;
-        case "TEXCOORD_0": {
-          var ptSemantic = GetTexcoordSemantic(state, accessor, desc, 0);
-          ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
-          ChangeUvBasis(data, ptSemantic);
-          mesh.uvSets[0] = data;
-          break;
-        }
-        case "TEXCOORD_1": {
-          var ptSemantic = GetTexcoordSemantic(state, accessor, desc, 1);
-          ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
-          ChangeUvBasis(data, ptSemantic);
-          mesh.uvSets[1] = data;
-          break;
-        }
-        case "VERTEXID":
-          // This was an attempt to get vertex id in webgl, but it didn't work out.
-          // The data is not fully hooked-up in the gltf, and it doesn't make its way to THREE.
-          // So: ignore it.
-          break;
-        default:
-          Debug.LogWarningFormat("Unhandled attribute {0}", semantic);
-          break;
-        }
+        StoreDataInMesh(state, desc, semantic, data, mesh);
       }
 
       {
@@ -884,6 +815,86 @@ public static class ImportGltf {
       FixInvalidNormals(mesh);
     }
     return meshes;
+  }
+
+  // Takes raw data from glTF (data), then:
+  // - Looks up precise semantics from semantic and desc.uvNSemantic
+  // - Uses semantic to make basis, unit, scale transformations
+  // - Uses semantic to determine where to store the data
+  private static void StoreDataInMesh(
+      ImportState state,
+      BrushDescriptor desc, string semantic, Array data,
+      MeshPrecursor mesh) {
+    switch (semantic) {
+    case "POSITION":
+      ChangeBasisAndApplyScale(data, Semantic.Position, state.scaleFactor, state.unityFromGltf);
+      mesh.vertices = (Vector3[]) data;
+      break;
+    case "NORMAL":
+      ChangeBasisAndApplyScale(
+          data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
+      mesh.normals = (Vector3[]) data;
+      break;
+    case "COLOR":
+    case "COLOR_0": {
+      Color[] colors = data as Color[];
+      if (colors == null) {
+        Debug.LogWarningFormat(
+            "Unsupported: color buffer of type {0}",
+            data == null ? "null" : data.GetType().ToString());
+        break;
+      }
+
+      var desiredSpace = GetDesiredColorSpace(state.root);
+      var actualSpace = GetActualColorSpace(state.root);
+      if (actualSpace == ColorSpace.Unknown) {
+        Debug.LogWarning("Reading color buffer in unknown color space");
+        // Guess at something, so we at least offer consistent results.
+        // sRGB is the most likely.
+        actualSpace = ColorSpace.Srgb;
+      }
+
+      if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
+        for (int i = 0; i < colors.Length; ++i) {
+          colors[i] = colors[i].gamma;
+        }
+      } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
+        for (int i = 0; i < colors.Length; ++i) {
+          colors[i] = colors[i].linear;
+        }
+      }
+
+      mesh.colors = colors;
+      break;
+    }
+    case "TANGENT":
+      ChangeBasisAndApplyScale(
+          data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
+      mesh.tangents = (Vector4[]) data;
+      break;
+    case "TEXCOORD_0": {
+      var ptSemantic = GetTexcoordSemantic(state, desc, 0);
+      ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
+      ChangeUvBasis(data, ptSemantic);
+      mesh.uvSets[0] = data;
+      break;
+    }
+    case "TEXCOORD_1": {
+      var ptSemantic = GetTexcoordSemantic(state, desc, 1);
+      ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
+      ChangeUvBasis(data, ptSemantic);
+      mesh.uvSets[1] = data;
+      break;
+    }
+    case "VERTEXID":
+      // This was an attempt to get vertex id in webgl, but it didn't work out.
+      // The data is not fully hooked-up in the gltf, and it doesn't make its way to THREE.
+      // So: ignore it.
+      break;
+    default:
+      Debug.LogWarningFormat("Unhandled attribute {0}", semantic);
+      break;
+    }
   }
 
   /// <summary>
@@ -958,8 +969,7 @@ public static class ImportGltf {
 
   // Returns a Semantic which tells us how to manipulate the uv to convert it
   // from glTF conventions to Unity conventions.
-  static Semantic GetTexcoordSemantic(
-      ImportState state, GltfAccessorBase accessor, BrushDescriptor desc, int uvChannel) {
+  static Semantic GetTexcoordSemantic(ImportState state, BrushDescriptor desc, int uvChannel) {
     // GL and Unity use the convention "texture origin is lower-left"
     // glTF, DX, Metal, and modern APIs use the convention "texture origin is upper-left"
     // We want to match the logic used by the exporter which generated this gltf, down to its bugs.

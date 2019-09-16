@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 using UnityEngine;
@@ -367,9 +368,14 @@ public class GltfMaterialConverter {
 #endif
       if (tex == null) {
         byte[] textureBytes;
-        using (IBufferReader r = loader.Load(gltfTexture.SourcePtr.uri)) {
-          textureBytes = new byte[r.GetContentLength()];
-          r.Read(textureBytes, destinationOffset: 0, readStart: 0, readSize: textureBytes.Length);
+        try {
+          using (IBufferReader r = loader.Load(gltfTexture.SourcePtr.uri)) {
+            textureBytes = new byte[r.GetContentLength()];
+            r.Read(textureBytes, destinationOffset: 0, readStart: 0, readSize: textureBytes.Length);
+          }
+        } catch (IOException e) {
+          Debug.LogWarning($"Cannot read uri {gltfTexture.SourcePtr.uri}: {e}");
+          yield break;
         }
         tex = new Texture2D(1,1);
         tex.LoadImage(textureBytes, markNonReadable: false);

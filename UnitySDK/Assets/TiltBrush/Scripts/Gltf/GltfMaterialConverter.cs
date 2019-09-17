@@ -426,6 +426,8 @@ public class GltfMaterialConverter {
   /// Returns a BrushDescriptor given a gltf material, or null if not found.
   /// If the material is an instance of a template, the descriptor for that
   /// will be returned.
+  /// Note that gltf2 has pbr support, and Tilt Brush uses that instead of
+  /// template "brushes".
   public static BrushDescriptor LookupBrushDescriptor(GltfMaterialBase gltfMaterial) {
     Guid guid = ParseGuidFromMaterial(gltfMaterial);
     if (guid == Guid.Empty) {
@@ -439,7 +441,6 @@ public class GltfMaterialConverter {
         // can be found on the shader.
         Gltf1Material gltf1Material = gltfMaterial as Gltf1Material;
         if (gltf1Material == null) {
-          Debug.LogErrorFormat("Unexpected: glTF2 Tilt Brush material");
           return null;
         }
         Guid templateGuid = ParseGuidFromShader((Gltf1Material)gltfMaterial);

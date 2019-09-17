@@ -270,22 +270,20 @@ public class GltfMaterialConverter {
     Material baseMaterial; {
       string alphaMode = gltfMat.alphaMode == null ? null : gltfMat.alphaMode.ToUpperInvariant();
 
-      if (!gltfMat.doubleSided) {
-        Debug.LogWarning("Not yet supported: single-sided pbr materials");
-      }
-
       switch (alphaMode) {
-      case Gltf2Material.kAlphaModeMask:
-        Debug.LogWarning("Not yet supported: alphaMode=MASK");
-        baseMaterial = TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial;
-        break;
-      default:
       case Gltf2Material.kAlphaModeOpaque:
-        baseMaterial = TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial;
+        baseMaterial = gltfMat.doubleSided
+            ? TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial
+            : TbtSettings.Instance.m_BasePbrOpaqueSingleSidedMaterial;
         break;
       case Gltf2Material.kAlphaModeBlend:
-        baseMaterial = TbtSettings.Instance.m_BasePbrBlendDoubleSidedMaterial;
+        baseMaterial = gltfMat.doubleSided
+            ? TbtSettings.Instance.m_BasePbrBlendDoubleSidedMaterial
+            : TbtSettings.Instance.m_BasePbrBlendSingleSidedMaterial;
         break;
+      default:
+        Debug.LogWarning($"Not yet supported: alphaMode={alphaMode}");
+        goto case Gltf2Material.kAlphaModeOpaque;
       }
     }
 

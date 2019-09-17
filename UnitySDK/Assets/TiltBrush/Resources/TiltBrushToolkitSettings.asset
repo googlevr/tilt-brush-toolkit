@@ -14,5 +14,9 @@ MonoBehaviour:
   m_BrushManifest: {fileID: 11400000, guid: 2b3e59298bb8cfc47bddd1e1ea01be06, type: 2}
   m_BasePbrOpaqueDoubleSidedMaterial: {fileID: 2100000, guid: a24c5cab5717b124889fe758761686b4,
     type: 2}
+  m_BasePbrOpaqueSingleSidedMaterial: {fileID: 2100000, guid: bf9540d0511f2ff4eb1b0e4c5b4fe197,
+    type: 2}
   m_BasePbrBlendDoubleSidedMaterial: {fileID: 2100000, guid: b2b07ce943390e34993803beeb1e8548,
+    type: 2}
+  m_BasePbrBlendSingleSidedMaterial: {fileID: 2100000, guid: 6247073d7a73b1143a8edf84c9b05aef,
     type: 2}

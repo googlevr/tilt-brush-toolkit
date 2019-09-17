@@ -713,7 +713,6 @@ public static class ImportGltf {
     }
 
     BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(prim.MaterialPtr);
-
     if (desc != null) {
       if (desc.m_bFbxExportNormalAsTexcoord1) {
         // make the gltf look like what the fbx shaders expect
@@ -792,7 +791,7 @@ public static class ImportGltf {
         // all the vertices, even if (due to the problems described above) the accessor is missing
         // some elements. The missing elements will be initialized to zero.
         data = PadArrayToSize(data, subset.vertices.Size);
-        StoreDataInMesh(state, desc, semantic, data, mesh);
+        StoreDataInMesh(state, prim.MaterialPtr, semantic, data, mesh);
       }
 
       {
@@ -823,7 +822,7 @@ public static class ImportGltf {
   // - Uses semantic to determine where to store the data
   private static void StoreDataInMesh(
       ImportState state,
-      BrushDescriptor desc, string semantic, Array data,
+      GltfMaterialBase material, string semantic, Array data,
       MeshPrecursor mesh) {
     int txcChannel;
     switch (semantic) {
@@ -886,7 +885,7 @@ public static class ImportGltf {
       txcChannel = 3;
       goto GenericTexcoord;
 GenericTexcoord:
-      var ptSemantic = GetTexcoordSemantic(state, desc, txcChannel);
+      var ptSemantic = GetTexcoordSemantic(state, material, txcChannel);
       ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
       ChangeUvBasis(data, ptSemantic);
       mesh.uvSets[txcChannel] = data;
@@ -974,7 +973,7 @@ GenericTexcoord:
 
   // Returns a Semantic which tells us how to manipulate the uv to convert it
   // from glTF conventions to Unity conventions.
-  static Semantic GetTexcoordSemantic(ImportState state, BrushDescriptor desc, int uvChannel) {
+  static Semantic GetTexcoordSemantic(ImportState state, GltfMaterialBase material, int uvChannel) {
     // GL and Unity use the convention "texture origin is lower-left"
     // glTF, DX, Metal, and modern APIs use the convention "texture origin is upper-left"
     // We want to match the logic used by the exporter which generated this gltf, down to its bugs.
@@ -983,12 +982,24 @@ GenericTexcoord:
       // Not Tilt Brush, so we can sort-of safely assume texcoord.xy is a UV coordinate.
       return Semantic.XyIsUv;
     } else {
+      BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(material);
       // Tilt Brush doesn't use "correct" logic (flip y of every texcoord) because that
       // fails if any importers choose the strategy "flip texture" rather than "flip texcoord.y".
       // Thus it needs to be data-driven.
       if (desc == null) {
-        Debug.LogWarning("Unexpected: TB geometry without descriptor");
-        return Semantic.Unspecified;
+        // Might happen in gltf2
+        Gltf2Material material2 = (Gltf2Material)material;
+        if (material2 == null) {
+          Debug.LogWarning("Unexpected: Non-BrushDescriptor geometry in gltf1");
+          return Semantic.Unspecified;
+        } else {
+          if (material2.pbrMetallicRoughness == null) {
+            Debug.LogWarning("Unexpected: Non-BrushDescriptor, non-PBR geometry in gltf2");
+          }
+          // Pretty safe assumption, since gltf non-texcoord data should be in non-TEXCOORD
+          // semantics (if you're following the spec)
+          return Semantic.XyIsUv;
+        }
       } else {
         // VERY SUBTLE incorrectness here -- TB pre-15 didn't flip y on Semantic.XyIsUvZIsDistance
         // because of an exporter bug. To be perfectly correct, if version <= 14,

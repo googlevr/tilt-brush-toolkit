@@ -912,6 +912,10 @@ GenericTexcoord:
       // The data is not fully hooked-up in the gltf, and it doesn't make its way to THREE.
       // So: ignore it.
       break;
+    case "_TB_TIMESTAMP":
+      // Tilt Brush .glb files don't ever have txc2, so this is a safe place to stuff timestamps
+      mesh.uvSets[2] = data;
+      break;
     default:
       Debug.LogWarningFormat("Unhandled attribute {0}", semantic);
       break;
@@ -1025,9 +1029,6 @@ GenericTexcoord:
           return desc.m_uv0Semantic;
         } else if (uvChannel == 1) {
           return desc.m_uv1Semantic;
-        } else if (uvChannel == 2) {
-          // All brushes use texcoord2 as (optional) timestamp data
-          return Semantic.Timestamp;
         } else {
           Debug.LogWarningFormat("Unexpected TB texcoord: {0}", uvChannel);
           return Semantic.Unspecified;

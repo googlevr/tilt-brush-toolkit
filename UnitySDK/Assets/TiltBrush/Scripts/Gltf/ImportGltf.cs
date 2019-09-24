@@ -541,6 +541,7 @@ public static class ImportGltf {
     mesh.vertices = precursor.vertices;
     if (precursor.normals != null)  { mesh.normals = precursor.normals;   }
     if (precursor.colors != null)   { mesh.colors = precursor.colors;     }
+    if (precursor.colors32 != null) { mesh.colors32 = precursor.colors32; }
     if (precursor.tangents != null) { mesh.tangents = precursor.tangents; }
     for (int i = 0; i < precursor.uvSets.Length; ++i) {
       if (precursor.uvSets[i] != null) {
@@ -732,8 +733,12 @@ public static class ImportGltf {
     BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(prim.MaterialPtr);
     if (desc != null) {
       if (desc.m_bFbxExportNormalAsTexcoord1) {
-        // make the gltf look like what the fbx shaders expect
-        // normals moved to texcoord1
+        // Because of historical compat issues with fbx, some TBT shaders are slightly different
+        // from TB's shaders; they read from TEXCOORD1 instead of NORMAL, and there is a
+        // corresponding data change.
+        // - For fbx we move NORMAL -> TEXCOORD1 at export time.
+        // - For gltf we are moving NORMAL -> TEXCOORD1 at import time.
+        // If we ever fix our TBT shaders to not be different from TB shaders, we can skip this.
         prim.ReplaceAttribute("NORMAL", "TEXCOORD_1");
       }
     }
@@ -854,11 +859,8 @@ public static class ImportGltf {
       break;
     case "COLOR":
     case "COLOR_0": {
-      Color[] colors = data as Color[];
-      if (colors == null) {
-        Debug.LogWarningFormat(
-            "Unsupported: color buffer of type {0}",
-            data == null ? "null" : data.GetType().ToString());
+      if (! (data is Color[] || data is Color32[])) {
+        Debug.LogWarning($"Unsupported: color buffer of type {data?.GetType()}");
         break;
       }
 
@@ -871,17 +873,28 @@ public static class ImportGltf {
         actualSpace = ColorSpace.Srgb;
       }
 
-      if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
-        for (int i = 0; i < colors.Length; ++i) {
-          colors[i] = colors[i].gamma;
+      if (desiredSpace != actualSpace) {
+        Color[] colors = data as Color[];
+        if (colors == null) {
+          // Explicitly widen so we get more precision in the colorspace conversion
+          data = colors = ((Color32[])data).Select(c32 => (Color)c32).ToArray();
         }
-      } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
-        for (int i = 0; i < colors.Length; ++i) {
-          colors[i] = colors[i].linear;
+        if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
+          for (int i = 0; i < colors.Length; ++i) {
+            colors[i] = colors[i].gamma;
+          }
+        } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
+          for (int i = 0; i < colors.Length; ++i) {
+            colors[i] = colors[i].linear;
+          }
         }
       }
 
-      mesh.colors = colors;
+      if (data is Color32[] colors32) {
+        mesh.colors32 = colors32;
+      } else {
+        mesh.colors = (Color[])data;
+      }
       break;
     }
     case "TANGENT":
@@ -1079,6 +1092,15 @@ GenericTexcoord:
         result = destination;
         return true;
       }
+    } else if (accessor.type == "VEC4"
+               && accessor.componentType == GltfAccessorBase.ComponentType.UNSIGNED_BYTE
+               && semantic.StartsWith("COLOR")) {
+      var destination = new Color32[eltRange.Size];
+      fixed (void* destPtr = destination) {
+        ReadAccessorData(accessor, eltRange, sizeof(Color32), (IntPtr)destPtr);
+      }
+      result = destination;
+      return true;
     } else if (accessor.type == "SCALAR" && accessor.componentType == FLOAT) {
       var destination = new float[eltRange.Size];
       fixed (void* destPtr = destination) {
@@ -1104,8 +1126,8 @@ GenericTexcoord:
       return true;
     } else {
       Debug.LogWarningFormat(
-          "Unknown accessor type {0} componentType {1}",
-          accessor.type, accessor.componentType);
+          "Unknown accessor type {0} componentType {1} for {2}",
+          accessor.type, accessor.componentType, semantic);
     }
     result = null;
     return false;

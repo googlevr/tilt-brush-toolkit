@@ -42,6 +42,10 @@ public static class ImportGltf {
   /// </summary>
   private const float MIN_VALID_NORMAL_SQRMAGNITUDE = float.Epsilon;  // Only fix normals that are exactly the 0 vector.
 
+  // Attributes intended only for the Tilt Brush Toolkit are prefixed with this, eg
+  // "_TB_UNITY_TEXCOORD_0". This distinguishes them a true TEXCOORD_0 that matches gltf's semantics
+  private const string kTookitAttributePrefix = "_TB_UNITY_";
+
   private static readonly JsonSerializer kSerializer = new JsonSerializer {
     ContractResolver = new GltfJsonContractResolver()
   };
@@ -165,6 +169,19 @@ public static class ImportGltf {
     using (var reader = new JsonTextReader(stream)) {
       var root = DeserializeGltfRoot(gltfVersion, reader);
       root.Dereference(uriLoader);
+
+      // Convert attribute names to the ones we expect.
+      // This may eg overwrite TEXCOORD_0 with _TB_UNITY_TEXCOORD_0 (which will contain more data)
+      foreach (var mesh in root.Meshes) {
+        foreach (var prim in mesh.Primitives) {
+          string[] attrs = prim.GetAttributeNames()
+              .Where(n => n.StartsWith(kTookitAttributePrefix)).ToArray();
+          foreach (var tbAttr in attrs) {
+            string renamed = tbAttr.Substring(kTookitAttributePrefix.Length);
+            prim.ReplaceAttribute(tbAttr, renamed);
+          }
+        }
+      }
 
       // Extract Google-specific information.
       if (root.asset != null) {

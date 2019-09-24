@@ -155,6 +155,7 @@ public abstract class GltfRootBase : IDisposable {
   public abstract IEnumerable<GltfImageBase> Images { get; }
   public abstract IEnumerable<GltfTextureBase> Textures { get; }
   public abstract IEnumerable<GltfMaterialBase> Materials { get; }
+  public abstract IEnumerable<GltfMeshBase> Meshes { get; }
 
   public abstract void Dereference(IUriLoader uriLoader = null, PolyFormat gltfFormat = null);
 

@@ -59,6 +59,13 @@ public sealed class Gltf2Root : GltfRootBase {
     }
   }
 
+  public override IEnumerable<GltfMeshBase> Meshes {
+    get {
+      if (meshes == null) { return new GltfMeshBase[0]; }
+      return meshes.Cast<GltfMeshBase>();
+    }
+  }
+
   // Disposable pattern, with Dispose(void) and Dispose(bool), as recommended by:
   // https://docs.microsoft.com/en-us/dotnet/api/system.idisposable
   protected override void Dispose(bool disposing) {

@@ -25,8 +25,11 @@ namespace TiltBrushToolkit {
 public class GltfMaterialConverter {
   private static readonly Regex kTiltBrushMaterialRegex = new Regex(
       @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$");
+  // Matches
+  //    http://...<guid>/shadername.glsl
+  //    <some local file>/.../<guid>-<version>.glsl
   private static readonly Regex kTiltBrushShaderRegex = new Regex(
-      @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/");
+      @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[/-]");
 
   /// <summary>
   /// Information about a Unity material generated from a Gltf node.

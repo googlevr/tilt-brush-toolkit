@@ -1009,8 +1009,7 @@ GenericTexcoord:
       // Thus it needs to be data-driven.
       if (desc == null) {
         // Might happen in gltf2
-        Gltf2Material material2 = (Gltf2Material)material;
-        if (material2 == null) {
+        if (!(material is Gltf2Material material2)) {
           Debug.LogWarning("Unexpected: Non-BrushDescriptor geometry in gltf1");
           return Semantic.Unspecified;
         } else {

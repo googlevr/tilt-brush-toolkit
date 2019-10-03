@@ -393,6 +393,10 @@ public class GltfMaterialConverter {
   // It may also refer to a dynamically-generated material, in which case the base material
   // can be found by using ParseGuidFromShader.
   private static Guid ParseGuidFromMaterial(GltfMaterialBase gltfMaterial) {
+    if (Guid.TryParse((gltfMaterial as Gltf2Material)?.extensions?.GOOGLE_tilt_brush_material?.guid,
+                      out Guid guid)) {
+      return guid;
+    }
     // Tilt Brush names its gltf materials like:
     //   material_Light-2241cd32-8ba2-48a5-9ee7-2caef7e9ed62
 

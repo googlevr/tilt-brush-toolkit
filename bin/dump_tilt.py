@@ -36,15 +36,17 @@ def dump_sketch(sketch):
   cooky, version, unused = sketch.header[0:3]
   print 'Cooky:0x%08x  Version:%s  Unused:%s  Extra:(%d bytes)' % (
     cooky, version, unused, len(sketch.additional_header))
-  if len(sketch.strokes):
-    stroke = sketch.strokes[0]  # choose one representative one
-    def extension_names(lookup):
-      # lookup is a dict mapping name -> idx
-      extensions = sorted(lookup.items(), key=lambda (n,i): i)
-      return ', '.join(name for (name, idx) in extensions)
-    print "Stroke Ext: %s" % extension_names(stroke.stroke_ext_lookup)
-    if len(stroke.controlpoints):
-      print "CPoint Ext: %s" % extension_names(stroke.cp_ext_lookup)
+
+  # Create dicts that are the union of all the stroke-extension and
+  # control-point-extension # lookup tables.
+  union_stroke_extension = {}
+  union_cp_extension = {}
+  for stroke in sketch.strokes:
+    union_stroke_extension.update(stroke.stroke_ext_lookup)
+    union_cp_extension.update(stroke.cp_ext_lookup)
+
+  print "Stroke Ext: %s" % ', '.join(union_stroke_extension.keys())
+  print "CPoint Ext: %s" % ', '.join(union_cp_extension.keys())
 
   for (i, stroke) in enumerate(sketch.strokes):
     print "%3d: " % i,
@@ -65,12 +67,21 @@ def dump_stroke(stroke):
   except KeyError:
     scale = 1
 
-  print "Brush: %2d  Size: %.3f  Color: #%02X%02X%02X %s  [%4d]" % (
+  if 'group' in stroke.stroke_ext_lookup:
+    group = stroke.extension[stroke.stroke_ext_lookup['group']]
+  else: group = '--'
+
+  if 'seed' in stroke.stroke_ext_lookup:
+    seed = '%08x' % stroke.extension[stroke.stroke_ext_lookup['seed']]
+  else: seed = '-none-'
+
+  print "B:%2d  S:%.3f  C:#%02X%02X%02X g:%2s s:%8s %s  [%4d]" % (
     stroke.brush_idx, stroke.brush_size * scale,
     int(stroke.brush_color[0] * 255),
     int(stroke.brush_color[1] * 255),
     int(stroke.brush_color[2] * 255),
     #stroke.brush_color[3],
+    group, seed,
     start_ts,
     len(stroke.controlpoints))
 

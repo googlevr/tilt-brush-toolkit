@@ -31,6 +31,8 @@ __all__ = ('Tilt', 'Sketch', 'Stroke', 'ControlPoint',
 STROKE_EXTENSION_BITS = {
   0x1: ('flags', 'I'),
   0x2: ('scale', 'f'),
+  0x4: ('group', 'I'),
+  0x8: ('seed', 'I'),
   'unknown': lambda bit: ('stroke_ext_%d' % math.log(bit, 2),
                           'I' if (bit & 0xffff) else '@')
 }

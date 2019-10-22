@@ -430,7 +430,13 @@ public static class ImportGltf {
       ImportState state, Transform parent, GltfNodeBase node, GltfImportResult result,
       GltfMaterialConverter matConverter, Vector3 translationToApply) {
     if (node.Mesh == null && !node.Children.Any()) {
-      yield break;
+      if (node.name != null && node.name.StartsWith("empty_")) {
+        // explicitly-empty nodes are used to mark things like non-exportable models
+        /* fall through */
+      } else {
+        // Other empty nodes can creep in, like the SceneLight_ nodes. Don't want those.
+        yield break;
+      }
     }
 
     GameObject obj = new GameObject(node.name);

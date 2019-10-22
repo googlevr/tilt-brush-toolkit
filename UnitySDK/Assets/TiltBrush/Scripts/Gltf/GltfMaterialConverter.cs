@@ -258,7 +258,7 @@ public class GltfMaterialConverter {
       }
       // Tilt Brush doesn't support metallicRoughnessTexture (yet?)
     }
-    return CreateNewPbrMaterial(desc.Material, pbr);
+    return CreateNewPbrMaterial(desc.Material, gltfMat.name, pbr);
   }
 
   /// <summary>
@@ -295,31 +295,37 @@ public class GltfMaterialConverter {
       return null;
     }
 
-    return CreateNewPbrMaterial(baseMaterial, gltfMat.pbrMetallicRoughness);
+    return CreateNewPbrMaterial(baseMaterial, gltfMat.name, gltfMat.pbrMetallicRoughness);
   }
 
   // Helper for ConvertGltf{1,2}Material
   private UnityMaterial CreateNewPbrMaterial(
-      Material baseMaterial, Gltf2Material.PbrMetallicRoughness pbr) {
+      Material baseMaterial, string gltfMatName, Gltf2Material.PbrMetallicRoughness pbr) {
     Material mat = UnityEngine.Object.Instantiate(baseMaterial);
 
-    string matName = baseMaterial.name;
-    if (matName.StartsWith("Base")) {
-      matName = matName.Substring(4);
-    }
-
-    mat.SetColor("_BaseColorFactor", pbr.baseColorFactor);
     Texture tex = null;
     if (pbr.baseColorTexture != null) {
       tex = pbr.baseColorTexture.texture.unityTexture;
       mat.SetTexture("_BaseColorTex", tex);
     }
-    if (tex != null) {
-      matName = string.Format("{0}_{1}", matName, tex.name);
+
+    if (gltfMatName != null) {
+      // The gltf has a name it wants us to use
+      mat.name = gltfMatName;
+    } else {
+      // No name in the gltf; make up something reasonable
+      string matName = baseMaterial.name.StartsWith("Base")
+          ? baseMaterial.name.Substring(4)
+          : baseMaterial.name;
+      if (tex != null) {
+        matName = string.Format("{0}_{1}", matName, tex.name);
+      }
+      mat.name = matName;
     }
+
+    mat.SetColor("_BaseColorFactor", pbr.baseColorFactor);
     mat.SetFloat("_MetallicFactor", pbr.metallicFactor);
     mat.SetFloat("_RoughnessFactor", pbr.roughnessFactor);
-    mat.name = matName;
 
     return new UnityMaterial { material = mat, template = baseMaterial };
   }

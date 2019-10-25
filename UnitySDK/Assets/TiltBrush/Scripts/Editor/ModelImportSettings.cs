@@ -14,8 +14,10 @@
 
 using System.Collections.Generic;
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -160,8 +162,53 @@ public class ModelImportSettings : AssetPostprocessor {
     }
   }
 
-  // Try to find a Tilt Brush material using the imported models's material name
+  // Returns a Material which is also an asset.
+  // The resulting asset will be somehere "nearby" relatedAssetPath.
+  Material GetOrCreateAsset(Material material, string relatedAssetPath) {
+    // You can't add assets to a .fbx unless you're Unity.
+    // So instead, put it in a loose .mat near the fbx.
+    // This also allows the user to customize the material if they want.
+    string objAssetPath = Path.Combine(
+        Path.GetDirectoryName(relatedAssetPath), $"{material.name}.mat");
+
+    // If it already exists on disk, it came either from a previous import, or (more likely)
+    // from a previous OnAssignMaterialModel for a material of the same name.
+    // We can't tell the difference, but our desired behavior in both cases is the same.
+    Material existing = AssetDatabase.LoadAssetAtPath<Material>(objAssetPath);
+    if (existing != null) {
+      return existing;
+    } else {
+      AssetDatabase.CreateAsset(material, objAssetPath);
+      return material;
+    }
+  }
+
+  // Sets the first texture-valued property on mtl, based on the properties required by its shader.
+  void SetFirstShaderTexture(Material material, Texture texture) {
+    var shader = material.shader;
+    for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); ++i) {
+      if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv) {
+        material.SetTexture(ShaderUtil.GetPropertyName(shader, i), texture);
+        return;
+      }
+    }
+  }
+
+  // Returns true if this is a BrushDescriptor meant to be cloned and customized rather
+  // than used directly, to support things like gltf PbrMetallicRoughness or
+  // double-sided/non-culling materials in fbx
+  bool IsTemplateDescriptor(BrushDescriptor desc) {
+    return desc.name.StartsWith("Pbr");  // hacky but works for now
+  }
+
+  // Try to find a Tilt Brush material using the imported models's material name.
   Material OnAssignMaterialModel(Material material, Renderer renderer) {
+    // This gets called once for each (Renderer, Material) pair.
+    // However, Unity passes a fresh Material every time, even if two FbxNodes use the
+    // same FbxMaterial. Therefore we can't distinguish between "two unique materials with
+    // the same name" and "one material being used multiple times".
+    // Therefore we have to rely on the exporter using distinct names.
+
     // Ignore models that aren't Tilt Brush - generated FBXs
     if (! IsTiltBrush) {
       return null;
@@ -171,6 +218,21 @@ public class ModelImportSettings : AssetPostprocessor {
     BrushDescriptor desc = GetDescriptorForStroke(material.name);
 
     if (desc != null) {
+      if (IsTemplateDescriptor(desc)) {
+        // Replace shader with our own so we get culling and so on.
+
+        // First 32 characters are the guid and underscore
+        material.name = material.name.Substring(33);
+        material.shader = desc.m_Material.shader;
+        // Our shaders don't use "_MainTex", so we need to find the correct property name.
+        SetFirstShaderTexture(material, material.mainTexture);
+        // If we return null, Unity will ignore our material mutations.
+        // If we return the material, Unity complains it's not an asset instead of making it one
+        // and embedding it in the fbx.
+        // So create one explicitly.
+        return GetOrCreateAsset(material, this.assetPath);
+      }
+
       // This is a stroke mesh and needs postprocessing.
       if (renderer.GetComponent<MeshFilter>() != null) {
         var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;

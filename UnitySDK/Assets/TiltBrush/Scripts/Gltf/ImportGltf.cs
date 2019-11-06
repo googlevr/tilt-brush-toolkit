@@ -42,6 +42,10 @@ public static class ImportGltf {
   /// </summary>
   private const float MIN_VALID_NORMAL_SQRMAGNITUDE = float.Epsilon;  // Only fix normals that are exactly the 0 vector.
 
+  // Attributes intended only for the Tilt Brush Toolkit are prefixed with this, eg
+  // "_TB_UNITY_TEXCOORD_0". This distinguishes them a true TEXCOORD_0 that matches gltf's semantics
+  private const string kTookitAttributePrefix = "_TB_UNITY_";
+
   private static readonly JsonSerializer kSerializer = new JsonSerializer {
     ContractResolver = new GltfJsonContractResolver()
   };
@@ -165,6 +169,19 @@ public static class ImportGltf {
     using (var reader = new JsonTextReader(stream)) {
       var root = DeserializeGltfRoot(gltfVersion, reader);
       root.Dereference(uriLoader);
+
+      // Convert attribute names to the ones we expect.
+      // This may eg overwrite TEXCOORD_0 with _TB_UNITY_TEXCOORD_0 (which will contain more data)
+      foreach (var mesh in root.Meshes) {
+        foreach (var prim in mesh.Primitives) {
+          string[] attrs = prim.GetAttributeNames()
+              .Where(n => n.StartsWith(kTookitAttributePrefix)).ToArray();
+          foreach (var tbAttr in attrs) {
+            string renamed = tbAttr.Substring(kTookitAttributePrefix.Length);
+            prim.ReplaceAttribute(tbAttr, renamed);
+          }
+        }
+      }
 
       // Extract Google-specific information.
       if (root.asset != null) {
@@ -413,7 +430,13 @@ public static class ImportGltf {
       ImportState state, Transform parent, GltfNodeBase node, GltfImportResult result,
       GltfMaterialConverter matConverter, Vector3 translationToApply) {
     if (node.Mesh == null && !node.Children.Any()) {
-      yield break;
+      if (node.name != null && node.name.StartsWith("empty_")) {
+        // explicitly-empty nodes are used to mark things like non-exportable models
+        /* fall through */
+      } else {
+        // Other empty nodes can creep in, like the SceneLight_ nodes. Don't want those.
+        yield break;
+      }
     }
 
     GameObject obj = new GameObject(node.name);
@@ -524,6 +547,7 @@ public static class ImportGltf {
     mesh.vertices = precursor.vertices;
     if (precursor.normals != null)  { mesh.normals = precursor.normals;   }
     if (precursor.colors != null)   { mesh.colors = precursor.colors;     }
+    if (precursor.colors32 != null) { mesh.colors32 = precursor.colors32; }
     if (precursor.tangents != null) { mesh.tangents = precursor.tangents; }
     for (int i = 0; i < precursor.uvSets.Length; ++i) {
       if (precursor.uvSets[i] != null) {
@@ -713,11 +737,14 @@ public static class ImportGltf {
     }
 
     BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(prim.MaterialPtr);
-
     if (desc != null) {
       if (desc.m_bFbxExportNormalAsTexcoord1) {
-        // make the gltf look like what the fbx shaders expect
-        // normals moved to texcoord1
+        // Because of historical compat issues with fbx, some TBT shaders are slightly different
+        // from TB's shaders; they read from TEXCOORD1 instead of NORMAL, and there is a
+        // corresponding data change.
+        // - For fbx we move NORMAL -> TEXCOORD1 at export time.
+        // - For gltf we are moving NORMAL -> TEXCOORD1 at import time.
+        // If we ever fix our TBT shaders to not be different from TB shaders, we can skip this.
         prim.ReplaceAttribute("NORMAL", "TEXCOORD_1");
       }
     }
@@ -792,7 +819,7 @@ public static class ImportGltf {
         // all the vertices, even if (due to the problems described above) the accessor is missing
         // some elements. The missing elements will be initialized to zero.
         data = PadArrayToSize(data, subset.vertices.Size);
-        StoreDataInMesh(state, desc, semantic, data, mesh);
+        StoreDataInMesh(state, prim.MaterialPtr, semantic, data, mesh);
       }
 
       {
@@ -823,7 +850,7 @@ public static class ImportGltf {
   // - Uses semantic to determine where to store the data
   private static void StoreDataInMesh(
       ImportState state,
-      BrushDescriptor desc, string semantic, Array data,
+      GltfMaterialBase material, string semantic, Array data,
       MeshPrecursor mesh) {
     int txcChannel;
     switch (semantic) {
@@ -838,11 +865,8 @@ public static class ImportGltf {
       break;
     case "COLOR":
     case "COLOR_0": {
-      Color[] colors = data as Color[];
-      if (colors == null) {
-        Debug.LogWarningFormat(
-            "Unsupported: color buffer of type {0}",
-            data == null ? "null" : data.GetType().ToString());
+      if (! (data is Color[] || data is Color32[])) {
+        Debug.LogWarning($"Unsupported: color buffer of type {data?.GetType()}");
         break;
       }
 
@@ -855,17 +879,28 @@ public static class ImportGltf {
         actualSpace = ColorSpace.Srgb;
       }
 
-      if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
-        for (int i = 0; i < colors.Length; ++i) {
-          colors[i] = colors[i].gamma;
+      if (desiredSpace != actualSpace) {
+        Color[] colors = data as Color[];
+        if (colors == null) {
+          // Explicitly widen so we get more precision in the colorspace conversion
+          data = colors = ((Color32[])data).Select(c32 => (Color)c32).ToArray();
         }
-      } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
-        for (int i = 0; i < colors.Length; ++i) {
-          colors[i] = colors[i].linear;
+        if (desiredSpace == ColorSpace.Srgb && actualSpace == ColorSpace.Linear) {
+          for (int i = 0; i < colors.Length; ++i) {
+            colors[i] = colors[i].gamma;
+          }
+        } else if (desiredSpace == ColorSpace.Linear && actualSpace == ColorSpace.Srgb) {
+          for (int i = 0; i < colors.Length; ++i) {
+            colors[i] = colors[i].linear;
+          }
         }
       }
 
-      mesh.colors = colors;
+      if (data is Color32[] colors32) {
+        mesh.colors32 = colors32;
+      } else {
+        mesh.colors = (Color[])data;
+      }
       break;
     }
     case "TANGENT":
@@ -886,7 +921,7 @@ public static class ImportGltf {
       txcChannel = 3;
       goto GenericTexcoord;
 GenericTexcoord:
-      var ptSemantic = GetTexcoordSemantic(state, desc, txcChannel);
+      var ptSemantic = GetTexcoordSemantic(state, material, txcChannel);
       ChangeBasisAndApplyScale(data, ptSemantic, state.scaleFactor, state.unityFromGltf);
       ChangeUvBasis(data, ptSemantic);
       mesh.uvSets[txcChannel] = data;
@@ -895,6 +930,10 @@ GenericTexcoord:
       // This was an attempt to get vertex id in webgl, but it didn't work out.
       // The data is not fully hooked-up in the gltf, and it doesn't make its way to THREE.
       // So: ignore it.
+      break;
+    case "_TB_TIMESTAMP":
+      // Tilt Brush .glb files don't ever have txc2, so this is a safe place to stuff timestamps
+      mesh.uvSets[2] = data;
       break;
     default:
       Debug.LogWarningFormat("Unhandled attribute {0}", semantic);
@@ -974,7 +1013,7 @@ GenericTexcoord:
 
   // Returns a Semantic which tells us how to manipulate the uv to convert it
   // from glTF conventions to Unity conventions.
-  static Semantic GetTexcoordSemantic(ImportState state, BrushDescriptor desc, int uvChannel) {
+  static Semantic GetTexcoordSemantic(ImportState state, GltfMaterialBase material, int uvChannel) {
     // GL and Unity use the convention "texture origin is lower-left"
     // glTF, DX, Metal, and modern APIs use the convention "texture origin is upper-left"
     // We want to match the logic used by the exporter which generated this gltf, down to its bugs.
@@ -983,12 +1022,23 @@ GenericTexcoord:
       // Not Tilt Brush, so we can sort-of safely assume texcoord.xy is a UV coordinate.
       return Semantic.XyIsUv;
     } else {
+      BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(material);
       // Tilt Brush doesn't use "correct" logic (flip y of every texcoord) because that
       // fails if any importers choose the strategy "flip texture" rather than "flip texcoord.y".
       // Thus it needs to be data-driven.
       if (desc == null) {
-        Debug.LogWarning("Unexpected: TB geometry without descriptor");
-        return Semantic.Unspecified;
+        // Might happen in gltf2
+        if (!(material is Gltf2Material material2)) {
+          Debug.LogWarning("Unexpected: Non-BrushDescriptor geometry in gltf1");
+          return Semantic.Unspecified;
+        } else {
+          if (material2.pbrMetallicRoughness == null) {
+            Debug.LogWarning("Unexpected: Non-BrushDescriptor, non-PBR geometry in gltf2");
+          }
+          // Pretty safe assumption, since gltf non-texcoord data should be in non-TEXCOORD
+          // semantics (if you're following the spec)
+          return Semantic.XyIsUv;
+        }
       } else {
         // VERY SUBTLE incorrectness here -- TB pre-15 didn't flip y on Semantic.XyIsUvZIsDistance
         // because of an exporter bug. To be perfectly correct, if version <= 14,
@@ -997,9 +1047,6 @@ GenericTexcoord:
           return desc.m_uv0Semantic;
         } else if (uvChannel == 1) {
           return desc.m_uv1Semantic;
-        } else if (uvChannel == 2) {
-          // All brushes use texcoord2 as (optional) timestamp data
-          return Semantic.Timestamp;
         } else {
           Debug.LogWarningFormat("Unexpected TB texcoord: {0}", uvChannel);
           return Semantic.Unspecified;
@@ -1051,6 +1098,15 @@ GenericTexcoord:
         result = destination;
         return true;
       }
+    } else if (accessor.type == "VEC4"
+               && accessor.componentType == GltfAccessorBase.ComponentType.UNSIGNED_BYTE
+               && semantic.StartsWith("COLOR")) {
+      var destination = new Color32[eltRange.Size];
+      fixed (void* destPtr = destination) {
+        ReadAccessorData(accessor, eltRange, sizeof(Color32), (IntPtr)destPtr);
+      }
+      result = destination;
+      return true;
     } else if (accessor.type == "SCALAR" && accessor.componentType == FLOAT) {
       var destination = new float[eltRange.Size];
       fixed (void* destPtr = destination) {
@@ -1076,8 +1132,8 @@ GenericTexcoord:
       return true;
     } else {
       Debug.LogWarningFormat(
-          "Unknown accessor type {0} componentType {1}",
-          accessor.type, accessor.componentType);
+          "Unknown accessor type {0} componentType {1} for {2}",
+          accessor.type, accessor.componentType, semantic);
     }
     result = null;
     return false;

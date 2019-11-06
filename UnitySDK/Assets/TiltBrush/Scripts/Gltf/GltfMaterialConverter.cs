@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 using UnityEngine;
@@ -24,8 +25,11 @@ namespace TiltBrushToolkit {
 public class GltfMaterialConverter {
   private static readonly Regex kTiltBrushMaterialRegex = new Regex(
       @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$");
+  // Matches
+  //    http://...<guid>/shadername.glsl
+  //    <some local file>/.../<guid>-<version>.glsl
   private static readonly Regex kTiltBrushShaderRegex = new Regex(
-      @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/");
+      @".*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[/-]");
 
   /// <summary>
   /// Information about a Unity material generated from a Gltf node.
@@ -254,7 +258,7 @@ public class GltfMaterialConverter {
       }
       // Tilt Brush doesn't support metallicRoughnessTexture (yet?)
     }
-    return CreateNewPbrMaterial(desc.Material, pbr);
+    return CreateNewPbrMaterial(desc.Material, gltfMat.name, pbr);
   }
 
   /// <summary>
@@ -269,22 +273,20 @@ public class GltfMaterialConverter {
     Material baseMaterial; {
       string alphaMode = gltfMat.alphaMode == null ? null : gltfMat.alphaMode.ToUpperInvariant();
 
-      if (!gltfMat.doubleSided) {
-        Debug.LogWarning("Not yet supported: single-sided pbr materials");
-      }
-
       switch (alphaMode) {
-      case Gltf2Material.kAlphaModeMask:
-        Debug.LogWarning("Not yet supported: alphaMode=MASK");
-        baseMaterial = TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial;
-        break;
-      default:
       case Gltf2Material.kAlphaModeOpaque:
-        baseMaterial = TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial;
+        baseMaterial = gltfMat.doubleSided
+            ? TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial
+            : TbtSettings.Instance.m_BasePbrOpaqueSingleSidedMaterial;
         break;
       case Gltf2Material.kAlphaModeBlend:
-        baseMaterial = TbtSettings.Instance.m_BasePbrBlendDoubleSidedMaterial;
+        baseMaterial = gltfMat.doubleSided
+            ? TbtSettings.Instance.m_BasePbrBlendDoubleSidedMaterial
+            : TbtSettings.Instance.m_BasePbrBlendSingleSidedMaterial;
         break;
+      default:
+        Debug.LogWarning($"Not yet supported: alphaMode={alphaMode}");
+        goto case Gltf2Material.kAlphaModeOpaque;
       }
     }
 
@@ -293,31 +295,37 @@ public class GltfMaterialConverter {
       return null;
     }
 
-    return CreateNewPbrMaterial(baseMaterial, gltfMat.pbrMetallicRoughness);
+    return CreateNewPbrMaterial(baseMaterial, gltfMat.name, gltfMat.pbrMetallicRoughness);
   }
 
   // Helper for ConvertGltf{1,2}Material
   private UnityMaterial CreateNewPbrMaterial(
-      Material baseMaterial, Gltf2Material.PbrMetallicRoughness pbr) {
+      Material baseMaterial, string gltfMatName, Gltf2Material.PbrMetallicRoughness pbr) {
     Material mat = UnityEngine.Object.Instantiate(baseMaterial);
 
-    string matName = baseMaterial.name;
-    if (matName.StartsWith("Base")) {
-      matName = matName.Substring(4);
-    }
-
-    mat.SetColor("_BaseColorFactor", pbr.baseColorFactor);
     Texture tex = null;
     if (pbr.baseColorTexture != null) {
       tex = pbr.baseColorTexture.texture.unityTexture;
       mat.SetTexture("_BaseColorTex", tex);
     }
-    if (tex != null) {
-      matName = string.Format("{0}_{1}", matName, tex.name);
+
+    if (gltfMatName != null) {
+      // The gltf has a name it wants us to use
+      mat.name = gltfMatName;
+    } else {
+      // No name in the gltf; make up something reasonable
+      string matName = baseMaterial.name.StartsWith("Base")
+          ? baseMaterial.name.Substring(4)
+          : baseMaterial.name;
+      if (tex != null) {
+        matName = string.Format("{0}_{1}", matName, tex.name);
+      }
+      mat.name = matName;
     }
+
+    mat.SetColor("_BaseColorFactor", pbr.baseColorFactor);
     mat.SetFloat("_MetallicFactor", pbr.metallicFactor);
     mat.SetFloat("_RoughnessFactor", pbr.roughnessFactor);
-    mat.name = matName;
 
     return new UnityMaterial { material = mat, template = baseMaterial };
   }
@@ -367,9 +375,14 @@ public class GltfMaterialConverter {
 #endif
       if (tex == null) {
         byte[] textureBytes;
-        using (IBufferReader r = loader.Load(gltfTexture.SourcePtr.uri)) {
-          textureBytes = new byte[r.GetContentLength()];
-          r.Read(textureBytes, destinationOffset: 0, readStart: 0, readSize: textureBytes.Length);
+        try {
+          using (IBufferReader r = loader.Load(gltfTexture.SourcePtr.uri)) {
+            textureBytes = new byte[r.GetContentLength()];
+            r.Read(textureBytes, destinationOffset: 0, readStart: 0, readSize: textureBytes.Length);
+          }
+        } catch (IOException e) {
+          Debug.LogWarning($"Cannot read uri {gltfTexture.SourcePtr.uri}: {e}");
+          yield break;
         }
         tex = new Texture2D(1,1);
         tex.LoadImage(textureBytes, markNonReadable: false);
@@ -386,6 +399,10 @@ public class GltfMaterialConverter {
   // It may also refer to a dynamically-generated material, in which case the base material
   // can be found by using ParseGuidFromShader.
   private static Guid ParseGuidFromMaterial(GltfMaterialBase gltfMaterial) {
+    if (Guid.TryParse((gltfMaterial as Gltf2Material)?.extensions?.GOOGLE_tilt_brush_material?.guid,
+                      out Guid guid)) {
+      return guid;
+    }
     // Tilt Brush names its gltf materials like:
     //   material_Light-2241cd32-8ba2-48a5-9ee7-2caef7e9ed62
 
@@ -420,6 +437,8 @@ public class GltfMaterialConverter {
   /// Returns a BrushDescriptor given a gltf material, or null if not found.
   /// If the material is an instance of a template, the descriptor for that
   /// will be returned.
+  /// Note that gltf2 has pbr support, and Tilt Brush uses that instead of
+  /// template "brushes".
   public static BrushDescriptor LookupBrushDescriptor(GltfMaterialBase gltfMaterial) {
     Guid guid = ParseGuidFromMaterial(gltfMaterial);
     if (guid == Guid.Empty) {
@@ -433,7 +452,6 @@ public class GltfMaterialConverter {
         // can be found on the shader.
         Gltf1Material gltf1Material = gltfMaterial as Gltf1Material;
         if (gltf1Material == null) {
-          Debug.LogErrorFormat("Unexpected: glTF2 Tilt Brush material");
           return null;
         }
         Guid templateGuid = ParseGuidFromShader((Gltf1Material)gltfMaterial);

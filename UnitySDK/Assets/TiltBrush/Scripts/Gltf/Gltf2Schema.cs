@@ -21,6 +21,11 @@ using UnityEngine;
 
 namespace TiltBrushToolkit {
 [Serializable]
+public class GOOGLE_tilt_brush_material {
+  public string guid;
+}
+
+[Serializable]
 public sealed class Gltf2Root : GltfRootBase {
   public List<Gltf2Buffer> buffers;
   public List<Gltf2Accessor> accessors;
@@ -56,6 +61,13 @@ public sealed class Gltf2Root : GltfRootBase {
     get {
       if (materials == null) { return new GltfMaterialBase[0]; }
       return materials.Cast<GltfMaterialBase>();
+    }
+  }
+
+  public override IEnumerable<GltfMeshBase> Meshes {
+    get {
+      if (meshes == null) { return new GltfMeshBase[0]; }
+      return meshes.Cast<GltfMeshBase>();
     }
   }
 
@@ -249,6 +261,12 @@ public class Gltf2Material : GltfMaterialBase {
   public Vector3 emissiveFactor;
   public string alphaMode;
   public bool doubleSided;
+  public Extensions extensions;
+
+  [Serializable]
+  public class Extensions {
+    public GOOGLE_tilt_brush_material GOOGLE_tilt_brush_material;
+  }
 
   [Serializable]
   public class PbrMetallicRoughness {

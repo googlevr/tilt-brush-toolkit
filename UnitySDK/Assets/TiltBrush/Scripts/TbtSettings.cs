@@ -45,10 +45,11 @@ public class TbtSettings : ScriptableObject {
   [SerializeField] private BrushManifest m_BrushManifest = null;
 
   // This is the same material used by the BrushDescriptor "PbrTemplate".
-  // The Brush descriptor version is used when Tilt Brush exports to gltf1 (which has no PBR)
   public Material m_BasePbrOpaqueDoubleSidedMaterial;
+  public Material m_BasePbrOpaqueSingleSidedMaterial;
   // This is the same material used by the BrushDescriptor "PbrTransparentTemplate"
   public Material m_BasePbrBlendDoubleSidedMaterial;
+  public Material m_BasePbrBlendSingleSidedMaterial;
 }
 
 }

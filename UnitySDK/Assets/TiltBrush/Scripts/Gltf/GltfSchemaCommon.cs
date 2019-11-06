@@ -133,6 +133,7 @@ public class MeshPrecursor {
   public Vector3[] vertices;
   public Vector3[] normals;
   public Color[] colors;
+  public Color32[] colors32;
   public Vector4[] tangents;
   public Array[] uvSets = new Array[4];
   public int[] triangles;
@@ -155,6 +156,7 @@ public abstract class GltfRootBase : IDisposable {
   public abstract IEnumerable<GltfImageBase> Images { get; }
   public abstract IEnumerable<GltfTextureBase> Textures { get; }
   public abstract IEnumerable<GltfMaterialBase> Materials { get; }
+  public abstract IEnumerable<GltfMeshBase> Meshes { get; }
 
   public abstract void Dereference(IUriLoader uriLoader = null, PolyFormat gltfFormat = null);
 

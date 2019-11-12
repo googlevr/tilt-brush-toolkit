@@ -49,7 +49,7 @@ Category {
       };
 
       struct v2f {
-        float4 vertex : POSITION;
+        float4 vertex : SV_POSITION;
         float4 color : COLOR;
         float2 texcoord : TEXCOORD0;
         float4 unbloomedColor : TEXCOORD1;
@@ -67,7 +67,7 @@ Category {
       }
 
       // Input color is srgb
-      fixed4 frag (v2f i) : COLOR
+      fixed4 frag (v2f i) : SV_Target
       {
         // Envelope
         float envelope = sin(i.texcoord.x * 3.14159);

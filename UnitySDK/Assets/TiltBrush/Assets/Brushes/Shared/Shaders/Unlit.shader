@@ -45,7 +45,7 @@ SubShader {
         };
 
         struct v2f {
-            float4 vertex : POSITION;
+            float4 vertex : SV_POSITION;
             float2 texcoord : TEXCOORD0;
             float4 color : COLOR;
             UNITY_FOG_COORDS(1)
@@ -63,7 +63,7 @@ SubShader {
             return o;
         }
 
-        fixed4 frag (v2f i) : COLOR
+        fixed4 frag (v2f i) : SV_Target
         {
             fixed4 c;
             UNITY_APPLY_FOG(i.fogCoord, i.color);

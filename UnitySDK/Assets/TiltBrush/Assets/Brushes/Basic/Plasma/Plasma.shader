@@ -59,7 +59,7 @@ Category {
       };
 
       struct v2f {
-        float4 vertex : POSITION;
+        float4 vertex : SV_POSITION;
         fixed4 color : COLOR;
         float2 texcoord : TEXCOORD0;
         float3 worldPos : TEXCOORD1;
@@ -90,7 +90,7 @@ Category {
         return abs(noise.x + noise.y) * 0.5;
       }
 
-      fixed4 frag (v2f i) : COLOR
+      fixed4 frag (v2f i) : SV_Target
       {
         // Workaround for b/30500118, caused by b/30504121
         i.color.a = saturate(i.color.a);

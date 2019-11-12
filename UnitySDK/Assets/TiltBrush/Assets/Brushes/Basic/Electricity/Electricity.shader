@@ -38,7 +38,7 @@ CGINCLUDE
   half _EmissionGain;
 
   struct v2f {
-    float4 vertex : POSITION;
+    float4 vertex : SV_POSITION;
     fixed4 color : COLOR;
     float2 texcoord : TEXCOORD0;
   };
@@ -112,7 +112,7 @@ CGINCLUDE
   }
 
   // Input color is srgb
-  fixed4 frag (v2f i) : COLOR
+  fixed4 frag (v2f i) : SV_Target
   {
     // interior procedural line
     float procedural = ( abs(i.texcoord.y - 0.5) < .1 ) ? 2 : 0;

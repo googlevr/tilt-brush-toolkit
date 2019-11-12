@@ -48,7 +48,7 @@ Category {
       };
 
       struct v2f {
-        float4 vertex : POSITION;
+        float4 vertex : SV_POSITION;
         fixed4 color : COLOR;
         float2 texcoord : TEXCOORD0;
       };
@@ -153,7 +153,7 @@ Category {
       }
 
       // Input color is srgb
-      fixed4 frag (v2f i) : COLOR
+      fixed4 frag (v2f i) : SV_Target
       {
         i.color.a = 1; //ignore incoming vert alpha
 #ifdef AUDIO_REACTIVE

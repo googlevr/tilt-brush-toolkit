@@ -47,7 +47,7 @@ Shader "Brush/Special/CelVinyl" {
         };
 
         struct v2f {
-            float4 vertex : POSITION;
+            float4 vertex : SV_POSITION;
             float2 texcoord : TEXCOORD0;
             float4 color : COLOR;
             UNITY_FOG_COORDS(1)
@@ -65,7 +65,7 @@ Shader "Brush/Special/CelVinyl" {
           return o;
         }
 
-        fixed4 frag (v2f i) : COLOR
+        fixed4 frag (v2f i) : SV_Target
         {
           fixed4 tex = tex2D(_MainTex, i.texcoord) * i.color;
           UNITY_APPLY_FOG(i.fogCoord, tex);

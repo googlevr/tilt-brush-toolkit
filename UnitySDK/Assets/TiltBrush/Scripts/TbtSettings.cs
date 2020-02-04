@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+
 using UnityEngine;
 
 namespace TiltBrushToolkit {
@@ -34,12 +35,12 @@ public class TbtSettings : ScriptableObject {
     }
   }
 
-  public static Version Version {
-    get { return new Version { major = 21, minor = 0 }; }
+  public static Version TbtVersion {
+    get { return new Version { major = 23, minor = 0 }; }
   }
 
   public static BrushManifest BrushManifest {
-    get { return Instance.m_BrushManifest; }
+    get { return sm_Instance.m_BrushManifest; }
   }
 
   [SerializeField] private BrushManifest m_BrushManifest = null;
@@ -50,6 +51,11 @@ public class TbtSettings : ScriptableObject {
   // This is the same material used by the BrushDescriptor "PbrTransparentTemplate"
   public Material m_BasePbrBlendDoubleSidedMaterial;
   public Material m_BasePbrBlendSingleSidedMaterial;
+
+  /// <returns>null if not found</returns>
+  public bool TryGetBrush(Guid guid, out BrushDescriptor desc) {
+    return m_BrushManifest.BrushesByGuid.TryGetValue(guid, out desc);
+  }
 }
 
 }

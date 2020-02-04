@@ -158,7 +158,7 @@ public abstract class GltfRootBase : IDisposable {
   public abstract IEnumerable<GltfMaterialBase> Materials { get; }
   public abstract IEnumerable<GltfMeshBase> Meshes { get; }
 
-  public abstract void Dereference(IUriLoader uriLoader = null, PolyFormat gltfFormat = null);
+  public abstract void Dereference(IUriLoader uriLoader = null);
 
   // Disposable pattern, with Dispose(void) and Dispose(bool), as recommended by:
   // https://docs.microsoft.com/en-us/dotnet/api/system.idisposable
@@ -214,6 +214,8 @@ public abstract class GltfPrimitiveBase {
   public abstract GltfMaterialBase MaterialPtr { get; }
   public abstract GltfAccessorBase IndicesPtr { get; }
   public abstract GltfAccessorBase GetAttributePtr(string attributeName);
+  // Rename attribute from original -> replacement.
+  // ie, attrs[replacement] = attrs.pop(original)
   public abstract void ReplaceAttribute(string original, string replacement);
   public abstract HashSet<string> GetAttributeNames();
 }

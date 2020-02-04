@@ -87,7 +87,7 @@ public sealed class Gltf2Root : GltfRootBase {
   }
 
   /// Map gltfIndex values (ie, int indices) names to the objects they refer to
-  public override void Dereference(IUriLoader uriLoader = null, PolyFormat gltfFormat = null) {
+  public override void Dereference(IUriLoader uriLoader = null) {
     // "dereference" all the indices
     scenePtr = scenes[scene];
     for (int i = 0; i < buffers.Count; i++) {
@@ -97,14 +97,6 @@ public sealed class Gltf2Root : GltfRootBase {
         // Only id 0 may lack a URI; this indicates that it is the binary chunk.
         Debug.Assert(! (i != 0 && buffer.uri == null));
         buffer.data = uriLoader.Load(buffer.uri);
-      } else if (gltfFormat != null) {
-        // Runtime import case; the uris refer to resource files in the PolyFormat.
-        foreach (PolyFile resource in gltfFormat.resources) {
-          if (resource.relativePath == buffer.uri) {
-            buffer.data = new Reader(resource.contents);
-            break;
-          }
-        }
       }
     }
     for (int i = 0; i < accessors.Count; i++) {

@@ -14,22 +14,23 @@
 
 using System;
 
-using UnityEngine;
-
 namespace TiltBrushToolkit {
 /// <summary>
 /// Options that indicate how to import a given asset.
 /// </summary>
 [Serializable]
-[AutoStringifiable]
-public struct PolyImportOptions {
+public struct GltfImportOptions {
   public enum RescalingMode {
-    // Convert the object's units to scene units and optionally apply a scale as well
-    // (given by scaleFactor).
+    // Apply scaleFactor.
     CONVERT,
-    // Scale the object such that it fits a box of a particular size (desiredSize).
+    // Scale the object such that it fits a box of desiredSize, ignoring scaleFactor.
     FIT,
   }
+
+  /// <summary>
+  /// If not set, axis conventions default to the glTF 2.0 standard.
+  /// </summary>
+  public AxisConvention? axisConventionOverride;
 
   /// <summary>
   /// What type of rescaling to perform.
@@ -54,29 +55,15 @@ public struct PolyImportOptions {
   public bool recenter;
 
   /// <summary>
-  /// If true, do not immediately perform heavy main thread operations (mesh import, texture creation,
-  /// etc) on import. Rather, an enumerator will be returned (mainThreadThrottler) in PolyImportResult
-  /// which you can enumerate to gradually create meshes and perform other heavy UI thread operations.
-  /// This option is useful for performance-sensitive applications that want to be in full control of
-  /// when Unity objects are created on the main thread.
-  /// </summary>
-  [HideInInspector]
-  public bool clientThrottledMainThread;
-
-  /// <summary>
   /// Returns a default set of import options.
   /// </summary>
-  public static PolyImportOptions Default() {
-    PolyImportOptions options = new PolyImportOptions();
+  public static GltfImportOptions Default() {
+    GltfImportOptions options = new GltfImportOptions();
     options.recenter = true;
     options.rescalingMode = RescalingMode.CONVERT;
     options.scaleFactor = 1.0f;
     options.desiredSize = 1.0f;
     return options;
-  }
-
-  public override string ToString() {
-    return AutoStringify.Stringify(this);
   }
 }
 }

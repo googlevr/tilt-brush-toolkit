@@ -83,7 +83,7 @@ public interface IUriLoader {
 
 
 // ----------------------------------------------------------------------
- 
+
 public class Reader : IBufferReader {
   private byte[] data;
 
@@ -113,6 +113,7 @@ public class BufferedStreamLoader : IUriLoader {
   private string uriBase;
   private int bufferSize;
 
+  /// glbPath is the .gltf or .glb file being read; or null.
   public BufferedStreamLoader(string glbPath, string uriBase, int bufferSize=4096) {
     this.glbPath = glbPath;
     this.uriBase = uriBase;

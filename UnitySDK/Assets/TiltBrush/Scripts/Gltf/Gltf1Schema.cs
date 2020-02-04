@@ -86,7 +86,7 @@ public sealed class Gltf1Root : GltfRootBase {
   }
 
   /// Map glTFid values (ie, string names) names to the objects they refer to
-  public override void Dereference(IUriLoader uriLoader = null, PolyFormat gltfFormat = null) {
+  public override void Dereference(IUriLoader uriLoader = null) {
     // "dereference" all the names
     scenePtr = scenes[scene];
     foreach (var pair in buffers) {
@@ -102,17 +102,8 @@ public sealed class Gltf1Root : GltfRootBase {
           Debug.Assert(buffer.uri != null);
         }
         buffer.data = uriLoader.Load(buffer.uri);
-      } else if (gltfFormat != null) {
-          // Runtime import case; the uris refer to resource files in the PolyFormat.
-          Debug.Assert(buffer.type == "arraybuffer");
-          foreach (PolyFile resource in gltfFormat.resources) {
-            if (resource.relativePath == buffer.uri) {
-              buffer.data = new Reader(resource.contents);
-              break;
-            }
-          }
-        }
       }
+    }
     foreach (var pair in accessors) {
       pair.Value.gltfId = pair.Key;
       pair.Value.bufferViewPtr = bufferViews[pair.Value.bufferView];

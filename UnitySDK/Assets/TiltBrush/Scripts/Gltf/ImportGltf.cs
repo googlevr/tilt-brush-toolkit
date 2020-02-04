@@ -22,10 +22,24 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using UnityEngine;
 
-using Semantic = TiltBrushToolkit.BrushDescriptor.Semantic;
 using Debug = UnityEngine.Debug;
+using Semantic = TiltBrushToolkit.BrushDescriptor.Semantic;
 
 namespace TiltBrushToolkit {
+
+public class Null {
+  protected Null() {}
+}
+
+/// A callback that allows users to know when the import process has created a new material
+public interface IImportMaterialCollector {
+  // Pass:
+  //   unityMaterial - the template material, and the actual material used
+  //     (which may be identical to the template material)
+  //   gltfMaterial - the gltf node from which unityMaterial was generated
+  void Add(GltfMaterialConverter.UnityMaterial unityMaterial,
+           GltfMaterialBase gltfMaterial);
+}
 
 public static class ImportGltf {
   /// <summary>
@@ -58,6 +72,7 @@ public static class ImportGltf {
     public List<Mesh> meshes;
     public List<Material> materials;
     public List<Texture2D> textures;
+    public IImportMaterialCollector materialCollector = null;
   }
 
   /// <summary>State data used by the import process.</summary>
@@ -99,15 +114,17 @@ public static class ImportGltf {
   /// <param name="gltfVersion">The glTF format version to use.</param>
   /// <param name="gltfStream">A stream containing the contents of the .gltf file. Ownership of the stream is transferred; it will be closed after the import.</param>
   /// <param name="uriLoader">For fetching relative URIs referenced by the .gltf file.</param>
+  /// <param name="materialCollector">May be null if you don't need it.</param>
   /// <param name="options">The options to import the model with.</param>
   /// <seealso cref="ImportGltf.BeginImport" />
   /// <seealso cref="ImportGltf.EndImport" />
   public static GltfImportResult Import(
       GltfSchemaVersion gltfVersion, TextReader gltfStream, IUriLoader uriLoader,
-      PolyImportOptions options) {
+      IImportMaterialCollector materialCollector,
+      GltfImportOptions options) {
     using (var state = BeginImport(gltfVersion, gltfStream, uriLoader, options)) {
-      IEnumerable meshCreator;
-      GltfImportResult result = EndImport(state, uriLoader, out meshCreator);
+      IEnumerable<Null> meshCreator;
+      GltfImportResult result = EndImport(state, uriLoader, materialCollector, out meshCreator);
       foreach (var unused in meshCreator) {
         // create meshes!
       }
@@ -129,7 +146,7 @@ public static class ImportGltf {
         return gltf1Root;
       }
       case GltfSchemaVersion.GLTF2:
-        var gltf2Root= kSerializer.Deserialize<Gltf2Root>(reader);
+        var gltf2Root = kSerializer.Deserialize<Gltf2Root>(reader);
         if (gltf2Root == null || gltf2Root.nodes == null) {
           throw new Exception("Failed to parse GLTF2. File is empty or in the wrong format.");
         }
@@ -139,20 +156,43 @@ public static class ImportGltf {
     }
   }
 
-  private static void SanityCheckImportOptions(PolyImportOptions options) {
-    if (options.rescalingMode == PolyImportOptions.RescalingMode.CONVERT &&
+  private static void SanityCheckImportOptions(GltfImportOptions options) {
+    if (options.rescalingMode == GltfImportOptions.RescalingMode.CONVERT &&
         options.scaleFactor == 0.0f) {
       // If scaleFactor is exactly zero (not just close), it's PROBABLY because of user error,
-      // because this is what happens when you do "new PolyImportOptions()" and forget to set
-      // scaleFactor. PolyImportOptions is a struct so we can't have a default value.
-      throw new Exception("scaleFactor must be != 0 for PolyImportOptions CONVERT mode. " +
+      // because this is what happens when you do "new GltfImportOptions()" and forget to set
+      // scaleFactor. GltfImportOptions is a struct so we can't have a default value.
+      throw new Exception("scaleFactor must be != 0 for GltfImportOptions CONVERT mode. " +
           "Did you forget to set scaleFactor?");
-    } else if (options.rescalingMode == PolyImportOptions.RescalingMode.FIT &&
+    } else if (options.rescalingMode == GltfImportOptions.RescalingMode.FIT &&
         options.desiredSize <= 0.0f) {
-      throw new Exception("desiredSize must be > 0 for PolyImportOptions FIT mode. " +
+      throw new Exception("desiredSize must be > 0 for GltfImportOptions FIT mode. " +
           "Did you forget to set desiredSize?");
     }
 
+  }
+
+  private static void CheckCompatibility(
+      GltfRootBase root, string versionKey, Version currentVersion) {
+    var extras = root.asset.extras;
+    if (extras == null) { return; }
+
+    string requiredVersion;
+    extras.TryGetValue(versionKey, out requiredVersion);
+    if (requiredVersion != null) {
+      Match match = Regex.Match(requiredVersion, @"^([0-9]+)\.([0-9]+)");
+      if (match.Success) {
+        var required = new Version {
+            major = int.Parse(match.Groups[1].Value),
+            minor = int.Parse(match.Groups[2].Value)
+        };
+        if (required > currentVersion) {
+          Debug.LogWarningFormat(
+              "This file specifies {0} {1}; you are currently using {2}",
+              versionKey, required, currentVersion);
+        }
+      }
+    }
   }
 
   /// <summary>
@@ -162,12 +202,15 @@ public static class ImportGltf {
   /// <returns>An object which should be passed to <seealso cref="ImportGltf.EndImport"/> and then disposed</returns>
   public static ImportState BeginImport(
       GltfSchemaVersion gltfVersion, TextReader stream, IUriLoader uriLoader,
-      PolyImportOptions options) {
+      GltfImportOptions options) {
+    if (stream == null) { throw new ArgumentNullException("stream"); }
+    if (uriLoader == null) { throw new ArgumentNullException("uriLoader"); }
 
     SanityCheckImportOptions(options);
 
     using (var reader = new JsonTextReader(stream)) {
       var root = DeserializeGltfRoot(gltfVersion, reader);
+      if (root == null) { throw new NullReferenceException("root"); }
       root.Dereference(uriLoader);
 
       // Convert attribute names to the ones we expect.
@@ -195,28 +238,11 @@ public static class ImportGltf {
           }
         }
 
-        // Allow the glTF to define the limit of PT's data forward-compatibility
-        if (root.asset.extras != null) {
-          string requiredPtVersion;
-          root.asset.extras.TryGetValue("requiredTiltBrushToolkitVersion", out requiredPtVersion);
-          if (requiredPtVersion != null) {
-            Match match = Regex.Match(requiredPtVersion, @"^([0-9]+)\.([0-9]+)");
-            if (match.Success) {
-              var required = new Version {
-                major = int.Parse(match.Groups[1].Value),
-                minor = int.Parse(match.Groups[2].Value)
-              };
-              if (required > TbtSettings.Version) {
-                Debug.LogWarningFormat(
-                    "This file requires Tilt Brush Toolkit {0}; you are currently using {1}",
-                    required, TbtSettings.Version);
-              }
-            }
-          }
-        }
+        // Allow the glTF to define the limit of our data forward-compatibility
+        CheckCompatibility(root, "requiredTiltBrushToolkitVersion", TbtSettings.TbtVersion);
       }
 
-      var state = new ImportState(AxisConvention.kGltf2) {
+      var state = new ImportState(options.axisConventionOverride ?? AxisConvention.kGltf2) {
         root = root,
         desiredScene = root.ScenePtr,
       };
@@ -260,10 +286,10 @@ public static class ImportGltf {
   // the object's geometry to keep within Unity's modelview scale limits, and as a
   // result have to compensate for the scale at the top node.
   static void ComputeScaleFactor(
-      PolyImportOptions options, Bounds boundsInGltfSpace,
+      GltfImportOptions options, Bounds boundsInGltfSpace,
       out float directScaleFactor, out float nodeScaleFactor) {
     switch (options.rescalingMode) {
-      case PolyImportOptions.RescalingMode.CONVERT:
+      case GltfImportOptions.RescalingMode.CONVERT:
         directScaleFactor = options.scaleFactor;
         nodeScaleFactor = 1;
         float requiredShrink;
@@ -280,7 +306,7 @@ public static class ImportGltf {
           }
         }
         return;
-      case PolyImportOptions.RescalingMode.FIT:
+      case GltfImportOptions.RescalingMode.FIT:
         // User wants a specific size, so derive it from the bounding box.
         if (!ComputeScaleFactorToFit(boundsInGltfSpace, options.desiredSize, out directScaleFactor)) {
           Debug.LogWarningFormat("Could not automatically resize object; object is too small or empty.");
@@ -384,20 +410,25 @@ public static class ImportGltf {
   /// </summary>
   /// <param name="state">Returned by BeginImport</param>
   /// <param name="uriLoader">For fetching relative URIs referenced by the .gltf file.</param>
+  /// <param name="materialCollector">May be null if you don't need it</param>
   /// <param name="meshCreator">out reference to an enumerable that should be enumerated
   /// to create the unity meshes.</param>
   static public GltfImportResult EndImport(
-      ImportState state, IUriLoader uriLoader, out IEnumerable meshCreator) {
+      ImportState state,
+      IUriLoader uriLoader,
+      IImportMaterialCollector materialCollector,
+      out IEnumerable<Null> meshCreator) {
     var result = new GltfImportResult {
-      root = new GameObject("PolyImport"),
+      root = new GameObject("GltfImport"),
       meshes = new List<Mesh>(),
+      materialCollector = materialCollector
     };
     meshCreator = CreateGameObjectsFromNodes(state, result, uriLoader);
     return result;
   }
 
 
-  static IEnumerable CreateGameObjectsFromNodes(
+  static IEnumerable<Null> CreateGameObjectsFromNodes(
       ImportState state, GltfImportResult result, IUriLoader uriLoader) {
     var loaded = new List<Texture2D>();
     foreach (var unused in GltfMaterialConverter.LoadTexturesCoroutine(
@@ -490,7 +521,13 @@ public static class ImportGltf {
     // https://github.com/KhronosGroup/glTF/issues/1065
     for (int iP = 0; iP < mesh.PrimitiveCount; ++iP) {
       GltfPrimitiveBase prim = mesh.GetPrimitiveAt(iP);
-      GltfMaterialConverter.UnityMaterial? unityMaterial = matConverter.GetMaterial(prim.MaterialPtr);
+      GltfMaterialConverter.UnityMaterial? unityMaterial =
+          matConverter.GetMaterial(prim.MaterialPtr);
+      if (result.materialCollector != null && unityMaterial != null) {
+        Debug.Assert(unityMaterial.Value.material != null);
+        // Generate IExportableMaterial for later exports.
+        result.materialCollector.Add(unityMaterial.Value, prim.MaterialPtr);
+      }
 
       if (prim.precursorMeshes == null) {
         continue;
@@ -730,7 +767,8 @@ public static class ImportGltf {
   }
 
   // Annotates GltfPrimitive with materials, precursorMeshes
-  static List<MeshPrecursor> CreateMeshPrecursorsFromPrimitive(ImportState state, GltfPrimitiveBase prim) {
+  static List<MeshPrecursor> CreateMeshPrecursorsFromPrimitive(
+      ImportState state, GltfPrimitiveBase prim) {
     if (prim.mode != GltfPrimitiveBase.Mode.TRIANGLES) {
       Debug.LogWarningFormat("Cannot create mesh from {0}", prim.mode);
       return null;
@@ -774,7 +812,6 @@ public static class ImportGltf {
       }
     }
 
-
     List<MeshPrecursor> meshes = new List<MeshPrecursor>();
 
     // Tilt Brush particle meshes are sensitive to being broken up.
@@ -797,8 +834,7 @@ public static class ImportGltf {
         // count. In these cases, be lenient and ignore the missing data.
         if (attribRange.min >= accessor.count) {
           // No data at all for this accessor (entirely out of range).
-          // This is a verbose log, not a warning, because it's accepted as "correct".
-          PtDebug.LogVerboseFormat("Attribute {0} has no data: wanted range {1}, count was {2}",
+          Debug.LogWarningFormat("Attribute {0} has no data: wanted range {1}, count was {2}",
               semantic, attribRange, accessor.count);
           // Ignore this attribute.
           continue;
@@ -1013,7 +1049,8 @@ GenericTexcoord:
 
   // Returns a Semantic which tells us how to manipulate the uv to convert it
   // from glTF conventions to Unity conventions.
-  static Semantic GetTexcoordSemantic(ImportState state, GltfMaterialBase material, int uvChannel) {
+  static Semantic GetTexcoordSemantic(
+      ImportState state, GltfMaterialBase material, int uvChannel) {
     // GL and Unity use the convention "texture origin is lower-left"
     // glTF, DX, Metal, and modern APIs use the convention "texture origin is upper-left"
     // We want to match the logic used by the exporter which generated this gltf, down to its bugs.

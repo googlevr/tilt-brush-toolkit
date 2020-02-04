@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -52,7 +53,7 @@ public class SerializableGuidDrawer : PropertyDrawer {
 /// Adds the expense of conversions to/from native System.Guid,
 /// but enables Unity serialization.
 [System.Serializable]
-public struct SerializableGuid {
+public struct SerializableGuid : IFormattable {
   [SerializeField]
   private string m_storage;
 
@@ -61,7 +62,10 @@ public struct SerializableGuid {
   }
 
   public static implicit operator System.Guid(SerializableGuid rhs) {
-    if (rhs.m_storage == null) return System.Guid.Empty;
+    if (rhs.m_storage == null) {
+      return System.Guid.Empty;
+    }
+
     try {
       return new System.Guid(rhs.m_storage);
     } catch (System.FormatException) {
@@ -73,9 +77,9 @@ public struct SerializableGuid {
     return ToString("D");
   }
 
-  public string ToString(string format) {
+  public string ToString(string format, IFormatProvider provider=null) {
     return ((System.Guid)this).ToString(format);
   }
 }
 
-}  // namespace TiltBrush
+}  // namespace TiltBrushToolkit

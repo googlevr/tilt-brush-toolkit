@@ -32,8 +32,8 @@ public class Glb1Importer : ScriptedImporter {
   // import at queue offset = 0.
   const int kImportQueueOffset = 1;
 
-  private static readonly PolyImportOptions kOptions = new PolyImportOptions {
-      rescalingMode = PolyImportOptions.RescalingMode.CONVERT,
+  private static readonly GltfImportOptions kOptions = new GltfImportOptions {
+      rescalingMode = GltfImportOptions.RescalingMode.CONVERT,
       scaleFactor = 1,
       recenter = false,
   };
@@ -44,7 +44,7 @@ public class Glb1Importer : ScriptedImporter {
         ctx.assetPath, Path.GetDirectoryName(ctx.assetPath));
 
     ImportGltf.GltfImportResult result = ImportGltf.Import(
-        GltfSchemaVersion.GLTF1, gltfStream, loader, kOptions);
+        GltfSchemaVersion.GLTF1, gltfStream, loader, null, kOptions);
 
     // The "identifier" param passed here is supposed to be:
     // - Unique to this asset

@@ -173,31 +173,13 @@ public class GltfMaterialConverter {
   /// <returns>The global material that corresponds to the given GLTF material,
   /// if found. If not found, null.</returns>
   private static Material LookUpGlobalMaterial(GltfMaterialBase gltfMaterial) {
-    // Is this a Blocks gvrss material?
-#if false
-    if (gltfMaterial.TechniqueExtras != null) {
-      string surfaceShader = null;
-      gltfMaterial.TechniqueExtras.TryGetValue("gvrss", out surfaceShader);
-
-      if (surfaceShader != null) {
-        // Blocks material. Look up the mapping in PtSettings.
-        Material material = PtSettings.Instance.LookupSurfaceShaderMaterial(surfaceShader);
-        if (material != null) {
-          return material;
-        } else {
-          Debug.LogWarningFormat("Unknown gvrss surface shader {0}", surfaceShader);
-        }
-      }
-    }
-#endif
-
     // Check if it's a Tilt Brush material.
     Guid guid = ParseGuidFromMaterial(gltfMaterial);
     if (guid != Guid.Empty) {
       // Tilt Brush global material. PBR materials will use unrecognized guids;
       // these will be handled by the caller.
       BrushDescriptor desc;
-      if (TiltBrushToolkit.TbtSettings.BrushManifest.BrushesByGuid.TryGetValue(guid, out desc)) {
+      if (TbtSettings.Instance.TryGetBrush(guid, out desc)) {
         return desc.Material;
       }
     }
@@ -227,7 +209,7 @@ public class GltfMaterialConverter {
     Guid templateGuid = ParseGuidFromShader(gltfMat);
 
     BrushDescriptor desc;
-    if (!TiltBrushToolkit.TbtSettings.BrushManifest.BrushesByGuid.TryGetValue(templateGuid, out desc)) {
+    if (!TbtSettings.Instance.TryGetBrush(templateGuid, out desc)) {
       // If they are the same, there is no template/instance relationship.
       if (instanceGuid != templateGuid) {
         Debug.LogErrorFormat("Unexpected: cannot find template material {0} for {1}",
@@ -445,7 +427,7 @@ public class GltfMaterialConverter {
       return null;
     } else {
       BrushDescriptor desc;
-      TiltBrushToolkit.TbtSettings.BrushManifest.BrushesByGuid.TryGetValue(
+      TbtSettings.Instance.TryGetBrush(
           guid, out desc);
       if (desc == null) {
         // Maybe it's templated from a pbr material; the template guid
@@ -455,7 +437,7 @@ public class GltfMaterialConverter {
           return null;
         }
         Guid templateGuid = ParseGuidFromShader((Gltf1Material)gltfMaterial);
-        TiltBrushToolkit.TbtSettings.BrushManifest.BrushesByGuid.TryGetValue(
+        TbtSettings.Instance.TryGetBrush(
           templateGuid, out desc);
       }
       return desc;

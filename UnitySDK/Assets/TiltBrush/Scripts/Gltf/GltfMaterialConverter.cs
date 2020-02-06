@@ -273,8 +273,20 @@ public class GltfMaterialConverter {
     }
 
     if (gltfMat.pbrMetallicRoughness == null) {
-      Debug.LogWarningFormat("Material #{0} has no PBR info.", gltfMat.gltfIndex);
-      return null;
+      var specGloss = gltfMat.extensions?.KHR_materials_pbrSpecularGlossiness;
+      if (specGloss != null) {
+        // Try and make the best of pbrSpecularGlossiness.
+        // Maybe it would be better to support "extensionsRequired" and raise an error
+        // if the asset requires pbrSpecularGlossiness.
+        gltfMat.pbrMetallicRoughness = new Gltf2Material.PbrMetallicRoughness {
+            baseColorFactor = specGloss.diffuseFactor,
+            baseColorTexture = specGloss.diffuseTexture,
+            roughnessFactor = 1f - specGloss.glossinessFactor
+        };
+      } else {
+        Debug.LogWarningFormat("Material #{0} has no PBR info.", gltfMat.gltfIndex);
+        return null;
+      }
     }
 
     return CreateNewPbrMaterial(baseMaterial, gltfMat.name, gltfMat.pbrMetallicRoughness);

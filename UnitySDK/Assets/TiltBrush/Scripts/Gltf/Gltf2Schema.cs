@@ -137,6 +137,7 @@ public sealed class Gltf2Root : GltfRootBase {
         DereferenceTextureInfo(mat.pbrMetallicRoughness.baseColorTexture);
         DereferenceTextureInfo(mat.pbrMetallicRoughness.metallicRoughnessTexture);
       }
+      DereferenceTextureInfo(mat.extensions?.KHR_materials_pbrSpecularGlossiness?.diffuseTexture);
     }
     for (int i = 0; i < nodes.Count; i++) {
       nodes[i].gltfIndex = i;
@@ -258,6 +259,7 @@ public class Gltf2Material : GltfMaterialBase {
   [Serializable]
   public class Extensions {
     public GOOGLE_tilt_brush_material GOOGLE_tilt_brush_material;
+    public KHR_materials_pbrSpecularGlossiness KHR_materials_pbrSpecularGlossiness;
   }
 
   [Serializable]
@@ -267,6 +269,14 @@ public class Gltf2Material : GltfMaterialBase {
     public float roughnessFactor = 1.0f;
     public TextureInfo baseColorTexture;
     public TextureInfo metallicRoughnessTexture;
+  }
+
+  [Serializable]
+  public class KHR_materials_pbrSpecularGlossiness {
+    public Color diffuseFactor = Color.white;
+    public TextureInfo diffuseTexture;
+    // public Vector3 specularFactor; not supported
+    public float glossinessFactor = 1.0f;
   }
 
   [Serializable]

@@ -136,6 +136,16 @@ public static class GlbParser {
       }
     }
   }
+
+  // Returns null if this doesn't look like a glb
+  public static uint? GetGlbVersion(string glbPath) {
+    using (BinaryReader reader = new BinaryReader(File.OpenRead(glbPath))) {
+      if (reader.ReadUInt32() != kFourCC_glTF) {
+        return null;
+      }
+      return reader.ReadUInt32();
+    }
+  }
 }
 
 }

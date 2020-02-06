@@ -256,6 +256,8 @@ public class GltfMaterialConverter {
       string alphaMode = gltfMat.alphaMode == null ? null : gltfMat.alphaMode.ToUpperInvariant();
 
       switch (alphaMode) {
+      case null:
+      case "":
       case Gltf2Material.kAlphaModeOpaque:
         baseMaterial = gltfMat.doubleSided
             ? TbtSettings.Instance.m_BasePbrOpaqueDoubleSidedMaterial

@@ -351,6 +351,12 @@ public static class ImportGltf {
       version = new Version { major = 1, minor = 0 };
       return true;
     }
+    // Likely it's "glTF 1-to-2 Upgrader for Google Blocks"
+    // No other Blocks version info, so assume 1.0
+    if (generatorString.Contains("Google Blocks")) {
+      version = new Version { major = 1, minor = 0 };
+      return true;
+    }
     version = new Version { major = 0, minor = 0 };
     return false;
   }

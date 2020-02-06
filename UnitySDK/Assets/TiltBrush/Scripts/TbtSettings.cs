@@ -19,6 +19,10 @@ using UnityEngine;
 namespace TiltBrushToolkit {
 
 public class TbtSettings : ScriptableObject {
+  [Serializable]
+  public struct PbrMaterialInfo {
+    public Material material;
+  }
   const string kAssetName = "TiltBrushToolkitSettings";
 
   private static TbtSettings sm_Instance;
@@ -45,12 +49,10 @@ public class TbtSettings : ScriptableObject {
 
   [SerializeField] private BrushManifest m_BrushManifest = null;
 
-  // This is the same material used by the BrushDescriptor "PbrTemplate".
-  public Material m_BasePbrOpaqueDoubleSidedMaterial;
-  public Material m_BasePbrOpaqueSingleSidedMaterial;
-  // This is the same material used by the BrushDescriptor "PbrTransparentTemplate"
-  public Material m_BasePbrBlendDoubleSidedMaterial;
-  public Material m_BasePbrBlendSingleSidedMaterial;
+  public PbrMaterialInfo m_PbrOpaqueSingleSided;
+  public PbrMaterialInfo m_PbrOpaqueDoubleSided;
+  public PbrMaterialInfo m_PbrBlendSingleSided;
+  public PbrMaterialInfo m_PbrBlendDoubleSided;
 
   /// <returns>null if not found</returns>
   public bool TryGetBrush(Guid guid, out BrushDescriptor desc) {

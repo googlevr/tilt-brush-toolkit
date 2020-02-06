@@ -31,12 +31,15 @@ public class Null {
   protected Null() {}
 }
 
-/// A callback that allows users to know when the import process has created a new material
+/// A callback that allows users to know when the import process has processed
+/// a gltf material into a Unity material.
 public interface IImportMaterialCollector {
   // Pass:
   //   unityMaterial - the template material, and the actual material used
   //     (which may be identical to the template material)
-  //   gltfMaterial - the gltf node from which unityMaterial was generated
+  //   gltfMaterial - the gltf node from which unityMaterial was looked up or created
+  //
+  // It's acceptable to call this redundantly.
   void Add(GltfMaterialConverter.UnityMaterial unityMaterial,
            GltfMaterialBase gltfMaterial);
 }

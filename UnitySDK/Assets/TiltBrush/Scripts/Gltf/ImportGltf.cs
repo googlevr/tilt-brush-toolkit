@@ -741,8 +741,11 @@ public static class ImportGltf {
       basisChange *= Matrix4x4.Scale(Vector3.one * scaleFactor);
     } else if (semantic == Semantic.UnitlessVector) {
       // use basisChange as-is
-    } else if (semantic == Semantic.XyIsUvZIsDistance && scaleFactor != 1) {
-      if (data is Vector3[]) {
+    } else if (semantic == Semantic.XyIsUvZIsDistance) {
+      // Do unit change
+      if (scaleFactor == 1) {
+        // Don't bother
+      } else if (data is Vector3[]) {
         Vector3[] vData = (Vector3[])data;
         for (int i = 0; i < vData.Length; ++i) {
           var tmp = vData[i]; tmp.z *= scaleFactor; vData[i] = tmp;
@@ -755,6 +758,8 @@ public static class ImportGltf {
       } else {
         Debug.LogWarningFormat("Cannot change basis of type {0}", data.GetType());
       }
+      // no basis-change needed
+      return;
     } else {
       // no basis-change or unit-change needed
       return;
@@ -883,8 +888,13 @@ public static class ImportGltf {
 
       meshes.Add(mesh);
     }
-    foreach (MeshPrecursor mesh in meshes) {
-      FixInvalidNormals(mesh);
+
+    // This was added in PT to address bad data in Poly, but it can force the data
+    // to be unit-length; don't do it unless we know that's a valid fix.
+    if (GetNormalSemantic(state, prim.MaterialPtr) == Semantic.UnitlessVector) {
+      foreach (MeshPrecursor mesh in meshes) {
+        FixInvalidNormals(mesh);
+      }
     }
     return meshes;
   }
@@ -905,7 +915,7 @@ public static class ImportGltf {
       break;
     case "NORMAL":
       ChangeBasisAndApplyScale(
-          data, Semantic.UnitlessVector, state.scaleFactor, state.unityFromGltf);
+          data, GetNormalSemantic(state, material), state.scaleFactor, state.unityFromGltf);
       mesh.normals = (Vector3[]) data;
       break;
     case "COLOR":
@@ -1054,6 +1064,24 @@ GenericTexcoord:
         mesh.vertices[mesh.triangles[triStart + 1]],
         mesh.vertices[mesh.triangles[triStart + 2]]);
     }
+  }
+
+  // Within TB, TB brush materials will return Semantic.Unspecified or Semantic.Position.
+  // This method is useful for skipping overzealous code that wants to "fix" TB's normals.
+  static Semantic GetNormalSemantic(ImportState state, GltfMaterialBase material) {
+#if TILT_BRUSH
+    // "normalSemantic" doesn't exist in the stripped-down BrushDescriptor used by TBT.
+    // Only particles use a non-standard semantic for Normals.
+    // TBT puts vert.normal -> vert.txc1 at import time (see CreateMeshPrecursorsFromPrimitive).
+    // So BD.normalSemantic in TB becomes BD.txc1Semantic in TBT.
+    if (state.root.tiltBrushVersion != null) {
+      BrushDescriptor desc = GltfMaterialConverter.LookupBrushDescriptor(material);
+      if (desc != null) {
+        return desc.VertexLayout.normalSemantic;
+      }
+    }
+#endif
+    return Semantic.UnitlessVector;
   }
 
   // Returns a Semantic which tells us how to manipulate the uv to convert it

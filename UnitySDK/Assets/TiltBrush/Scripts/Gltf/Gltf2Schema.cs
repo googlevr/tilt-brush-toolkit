@@ -234,6 +234,9 @@ public class Gltf2Material : GltfMaterialBase {
       if (pbrMetallicRoughness != null) {
         yield return pbrMetallicRoughness.baseColorTexture;
         yield return pbrMetallicRoughness.metallicRoughnessTexture;
+      } else if (extensions?.KHR_materials_pbrSpecularGlossiness != null) {
+        var specGloss = extensions.KHR_materials_pbrSpecularGlossiness;
+        yield return specGloss.diffuseTexture;
       }
     }
   }

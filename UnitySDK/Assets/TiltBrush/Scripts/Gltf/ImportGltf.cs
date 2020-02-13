@@ -109,6 +109,44 @@ public static class ImportGltf {
     }
   }
 
+  public class GltfFileInfo : IDisposable {
+    public string Path { get; private set; }
+    public GltfSchemaVersion Version { get; private set; }
+    public bool IsGlb { get; private set; }
+    public TextReader Reader { get; private set; }
+
+    public GltfFileInfo(string path) {
+      Path = path;
+      if (GlbParser.GetGlbVersion(path) is uint glbFormatVersion) {
+        IsGlb = true;
+        Version = (glbFormatVersion == 1 ? GltfSchemaVersion.GLTF1 : GltfSchemaVersion.GLTF2);
+        Reader = new StringReader(GlbParser.GetJsonChunkAsString(path));
+      } else {
+        IsGlb = false;
+        string json = File.ReadAllText(path);
+        var gltf1Or2 = JsonConvert.DeserializeObject<Gltf1Or2>(json);
+        var versionString = gltf1Or2?.asset?.version ?? "2";  // default to 2, I guess?
+        Version = versionString.StartsWith("1") ? GltfSchemaVersion.GLTF1 : GltfSchemaVersion.GLTF2;
+        Reader = new StringReader(json);
+      }
+    }
+
+    public void Dispose() {
+      if (Reader != null) {
+        Reader.Dispose();
+      }
+    }
+  }
+
+  // Used only by GetVersionAndReader. The layout of a gltf file changes significantly
+  // between gltf v1 and v2, but thankfully the location of the version info didn't change.
+  #pragma warning disable 0649
+  [Serializable]
+  private class Gltf1Or2 {
+    public GltfAsset asset;
+  }
+  #pragma warning restore 0649
+
   /// <summary>
   /// Import a gltf model.
   /// If you would like to perform some of the work off the main thread, use
@@ -122,10 +160,10 @@ public static class ImportGltf {
   /// <seealso cref="ImportGltf.BeginImport" />
   /// <seealso cref="ImportGltf.EndImport" />
   public static GltfImportResult Import(
-      GltfSchemaVersion gltfVersion, TextReader gltfStream, IUriLoader uriLoader,
+      string gltfOrGlbPath, IUriLoader uriLoader,
       IImportMaterialCollector materialCollector,
       GltfImportOptions options) {
-    using (var state = BeginImport(gltfVersion, gltfStream, uriLoader, options)) {
+    using (var state = BeginImport(gltfOrGlbPath, uriLoader, options)) {
       IEnumerable<Null> meshCreator;
       GltfImportResult result = EndImport(state, uriLoader, materialCollector, out meshCreator);
       foreach (var unused in meshCreator) {
@@ -204,17 +242,15 @@ public static class ImportGltf {
   /// </summary>
   /// <returns>An object which should be passed to <seealso cref="ImportGltf.EndImport"/> and then disposed</returns>
   public static ImportState BeginImport(
-      GltfSchemaVersion gltfVersion, TextReader stream, IUriLoader uriLoader,
-      GltfImportOptions options) {
-    if (stream == null) { throw new ArgumentNullException("stream"); }
+      string gltfOrGlbPath, IUriLoader uriLoader, GltfImportOptions options) {
     if (uriLoader == null) { throw new ArgumentNullException("uriLoader"); }
-
     SanityCheckImportOptions(options);
 
-    using (var reader = new JsonTextReader(stream)) {
-      var root = DeserializeGltfRoot(gltfVersion, reader);
+    using (var info = new GltfFileInfo(gltfOrGlbPath))
+    using (var reader = new JsonTextReader(info.Reader)) {
+      var root = DeserializeGltfRoot(info.Version, reader);
       if (root == null) { throw new NullReferenceException("root"); }
-      root.Dereference(uriLoader);
+      root.Dereference(info.IsGlb, uriLoader);
 
       // Convert attribute names to the ones we expect.
       // This may eg overwrite TEXCOORD_0 with _TB_UNITY_TEXCOORD_0 (which will contain more data)

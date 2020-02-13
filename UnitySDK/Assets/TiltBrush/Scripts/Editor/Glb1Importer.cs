@@ -39,12 +39,11 @@ public class Glb1Importer : ScriptedImporter {
   };
 
   public override void OnImportAsset(AssetImportContext ctx) {
-    StringReader gltfStream = new StringReader(GlbParser.GetJsonChunkAsString(ctx.assetPath));
     IUriLoader loader = new BufferedStreamLoader(
         ctx.assetPath, Path.GetDirectoryName(ctx.assetPath));
 
     ImportGltf.GltfImportResult result = ImportGltf.Import(
-        GltfSchemaVersion.GLTF1, gltfStream, loader, null, kOptions);
+        ctx.assetPath, loader, null, kOptions);
 
     // The "identifier" param passed here is supposed to be:
     // - Unique to this asset

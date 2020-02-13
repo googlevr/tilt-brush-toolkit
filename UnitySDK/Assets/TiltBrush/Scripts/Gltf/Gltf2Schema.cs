@@ -87,15 +87,19 @@ public sealed class Gltf2Root : GltfRootBase {
   }
 
   /// Map gltfIndex values (ie, int indices) names to the objects they refer to
-  public override void Dereference(IUriLoader uriLoader = null) {
+  public override void Dereference(bool isGlb, IUriLoader uriLoader = null) {
     // "dereference" all the indices
     scenePtr = scenes[scene];
     for (int i = 0; i < buffers.Count; i++) {
       Gltf2Buffer buffer = buffers[i];
       buffer.gltfIndex = i;
+      if (buffer.uri == null && !(i == 0 && isGlb)) {
+        Debug.LogErrorFormat("Buffer {0} isGlb {1} has null uri", i, isGlb);
+        // leave the data buffer null
+        return;
+      }
+
       if (uriLoader != null) {
-        // Only id 0 may lack a URI; this indicates that it is the binary chunk.
-        Debug.Assert(! (i != 0 && buffer.uri == null));
         buffer.data = uriLoader.Load(buffer.uri);
       }
     }

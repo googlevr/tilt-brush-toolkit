@@ -86,7 +86,7 @@ public sealed class Gltf1Root : GltfRootBase {
   }
 
   /// Map glTFid values (ie, string names) names to the objects they refer to
-  public override void Dereference(IUriLoader uriLoader = null) {
+  public override void Dereference(bool isGlb, IUriLoader uriLoader = null) {
     // "dereference" all the names
     scenePtr = scenes[scene];
     foreach (var pair in buffers) {

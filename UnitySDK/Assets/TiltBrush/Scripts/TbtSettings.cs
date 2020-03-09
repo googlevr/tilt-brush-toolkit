@@ -44,7 +44,7 @@ public class TbtSettings : ScriptableObject {
   }
 
   public static BrushManifest BrushManifest {
-    get { return sm_Instance.m_BrushManifest; }
+    get { return Instance.m_BrushManifest; }
   }
 
   [SerializeField] private BrushManifest m_BrushManifest = null;

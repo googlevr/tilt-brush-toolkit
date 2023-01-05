@@ -35,3 +35,6 @@ Python 2.7 code and scripts for advanced Open Brush data manipulation.
      * `export.py` - Parse the legacy .json export format. This format contains the raw per-stroke geometry in a form intended to be easy to postprocess.
      * `tilt.py` - Read and write .tilt files. This format contains no geometry, but does contain timestamps, pressure, controller position and orientation, metadata, and so on -- everything Open Brush needs to regenerate the geometry.
      * `unpack.py` - Convert .tilt files from packed format to unpacked format and vice versa.
+### Render pipeline support
+* This repo currently has built in render pipleline support.
+* [This fork has URP support.](https://github.com/kijai/tilt-brush-toolkit)

@@ -4,7 +4,7 @@
 /Build/
 /Library/
 /Logs/
-
+/UserSettings/
 # mono debugging files, automatically created by UnityVS
 *.dll.mdb
 *.dll.mdb.meta

@@ -123,7 +123,10 @@ public static class GlbParser {
         } else {
           // length is stored explicitly
           binLength = reader.ReadUInt32();
-          if ((binLength % 4) != 0) { Err("bin length%4"); }
+
+          // See https://github.com/googlevr/tilt-brush-toolkit/issues/49
+          // if ((binLength % 4) != 0) { Err("bin length%4"); }
+
           if (reader.ReadUInt32() != kFourCC_BIN_) { Err("no 'BIN ' chunk"); }
           binStart = reader.BaseStream.Position;
         }

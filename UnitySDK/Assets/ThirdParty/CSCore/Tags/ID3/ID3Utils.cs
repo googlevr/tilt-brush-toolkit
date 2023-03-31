@@ -4,8 +4,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using CSCore.Tags.ID3.Frames;
-using Image = System.Drawing.Image;
-
 namespace CSCore.Tags.ID3
 {
     internal static class ID3Utils
@@ -138,24 +136,7 @@ namespace CSCore.Tags.ID3
         }
 
         public const string MimeURL = "-->";
-
-        public static Image DecodeImage(byte[] rawdata, string mimetype)
-        {
-            Stream stream;
-            if (mimetype.Trim() == MimeURL)
-            {
-                WebClient client = new WebClient();
-                var data = client.DownloadData(GetURL(rawdata, mimetype));
-                stream = new MemoryStream(data);
-            }
-            else
-            {
-                stream = new MemoryStream(rawdata, false);
-            }
-
-            return Image.FromStream(stream);
-        }
-
+        
         public static string GetURL(byte[] RawData, string MimeType)
         {
             if (RawData == null)

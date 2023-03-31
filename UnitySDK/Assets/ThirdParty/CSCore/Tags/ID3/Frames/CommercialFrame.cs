@@ -19,8 +19,6 @@ namespace CSCore.Tags.ID3.Frames
 
         public string LogoMimeType { get; private set; }
 
-        public Image Image { get; private set; }
-
         public CommercialFrame(FrameHeader header)
             : base(header)
         {
@@ -59,8 +57,6 @@ namespace CSCore.Tags.ID3.Frames
 
                 var logoData = new byte[content.Length - offset];
                 Array.Copy(content, offset, logoData, 0, logoData.Length);
-
-                Image = ID3Utils.DecodeImage(logoData, LogoMimeType);
             }
         }
     }

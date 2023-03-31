@@ -65,18 +65,7 @@ namespace CSCore.Tags.ID3
                 return String.Empty;
             }
         }
-
-        public Image Image
-        {
-            get
-            {
-                Frame f;
-                if ((f = _id3[FrameID.AttachedPicutre]) != null)
-                    return (f as PictureFrame).Image;
-                return null;
-            }
-        }
-
+        
         public int? Year
         {
             get

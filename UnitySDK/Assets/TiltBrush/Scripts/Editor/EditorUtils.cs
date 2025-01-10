@@ -45,9 +45,9 @@ public class EditorUtils {
 
     AssetDatabase.StartAssetEditing();
 
-    if (!AssetDatabase.IsValidFolder("Assets/SplitMeshByStroke"))
+    if (!AssetDatabase.IsValidFolder($"Assets/{m_SplitMeshByStrokeDirectoryName}"))
     {
-      AssetDatabase.CreateFolder("Assets","SplitMeshByStroke");
+      AssetDatabase.CreateFolder("Assets",$"{m_SplitMeshByStrokeDirectoryName}");
     }
 
     bool cancel = false;
@@ -451,7 +451,7 @@ public class EditorUtils {
     newMesh.colors = colors ?? OriginalMesh.colors;
     newMesh.subMeshCount = OriginalMesh.subMeshCount;
     newMesh.normals = normals ?? OriginalMesh.normals;
-    string assetName = AssetDatabase.GenerateUniqueAssetPath($"Assets/MeshToStrokes/{OriginalMesh.name}_submesh[{index}].asset");
+    string assetName = AssetDatabase.GenerateUniqueAssetPath($"Assets/{m_SplitMeshByStrokeDirectoryName}/{OriginalMesh.name}_submesh[{index}].asset");
     AssetDatabase.CreateAsset(newMesh, assetName);
     return newMesh;
   }
@@ -460,6 +460,7 @@ public class EditorUtils {
 
   #endregion
 
+  public static string m_SplitMeshByStrokeDirectoryName = "SplitMeshByStroke";
   public static string m_TiltBrushDirectoryName = "TiltBrush";
   static string m_TiltBrushDirectory = "";
   public static string TiltBrushDirectory {
